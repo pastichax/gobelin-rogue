@@ -182,47 +182,47 @@ function toggleMusic(){
 /* ---------- armes ---------- */
 const WEAPONS = [
   [ /* rang Basique */
-    {name:"Couteau rouillé",     type:'phys', dmg:8,  cd:340, range:26, cat:'dagger'},
-    {name:"Gourdin de bois",     type:'phys', dmg:14, cd:560, range:27, cat:'club'},
+    {name:"Couteau rouillé",     type:'phys', dmg:9,  cd:340, range:26, arc:1.3, cat:'dagger'},
+    {name:"Gourdin de bois",     type:'phys', dmg:15, cd:560, range:27, arc:2.3, cat:'club'},
     {name:"Bâton fêlé",          type:'mag',  dmg:7,  cd:460, range:0,  cat:'staff'},
-    {name:"Lame d'écaille",      type:'mag',  dmg:9,  cd:380, range:25, cat:'sword'},
+    {name:"Lame d'écaille",      type:'mag',  dmg:10, cd:380, range:25, arc:2.0, cat:'sword'},
     {name:"Vieille fronde",      type:'phys', dmg:5,  cd:300, range:0,  cat:'sling'},
-    {name:"Griffe usée",         type:'phys', dmg:6,  cd:220, range:21, cat:'dagger'},
+    {name:"Griffe usée",         type:'phys', dmg:7,  cd:220, range:22, arc:1.2, cat:'dagger'},
   ],
   [ /* rang Amélioré */
-    {name:"Dague d'aventurier",  type:'phys', dmg:12, cd:280, range:25, cat:'dagger'},
-    {name:"Épée courte",         type:'phys', dmg:17, cd:440, range:29, cat:'sword'},
-    {name:"Hachette",            type:'phys', dmg:20, cd:580, range:28, cat:'axe'},
+    {name:"Dague d'aventurier",  type:'phys', dmg:14, cd:280, range:26, arc:1.4, cat:'dagger'},
+    {name:"Épée courte",         type:'phys', dmg:18, cd:440, range:29, arc:2.2, cat:'sword'},
+    {name:"Hachette",            type:'phys', dmg:20, cd:580, range:28, arc:3.2, cat:'axe'},
     {name:"Baguette étincelante",type:'mag',  dmg:10, cd:380, range:0,  cat:'wand'},
-    {name:"Glaive de braise",    type:'mag',  dmg:15, cd:480, range:28, cat:'sword', burn:0.3},
-    {name:"Lance de milicien",   type:'phys', dmg:16, cd:520, range:36, cat:'spear'},
+    {name:"Glaive de braise",    type:'mag',  dmg:16, cd:480, range:28, arc:2.2, cat:'sword', burn:0.3},
+    {name:"Lance de milicien",   type:'phys', dmg:17, cd:520, range:38, arc:0.8, cat:'spear'},
     {name:"Arc court",           type:'phys', dmg:7,  cd:300, range:0,  cat:'bow'},
   ],
   [ /* rang Puissant */
-    {name:"Épée de mercenaire",  type:'phys', dmg:24, cd:470, range:30, cat:'sword'},
-    {name:"Hache de guerre",     type:'phys', dmg:32, cd:630, range:31, cat:'axe'},
+    {name:"Épée de mercenaire",  type:'phys', dmg:25, cd:470, range:30, arc:2.2, cat:'sword'},
+    {name:"Hache de guerre",     type:'phys', dmg:32, cd:630, range:31, arc:3.2, cat:'axe'},
     {name:"Arc de chasse",       type:'phys', dmg:13, cd:340, range:0,  cat:'bow'},
     {name:"Sceptre de braise",   type:'mag',  dmg:17, cd:420, range:0,  cat:'wand'},
-    {name:"Espadon runique",     type:'mag',  dmg:23, cd:500, range:30, cat:'sword'},
-    {name:"Trident",             type:'phys', dmg:27, cd:540, range:35, cat:'trident'},
+    {name:"Espadon runique",     type:'mag',  dmg:24, cd:500, range:30, arc:2.6, cat:'sword'},
+    {name:"Trident",             type:'phys', dmg:28, cd:540, range:37, arc:1.0, cat:'trident'},
     {name:"Arc long",            type:'phys', dmg:16, cd:480, range:0,  cat:'bow'},
     {name:"Arc elfique",         type:'phys', dmg:12, cd:360, range:0,  cat:'bow', pierce:true},
     {name:"Arc de givre",        type:'phys', dmg:11, cd:380, range:0,  cat:'bow', slow:true},
     {name:"Arc de feu",          type:'phys', dmg:13, cd:400, range:0,  cat:'bow', burn:0.3},
   ],
   [ /* rang Épique */
-    {name:"Lame runique du gobelin", type:'phys', dmg:36, cd:420, range:31, cat:'sword'},
-    {name:"Hache du Bourreau",       type:'phys', dmg:48, cd:680, range:32, cat:'axe'},
+    {name:"Lame runique du gobelin", type:'phys', dmg:38, cd:420, range:31, arc:2.2, cat:'sword'},
+    {name:"Hache du Bourreau",       type:'phys', dmg:48, cd:680, range:32, arc:3.4, cat:'axe'},
     {name:"Baguette du dragon",      type:'mag',  dmg:27, cd:380, range:0,  cat:'wand'},
     {name:"Sceptre du Nécromant",    type:'mag',  dmg:31, cd:460, range:0,  cat:'wand'},
-    {name:"Faucheuse astrale",       type:'mag',  dmg:38, cd:500, range:33, cat:'scythe'},
-    {name:"Faux démoniaque",         type:'phys', dmg:41, cd:520, range:34, cat:'scythe'},
+    {name:"Faucheuse astrale",       type:'mag',  dmg:38, cd:500, range:33, arc:3.6, cat:'scythe'},
+    {name:"Faux démoniaque",         type:'phys', dmg:41, cd:520, range:34, arc:3.6, cat:'scythe'},
     {name:"Arc composé",             type:'phys', dmg:24, cd:420, range:0,  cat:'bow', pierce:true},
     {name:"Arc de la tempête",       type:'phys', dmg:17, cd:340, range:0,  cat:'bow', multishot:3},
   ],
   [ /* rang Légendaire */
-    {name:"Croc du Roi gobelin", type:'phys', dmg:55, cd:380, range:32, cat:'sword'},
-    {name:"Lame du Jugement",    type:'mag',  dmg:48, cd:440, range:31, cat:'sword', burn:0.3},
+    {name:"Croc du Roi gobelin", type:'phys', dmg:57, cd:380, range:32, arc:2.2, cat:'sword'},
+    {name:"Lame du Jugement",    type:'mag',  dmg:50, cd:440, range:31, arc:2.2, cat:'sword', burn:0.3},
     {name:"Arc du Vide",         type:'phys', dmg:38, cd:360, range:0,  cat:'bow', pierce:true, multishot:2},
     {name:"Sceptre du Réveille-Morts", type:'mag', dmg:42, cd:420, range:0, cat:'wand'},
     {name:"Masse du Séisme",     type:'phys', dmg:46, cd:620, range:20, aoe:64, cat:'hammer'},
@@ -478,6 +478,10 @@ function weaponCardHtml(w, tag){
   const scale = w.type==='mag' ? 'Pouvoir' : 'Force';
   const fx=[];
   if(w.aoe) fx.push('Séisme : frappe TOUS les ennemis autour de vous (zone très large, 360°)');
+  else if(w.range>0){
+    const deg = Math.round((w.arc||Math.PI)*180/Math.PI);
+    fx.push(deg<=63 ? 'Poussée en ligne droite' : 'Arc de frappe : '+deg+'°');
+  }
   if(w.pierce) fx.push('Perforant : traverse les ennemis');
   if(w.slow) fx.push('Givre : ralentit les cibles (2 s)');
   if(w.burn) fx.push('Feu : brûlure sur la durée');
@@ -736,6 +740,11 @@ SPR.chien = makeSprite([
   '.hhhhhh..',
   '..k..k.k.',
 ],{h:'#8a5a2b',A:'#5e3818',k:'#3a2a16',t:'#b03a2e'});
+SPR.bone = makeSprite([
+  'w.....w',
+  'wwwwwww',
+  'w.....w',
+],{w:'#e8e4d8'});
 SPR.barde = makeSprite([
   '...ff.....',
   '..mmmmm...',
@@ -837,6 +846,7 @@ SPRW.hammer  = makeSprite(['.gggggg.','gwwwwwwg','gwwwwwwg','.gggggg.','...s....
 const HELD = {
   mage: SPRW.wand, pretre: SPR.holy, barde: SPR.lute, garde: SPR.halberd,
   paysan: SPR.pitchfork, guerrier: SPRW.sword, archer: SPRW.bow, assassin: SPRW.dagger,
+  chien: SPR.bone,
 };
 
 /* tuiles pré-rendues */
@@ -1539,12 +1549,15 @@ function tryAttack(){
     if(Math.abs(player.dirx)>Math.abs(player.diry)){ player.face='side'; player.faceLeft=player.dirx<0; }
     else player.face = player.diry<0 ? 'up' : 'down';
     const reach = w.aoe || (w.range + 6);
+    const base = Math.atan2(player.diry, player.dirx);
+    const half = ((w.arc||Math.PI)/2);
     for(const e of enemies){
       const d = dist(player.x,player.y,e.x,e.y);
       if(d > reach + e.r) continue;
-      if(!w.aoe){
-        const dot = (e.x-player.x)*player.dirx + (e.y-player.y)*player.diry;
-        if(dot <= 0) continue;
+      if(!w.aoe && d > 6){
+        let diff = Math.abs(Math.atan2(e.y-player.y, e.x-player.x) - base);
+        diff = Math.min(diff, Math.PI*2-diff);
+        if(diff > half) continue;
       }
       const res = playerDamage(w.dmg, w.type, e);
       hurtEnemy(e, res.d, w.type, true);
@@ -2004,9 +2017,25 @@ function drawMeleeArc(){
   }
   const reach = w.range + 14;
   const base = Math.atan2(player.diry, player.dirx);
-  const sweep = 2.0, a0 = base - sweep/2;
-  const sw = Math.min(1, t*1.6);
+  const sweep = w.arc||2.0, a0 = base - sweep/2;
   const magic = w.type==='mag';
+  if(sweep<=1.1){
+    const len = reach * Math.min(1, t*1.8);
+    ctx.save();
+    ctx.strokeStyle = magic ? '#e0c8ff' : '#fff3c4';
+    ctx.globalAlpha = 0.7*(1-t);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(px+Math.cos(base)*8, py+Math.sin(base)*8);
+    ctx.lineTo(px+Math.cos(base)*len, py+Math.sin(base)*len);
+    ctx.stroke();
+    ctx.globalAlpha = 0.25*(1-t);
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.restore();
+    return;
+  }
+  const sw = Math.min(1, t*1.6);
   ctx.save();
   ctx.fillStyle = magic ? '#c8a2ff' : '#ffe9a0';
   ctx.globalAlpha = 0.10*(1-t);

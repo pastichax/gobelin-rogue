@@ -88,8 +88,14 @@ de 230 améliorations réparties en 55 familles et 5 rangs (jusqu'à Légendaire
   un écran de comparaison affichant le rang, le DPS et le scaling (Force ou
   Pouvoir pour les dégâts, Agilité pour la cadence) : gardez la vôtre (1) ou
   prenez la nouvelle (2). Mêlée : attaque orientée selon le personnage, avec
-  un arc de frappe animé (doré ou violet pour le magique) couvrant la zone
-  touchée ; distance : tir vers la souris. L'arme actuellement équipée ne peut
+  une animation couvrant exactement la zone touchée (dorée ou violette pour
+  le magique) ; distance : tir vers la souris. Chaque famille de mêlée a sa
+  zone d'effet : dagues et griffes un petit arc rapide (~69-80°), épées un
+  arc large (~126°), espadon ~149°, gourdin ~132°, haches un très grand arc
+  (~183°), faucheuses et faux un arc quasi complet (~206°), tandis que la
+  lance (~46°) et le trident (~57°) frappent en **poussée linéaire** animée,
+  longue et étroite. Les dégâts des armes de mêlée sont légèrement
+  augmentés pour compenser la perte de couverture. L'arme actuellement équipée ne peut
   jamais retomber. Les rangs d'armes utilisent le même code couleur que les
   améliorations (gris, bleu, violet, or), visible sur les cartes de comparaison
   et dans le HUD.
