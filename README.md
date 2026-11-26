@@ -8,7 +8,7 @@ Ouvrez simplement `index.html` dans un navigateur.
 Vous êtes un gobelin. Des aventuriers, guerriers et magiciens ont envahi vos
 donjons et vos villages : éliminez-les tous, gagnez des niveaux, et choisissez
 à chaque niveau une amélioration parmi 3 tirées au hasard d'un pool de plus
-de 200 améliorations réparties en 55 familles et 4 rangs.
+de 230 améliorations réparties en 55 familles et 5 rangs (jusqu'à Légendaire).
 
 ## Contrôles
 
@@ -46,15 +46,20 @@ de 200 améliorations réparties en 55 familles et 4 rangs.
   taverne (comptoir, tonneaux, tables, ambiance chaleureuse, belliqueux),
   cour de château-fort (muraille, chemins de pierre, donjon central) et
   intérieur de château-fort (dalles de pierre, piliers).
-- **Ennemis** : aventurier (mêlée rapide), guerrier (lent, blindé), mage
-  (projectiles magiques à distance), archer (flèches à distance), bébé
+- **Ennemis** : assassin (très rapide, frappe lourdement au corps-à-corps
+  mais tombe en quelques coups), guerrier (lent, blindé), mage (baguette
+  magique, projectiles à distance), archer (flèches à distance), bébé
   (inoffensif, uniquement dans les villages), paysan (faible, villages et
-  tavernes), prêtre (rare, présent partout : soigne les autres ennemis à
-  courte portée mais jamais lui-même, et lance aussi de lents projectiles
-  magiques peu puissants) et chevalier (à cheval, rapide, attaque par charge
-  de lance
-  en ligne
-  droite, tourne difficilement), plus des **élites** (couronnées, bien plus
+  tavernes, fourche en main), prêtre (rare, présent partout : soigne les
+  autres ennemis à courte portée mais jamais lui-même, lance de lents
+  projectiles et brandit son symbole magique), chevalier (à cheval, rapide,
+  attaque par charge de lance en ligne droite, tourne difficilement),
+  **chien** (attaque en meutes, très rapide, morsure qui fait saigner sur la
+  durée), **barde** (taverne et villages : projectile magique lent et large
+  qui immobilise une demi-seconde à l'impact — une seconde pour le barde
+  élite — avec 4 s de recharge) et **garde** (châteaux et villages : frappe
+  à la hallebarde en ligne droite sur 30 px devant lui), plus des
+  **élites** (couronnées, bien plus
   dures, reconnaissables à leur teinte rougeâtre) qui lâchent une arme à
   comparer : il y en a 1 par étage, et 2 à partir de l'étage 5. Leur puissance
   (PV, dégâts, niveau, XP) croît nettement plus vite que celle des ennemis
@@ -64,9 +69,14 @@ de 200 améliorations réparties en 55 familles et 4 rangs.
   Pouvoir, Agilité, armures) quand on arrive à l'attraper. Chaque ennemi
   affiche son niveau au-dessus de lui, et les ennemis ne se chevauchent pas
   entre eux.
-- **Armes** : 31 armes en 4 rangs — Basique, Amélioré, Puissant, Épique —
-  reprenant les rangs des améliorations (mêlée et distance, physiques ou
-  magiques). Les armes de mêlée magiques (Lame d'écaille, Glaive de braise,
+- **Armes** : 36 armes en 5 rangs — Basique, Amélioré, Puissant, Épique,
+  Légendaire — reprenant les rangs des améliorations (mêlée et distance,
+  physiques ou magiques). Les légendaires : Croc du Roi gobelin (mêlée
+  physique), Lame du Jugement (mêlée magique enflammée), Arc du Vide
+  (perforant, tir double), Sceptre du Réveille-Morts (distance magique) et
+  Masse du Séisme (frappe tous les ennemis autour de vous dans une très
+  large zone à 360°). Elles apparaissent à partir de l'étage 12 (élites) ou
+  13 (coffres). Les armes de mêlée magiques (Lame d'écaille, Glaive de braise,
   Espadon runique, Faucheuse astrale) frappent en ignorant l'armure et scalent
   sur le Pouvoir ; certaines appliquent leurs effets (brûlure, givre) aussi au
   corps-à-corps. Les arcs ont des effets variés : perforant (traverse les
@@ -84,11 +94,18 @@ de 200 améliorations réparties en 55 familles et 4 rangs.
   améliorations (gris, bleu, violet, or), visible sur les cartes de comparaison
   et dans le HUD.
 - **Améliorations à rangs** : 55 familles (statistiques, compétences et
-  équipement), chacune déclinée en 4 rangs — Basique, Amélioré, Puissant,
-  Épique — des versions de plus en plus fortes. Un rang n'apparaît qu'après
-  avoir obtenu le rang immédiatement inférieur, et les rangs supérieurs ont
-  un taux d'apparition plus faible (poids 100 % / 70 % / 50 % / 35 %).
-  Chaque rang ne peut être pris qu'une fois.
+  équipement), chacune déclinée en 5 rangs — Basique, Amélioré, Puissant,
+  Épique, Légendaire — des versions de plus en plus fortes. Un rang
+  n'apparaît qu'après avoir obtenu le rang immédiatement inférieur, et les
+  rangs supérieurs ont un taux d'apparition plus faible (poids 100 % / 70 % /
+  50 % / 35 % / 25 %). Les 14 améliorations **Légendaires** (dorées)
+  fusionnent deux améliorations Épiques en une seule version bien plus
+  puissante, et n'apparaissent qu'une fois au moins deux améliorations
+  Épiques obtenues. Chaque rang ne peut être pris qu'une fois.
+- **Auras visuelles** : l'aura de gel (anneau bleu avec flocons orbitants)
+  et l'aura de poison (anneau vert à rayon croissant avec la puissance)
+  s'affichent en continu autour du gobelin, avec un rayon correspondant
+  exactement à la portée réelle de l'effet.
 - **Objectif** : tuer tous les ennemis d'un étage pour ouvrir l'escalier, et
   descendre le plus loin possible.
 
