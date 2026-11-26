@@ -33,9 +33,11 @@ de 200 améliorations réparties en 55 familles et 4 rangs.
   accélérable via plusieurs améliorations.
 - **Coffres** : 1 à 2 coffres par étage ; marchez dessus pour ouvrir. Ils
   contiennent une arme dans ~75 % des cas, et un écran de comparaison s'affiche
-  alors (dégâts de base et effectifs, cadence, DPS, palier, effets spéciaux) :
-  gardez votre arme (1) ou prenez la nouvelle (2). Sinon : bonus de
-  statistique ou soin complet.
+  alors (dégâts de base et effectifs, cadence, DPS avec les caractéristiques de
+  scaling, rang, effets spéciaux) : gardez votre arme (1) ou prenez la nouvelle
+  (2). Sinon : bonus de statistique ou soin complet. Le rang des armes trouvées
+  progresse lentement avec l'étage (Basique jusqu'à l'étage 3, puis un palier
+  tous les 3 étages).
 - **8 types d'étages en cycle** : donjon (salles procédurales + couloirs,
   ambiance sombre), forêt (bouquets d'arbres et clairières reliées par un
   sentier), ferme (champs cultivés clôturés, grange, arbres), village
@@ -50,19 +52,28 @@ de 200 améliorations réparties en 55 familles et 4 rangs.
   tavernes), prêtre (rare, présent partout : soigne les autres ennemis mais
   jamais lui-même) et chevalier (rapide, attaque par charge de lance en ligne
   droite, tourne difficilement), plus des **élites** (couronnées, bien plus
-  dures) qui lâchent une arme à comparer : il y en a autant que le numéro de
-  l'étage (1 à l'étage 1, 2 à l'étage 2…), et elles apparaissent toujours
-  loin du joueur. Chaque ennemi affiche son niveau au-dessus de lui, et les
-  ennemis ne se chevauchent pas entre eux.
-- **Armes** : 27 armes en 4 paliers (mêlée et distance, physiques ou magiques).
-  Les arcs ont des effets variés : perforant (traverse les ennemis), givre
-  (ralentit), feu (brûlure), triple tir (Arc de la tempête). Une arme de départ
-  aléatoire, de meilleures via l'amélioration « Coffre d'armurier », les coffres
-  ou en tuant une élite. Toute arme trouvée (coffre, élite, amélioration
-  « Coffre d'armurier ») ouvre un écran de comparaison : gardez la vôtre (1)
-  ou prenez la nouvelle (2). Mêlée : attaque orientée selon le personnage,
-  avec un arc de frappe animé couvrant la zone touchée ; distance : tir vers
-  la souris. L'arme actuellement équipée ne peut jamais retomber.
+  dures) qui lâchent une arme à comparer : il y en a 1 par étage, et 2 à
+  partir de l'étage 5. Leur puissance (PV, dégâts, niveau, XP) croît nettement
+  plus vite que celle des ennemis normaux dans les étages élevés, et elles
+  apparaissent toujours loin du joueur. Chaque ennemi affiche son niveau
+  au-dessus de lui, et les ennemis ne se chevauchent pas entre eux.
+- **Armes** : 31 armes en 4 rangs — Basique, Amélioré, Puissant, Épique —
+  reprenant les rangs des améliorations (mêlée et distance, physiques ou
+  magiques). Les armes de mêlée magiques (Lame d'écaille, Glaive de braise,
+  Espadon runique, Faucheuse astrale) frappent en ignorant l'armure et scalent
+  sur le Pouvoir ; certaines appliquent leurs effets (brûlure, givre) aussi au
+  corps-à-corps. Les arcs ont des effets variés : perforant (traverse les
+  ennemis), givre (ralentit), feu (brûlure), triple tir (Arc de la tempête).
+  Les armes de mêlée ont des dégâts par coup élevés, les armes à distance une
+  meilleure sécurité. Une arme de départ aléatoire, de meilleures via
+  l'amélioration « Coffre d'armurier », les coffres ou en tuant une élite.
+  Toute arme trouvée (coffre, élite, amélioration « Coffre d'armurier ») ouvre
+  un écran de comparaison affichant le rang, le DPS et le scaling (Force ou
+  Pouvoir pour les dégâts, Agilité pour la cadence) : gardez la vôtre (1) ou
+  prenez la nouvelle (2). Mêlée : attaque orientée selon le personnage, avec
+  un arc de frappe animé (doré ou violet pour le magique) couvrant la zone
+  touchée ; distance : tir vers la souris. L'arme actuellement équipée ne peut
+  jamais retomber.
 - **Améliorations à rangs** : 55 familles (statistiques, compétences et
   équipement), chacune déclinée en 4 rangs — Basique, Amélioré, Puissant,
   Épique — des versions de plus en plus fortes. Un rang n'apparaît qu'après

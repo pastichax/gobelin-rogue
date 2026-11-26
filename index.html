@@ -181,50 +181,54 @@ function toggleMusic(){
 
 /* ---------- armes ---------- */
 const WEAPONS = [
-  [ /* palier 0 */
-    {name:"Couteau rouillé",     type:'phys', dmg:6,  cd:340, range:24, cat:'dagger'},
-    {name:"Gourdin de bois",     type:'phys', dmg:10, cd:560, range:25, cat:'club'},
+  [ /* rang Basique */
+    {name:"Couteau rouillé",     type:'phys', dmg:8,  cd:340, range:26, cat:'dagger'},
+    {name:"Gourdin de bois",     type:'phys', dmg:14, cd:560, range:27, cat:'club'},
     {name:"Bâton fêlé",          type:'mag',  dmg:7,  cd:460, range:0,  cat:'staff'},
+    {name:"Lame d'écaille",      type:'mag',  dmg:9,  cd:380, range:25, cat:'sword'},
     {name:"Vieille fronde",      type:'phys', dmg:5,  cd:300, range:0,  cat:'sling'},
-    {name:"Griffe usée",         type:'phys', dmg:4,  cd:220, range:19, cat:'dagger'},
+    {name:"Griffe usée",         type:'phys', dmg:6,  cd:220, range:21, cat:'dagger'},
   ],
-  [ /* palier 1 */
-    {name:"Dague d'aventurier",  type:'phys', dmg:9,  cd:280, range:23, cat:'dagger'},
-    {name:"Épée courte",         type:'phys', dmg:13, cd:440, range:26, cat:'sword'},
-    {name:"Hachette",            type:'phys', dmg:15, cd:600, range:25, cat:'axe'},
+  [ /* rang Amélioré */
+    {name:"Dague d'aventurier",  type:'phys', dmg:12, cd:280, range:25, cat:'dagger'},
+    {name:"Épée courte",         type:'phys', dmg:17, cd:440, range:29, cat:'sword'},
+    {name:"Hachette",            type:'phys', dmg:20, cd:580, range:28, cat:'axe'},
     {name:"Baguette étincelante",type:'mag',  dmg:10, cd:380, range:0,  cat:'wand'},
-    {name:"Lance de milicien",   type:'phys', dmg:12, cd:520, range:34, cat:'spear'},
+    {name:"Glaive de braise",    type:'mag',  dmg:15, cd:480, range:28, cat:'sword', burn:0.3},
+    {name:"Lance de milicien",   type:'phys', dmg:16, cd:520, range:36, cat:'spear'},
     {name:"Arc court",           type:'phys', dmg:7,  cd:300, range:0,  cat:'bow'},
   ],
-  [ /* palier 2 */
-    {name:"Épée de mercenaire",  type:'phys', dmg:18, cd:470, range:27, cat:'sword'},
-    {name:"Hache de guerre",     type:'phys', dmg:24, cd:650, range:27, cat:'axe'},
+  [ /* rang Puissant */
+    {name:"Épée de mercenaire",  type:'phys', dmg:24, cd:470, range:30, cat:'sword'},
+    {name:"Hache de guerre",     type:'phys', dmg:32, cd:630, range:31, cat:'axe'},
     {name:"Arc de chasse",       type:'phys', dmg:13, cd:340, range:0,  cat:'bow'},
     {name:"Sceptre de braise",   type:'mag',  dmg:17, cd:420, range:0,  cat:'wand'},
-    {name:"Trident",             type:'phys', dmg:20, cd:540, range:33, cat:'trident'},
+    {name:"Espadon runique",     type:'mag',  dmg:23, cd:500, range:30, cat:'sword'},
+    {name:"Trident",             type:'phys', dmg:27, cd:540, range:35, cat:'trident'},
     {name:"Arc long",            type:'phys', dmg:16, cd:480, range:0,  cat:'bow'},
     {name:"Arc elfique",         type:'phys', dmg:12, cd:360, range:0,  cat:'bow', pierce:true},
     {name:"Arc de givre",        type:'phys', dmg:11, cd:380, range:0,  cat:'bow', slow:true},
     {name:"Arc de feu",          type:'phys', dmg:13, cd:400, range:0,  cat:'bow', burn:0.3},
   ],
-  [ /* palier 3 */
-    {name:"Lame runique du gobelin", type:'phys', dmg:27, cd:420, range:28, cat:'sword'},
-    {name:"Hache du Bourreau",       type:'phys', dmg:36, cd:700, range:29, cat:'axe'},
+  [ /* rang Épique */
+    {name:"Lame runique du gobelin", type:'phys', dmg:36, cd:420, range:31, cat:'sword'},
+    {name:"Hache du Bourreau",       type:'phys', dmg:48, cd:680, range:32, cat:'axe'},
     {name:"Baguette du dragon",      type:'mag',  dmg:27, cd:380, range:0,  cat:'wand'},
     {name:"Sceptre du Nécromant",    type:'mag',  dmg:31, cd:460, range:0,  cat:'wand'},
-    {name:"Faux démoniaque",         type:'phys', dmg:31, cd:520, range:31, cat:'scythe'},
+    {name:"Faucheuse astrale",       type:'mag',  dmg:38, cd:500, range:33, cat:'scythe'},
+    {name:"Faux démoniaque",         type:'phys', dmg:41, cd:520, range:34, cat:'scythe'},
     {name:"Arc composé",             type:'phys', dmg:24, cd:420, range:0,  cat:'bow', pierce:true},
     {name:"Arc de la tempête",       type:'phys', dmg:17, cd:340, range:0,  cat:'bow', multishot:3},
   ],
 ];
 let gameReady=false;
-function makeWeapon(tier){
+function makeWeapon(rank){
   for(let i=0;i<25;i++){
-    const b = pick(WEAPONS[tier]);
-    if(!gameReady || player.weapon.tier!==tier || player.weapon.name!==b.name)
-      return Object.assign({tier}, b);
+    const b = pick(WEAPONS[rank]);
+    if(!gameReady || player.weapon.rank!==rank || player.weapon.name!==b.name)
+      return Object.assign({rank}, b);
   }
-  return Object.assign({tier}, pick(WEAPONS[tier]));
+  return Object.assign({rank}, pick(WEAPONS[rank]));
 }
 
 /* ---------- améliorations (plus de 50) ---------- */
@@ -370,10 +374,10 @@ const UP_DEFS = [
     {d:"Soigne tout, +60 PV max", f:p=>{p.maxHp+=60;p.hp=p.maxHp;}},
   ]},
   {n:"Coffre d'armurier",    i:"🎁", r:[
-    {d:"Recevoir une arme du palier supérieur à comparer", f:p=>{const t=Math.min(3,p.weapon.tier+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
-    {d:"Recevoir une arme deux paliers au-dessus à comparer", f:p=>{const t=Math.min(3,p.weapon.tier+2); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
-    {d:"Recevoir une arme de palier maximal à comparer", f:p=>{proposeWeapon(makeWeapon(3), 'offerte par l\'armurier');}},
-    {d:"Recevoir deux armes de palier maximal à comparer", f:p=>{proposeWeapon(makeWeapon(3), 'offerte par l\'armurier');proposeWeapon(makeWeapon(3), 'offerte par l\'armurier');}},
+    {d:"Recevoir une arme du rang supérieur à comparer", f:p=>{const t=Math.min(3,p.weapon.rank+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
+    {d:"Recevoir une arme deux rangs au-dessus à comparer", f:p=>{const t=Math.min(3,p.weapon.rank+2); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
+    {d:"Recevoir une arme de rang maximal à comparer", f:p=>{proposeWeapon(makeWeapon(3), 'offerte par l\'armurier');}},
+    {d:"Recevoir deux armes de rang maximal à comparer", f:p=>{proposeWeapon(makeWeapon(3), 'offerte par l\'armurier');proposeWeapon(makeWeapon(3), 'offerte par l\'armurier');}},
   ]},
 ];
 const UPGRADES = [];
@@ -401,7 +405,7 @@ UP_DEFS.forEach(def=>{
 function openChest(ch){
   ch.open=true; sLoot();
   if(Math.random()<0.75){
-    proposeWeapon(makeWeapon(clamp(Math.floor(floorNum/2),0,3)), 'trouvée dans un coffre');
+    proposeWeapon(makeWeapon(clamp(Math.floor((floorNum-1)/3),0,3)), 'trouvée dans un coffre');
     return;
   }
   const opts=[
@@ -424,6 +428,8 @@ function weaponCardHtml(w, tag){
   const eff = Math.round(w.dmg * (w.type==='mag' ? (1+player.pow/50)*(1+player.magMult) : (1+player.str/50)*(1+player.physMult)));
   const dps = (w.dmg*1000/w.cd).toFixed(1);
   const effDps = (eff*1000/w.cd).toFixed(1);
+  const rk = RANK_META[w.rank]||RANK_META[0];
+  const scale = w.type==='mag' ? 'Pouvoir' : 'Force';
   const fx=[];
   if(w.pierce) fx.push('Perforant : traverse les ennemis');
   if(w.slow) fx.push('Givre : ralentit les cibles (2 s)');
@@ -431,9 +437,9 @@ function weaponCardHtml(w, tag){
   if(w.multishot) fx.push('Tir de '+w.multishot+' flèches en éventail');
   return '<div class="ico">'+(WPN_ICONS[w.cat]||'🗡')+'</div>'
     +'<div class="nm">'+w.name+'<br><span style="color:#666;font-weight:normal">('+tag+')</span></div>'
-    +'<div class="ds">Palier '+(w.tier+1)+' • '+(w.type==='mag'?'dégâts magiques':'dégâts physiques')+'<br>'
-    +'Dégâts : '+w.dmg+' (effectif ~'+eff+')<br>'
-    +'Cadence : '+(1000/w.cd).toFixed(1)+'/s<br>'
+    +'<div class="ds"><span style="color:'+rk.col+'">Rang : '+rk.label+'</span> • '+(w.type==='mag'?'dégâts magiques':'dégâts physiques')+'<br>'
+    +'Dégâts : '+w.dmg+' (effectif ~'+eff+', scaling : '+scale+')<br>'
+    +'Cadence : '+(1000/w.cd).toFixed(1)+'/s (accélérée par Agilité)<br>'
     +'DPS : '+dps+' (effectif ~'+effDps+')<br>'
     +(w.range>0?'Portée : mêlée':'Portée : distance (visée souris)')
     +(fx.length?'<br>'+fx.join('<br>'):'')+'</div>';
@@ -907,7 +913,7 @@ function genFloor(){
     player.x=(p0.x+(p0.w>>1))*TILE+8; player.y=(p0.y+(p0.h>>1))*TILE+8;
 
     const count = 5 + floorNum;
-    for(let i=0;i<floorNum;i++){
+    for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.4?'guerrier': roll<0.62?'mage': roll<0.82?'archer':'aventurier';
       spawnEnemy(true, kind, rooms.slice(1));
@@ -939,7 +945,7 @@ function genFloor(){
     stairsPos={x:sx*TILE+8,y:sy*TILE+8};
 
     const count = 6 + floorNum;
-    for(let i=0;i<floorNum;i++){
+    for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.5?'mage': roll<0.75?'guerrier':'archer';
       spawnEnemy(true, kind);
@@ -973,7 +979,7 @@ function genFloor(){
     stairsPos={x:sx*TILE+8,y:sy*TILE+8};
 
     const count = 7 + floorNum;
-    for(let i=0;i<floorNum;i++){
+    for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.45?'guerrier': roll<0.7?'aventurier': roll<0.9?'paysan':'archer';
       spawnEnemy(true, kind);
@@ -1003,7 +1009,7 @@ function genFloor(){
     }
     player.x=3*TILE+8; player.y=py*TILE+8;
     const count = 6 + floorNum;
-    for(let i=0;i<floorNum;i++){
+    for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.45?'chevalier': roll<0.7?'guerrier': roll<0.9?'archer':'aventurier';
       spawnEnemy(true, kind);
@@ -1027,7 +1033,7 @@ function genFloor(){
     setTile(sx,sy,T_STAIRS);
     stairsPos={x:sx*TILE+8,y:sy*TILE+8};
     const count = 6 + floorNum;
-    for(let i=0;i<floorNum;i++){
+    for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.5?'chevalier': roll<0.8?'guerrier':'mage';
       spawnEnemy(true, kind);
@@ -1064,7 +1070,7 @@ function genFloor(){
     setTile(sx,sy,T_STAIRS);
     stairsPos={x:sx*TILE+8, y:sy*TILE+8};
     const count = 6 + floorNum;
-    for(let i=0;i<floorNum;i++){
+    for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.45?'aventurier': roll<0.75?'archer':'guerrier';
       spawnEnemy(true, kind);
@@ -1101,7 +1107,7 @@ function genFloor(){
     setTile(sx,sy,T_STAIRS);
     stairsPos={x:sx*TILE+8,y:sy*TILE+8};
     const count = 7 + floorNum;
-    for(let i=0;i<floorNum;i++){
+    for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.4?'aventurier': roll<0.7?'archer':'guerrier';
       spawnEnemy(true, kind);
@@ -1144,7 +1150,7 @@ function genFloor(){
     stairsPos={x:sx*TILE+8,y:sy*TILE+8};
 
     const count = 7 + floorNum;
-    for(let i=0;i<floorNum;i++){
+    for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.4?'guerrier': roll<0.65?'aventurier': roll<0.85?'archer':'paysan';
       spawnEnemy(true, kind);
@@ -1171,6 +1177,7 @@ function placeChests(){
   }
 }
 
+function eliteCount(){ return floorNum>=5 ? 2 : 1; }
 function spawnEnemy(elite, kind, roomList){
   const rooms = roomList && roomList.length ? roomList : null;
   let x,y,tries=0;
@@ -1186,17 +1193,17 @@ function spawnEnemy(elite, kind, roomList){
 
   const base = ENEMY_TYPES[kind];
   const fm = 1 + 0.22*(floorNum-1);
-  const em = elite ? 3.2 : 1;
+  const em = elite ? 3.2 + 0.6*(floorNum-1) : 1;
   enemies.push({
     kind, elite,
     x, y, r: base.r*(elite?1.35:1),
     maxHp: Math.round(base.hp*fm*em), hp: Math.round(base.hp*fm*em),
-    dmg: base.dmg*(1+0.18*(floorNum-1))*(elite?1.6:1),
+    dmg: base.dmg*(1+0.18*(floorNum-1))*(elite ? 1.6 + 0.12*(floorNum-1) : 1),
     type: base.type, speed: base.speed*(elite?0.9:1),
-    atkCd: base.atkCd, cdT: rnd(0,0.8), xp: Math.round(base.xp*(elite?4:1)),
+    atkCd: base.atkCd, cdT: rnd(0,0.8), xp: Math.round(base.xp*(elite ? 4 + Math.floor(floorNum/2) : 1)),
     spr: base.spr, armor: base.armor||0,
     chargeT:0, chargeCd:rnd(1,2.5), cdx:0, cdy:0, chargeHit:false,
-    lvl: floorNum + (elite?2:0),
+    lvl: floorNum + (elite ? 2 + Math.floor(floorNum/2) : 0),
     aggro:false, wanderT:0, wdx:0, wdy:0, flip:false, hurtT:0, slowT:0, poisonT:0,
   });
 }
@@ -1285,8 +1292,8 @@ function killEnemy(e){
     openLevelUp();
   }
   if(e.elite){
-    const tier = clamp(1+Math.floor(floorNum/2), 1, 3);
-    proposeWeapon(makeWeapon(tier), 'prise sur une élite');
+    const rank = clamp(Math.floor(floorNum/3), 0, 3);
+    proposeWeapon(makeWeapon(rank), 'prise sur une élite');
   }
 }
 function hurtPlayer(dmg, type, src){
@@ -1345,6 +1352,8 @@ function tryAttack(){
       if(dot <= 0) continue;
       const res = playerDamage(w.dmg, w.type, e);
       hurtEnemy(e, res.d, w.type, true);
+      if(w.slow) e.slowT=2;
+      if(w.burn){ e.burnT=2.5; e.burnDps=res.d*w.burn; }
       if(res.crit) sfx(500,900,.08,.08);
     }
     if(player.boltOnHit){
@@ -1712,13 +1721,14 @@ function drawMeleeArc(){
   const base = Math.atan2(player.diry, player.dirx);
   const sweep = 2.0, a0 = base - sweep/2;
   const sw = Math.min(1, t*1.6);
+  const magic = w.type==='mag';
   ctx.save();
-  ctx.fillStyle = '#ffe9a0';
+  ctx.fillStyle = magic ? '#c8a2ff' : '#ffe9a0';
   ctx.globalAlpha = 0.10*(1-t);
   ctx.beginPath(); ctx.moveTo(px,py); ctx.arc(px,py,reach,a0,a0+sweep); ctx.closePath(); ctx.fill();
   ctx.globalAlpha = 0.28*(1-t);
   ctx.beginPath(); ctx.moveTo(px,py); ctx.arc(px,py,reach,a0,a0+sweep*sw); ctx.closePath(); ctx.fill();
-  ctx.strokeStyle = '#fff3c4';
+  ctx.strokeStyle = magic ? '#e0c8ff' : '#fff3c4';
   ctx.globalAlpha = 0.55*(1-t);
   ctx.lineWidth = 1;
   ctx.beginPath(); ctx.arc(px,py,reach,a0,a0+sweep*sw); ctx.stroke();
