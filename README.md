@@ -20,7 +20,8 @@ donjons et vos villages : éliminez-les tous, gagnez des niveaux, et choisissez
 | Tab | Panneau de caractéristiques et améliorations |
 | 1 / 2 / 3 ou clic | Choisir une amélioration |
 | Entrée | Démarrer / recommencer |
-| Marcher sur un coffre | Ouvrir le coffre (équipement) |
+| Marcher sur un coffre | Ouvrir le coffre (équipement ou arme à comparer) |
+| 1 / 2 / Échap (offre d'arme) | Garder l'actuelle / prendre la trouvée / garder |
 
 ## Systèmes
 
@@ -28,8 +29,10 @@ donjons et vos villages : éliminez-les tous, gagnez des niveaux, et choisissez
   (réduction magique), agilité (vitesse de déplacement et d'attaque), pouvoir
   (dégâts magiques), force (dégâts physiques). Régénération lente de base
   (+0,4 PV/s), accélérable via plusieurs améliorations.
-- **Coffres** : 2 à 4 coffres par étage ; marchez dessus pour ouvrir : arme
-  (palier lié à l'étage) ou bonus de statistique / soin complet.
+- **Coffres** : 2 à 4 coffres par étage ; marchez dessus pour ouvrir. S'ils
+  contiennent une arme, un écran de comparaison s'affiche (dégâts de base et
+  effectifs, cadence, DPS, palier, effets spéciaux) : gardez votre arme (1) ou
+  prenez la nouvelle (2). Sinon : bonus de statistique ou soin complet.
 - **Étages alternés** : donjons (génération procédurale de salles + couloirs,
   ambiance sombre) et villages (maisons, arbres, palissades).
 - **Ennemis** : aventurier (mêlée rapide), guerrier (lent, blindé), mage

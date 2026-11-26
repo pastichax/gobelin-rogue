@@ -20,7 +20,7 @@
   #titleScreen p  { margin:3px 0; font-size:15px; color:#cfc9b8; }
   #titleScreen .start { margin-top:14px; font-size:18px; color:#ffd94a; animation:blink 1s steps(2) infinite; }
   @keyframes blink { 50% { opacity:0; } }
-  #levelupScreen { background:rgba(5,5,12,.82); }
+  #levelupScreen, #lootScreen { background:rgba(5,5,12,.82); }
   #levelupScreen h2 { color:#ffd94a; font-size:24px; margin:0 0 4px 0; text-shadow:2px 2px 0 #000; }
   #levelupScreen .sub { font-size:13px; color:#9a957f; margin-bottom:12px; }
   #cards { display:flex; gap:14px; }
@@ -47,7 +47,8 @@
        ont envahi vos donjons et vos villages. Dévorez-les tous.</p>
     <p>ZQSD / WASD / Flèches : se déplacer &nbsp;•&nbsp; ESPACE / E : attaquer (mêlée)<br>
        Clic / visée souris : arme de distance &nbsp;•&nbsp; MAJ : dash<br>
-       TAB : caractéristiques &nbsp;•&nbsp; Marchez sur les coffres pour les ouvrir</p>
+       TAB : caractéristiques &nbsp;•&nbsp; Marchez sur les coffres pour les ouvrir<br>
+       M : musique on/off</p>
     <p class="start">— APPUYEZ SUR ENTRÉE —</p>
   </div>
 
@@ -61,6 +62,12 @@
     <h1>VOUS ÊTES MORT</h1>
     <p id="deadStats"></p>
     <p class="start">— ENTRÉE POUR RECOMMENCER —</p>
+  </div>
+
+  <div id="lootScreen" class="overlay">
+    <h2>ARME TROUVÉE DANS LE COFFRE !</h2>
+    <div class="sub">Laquelle gardez-vous ? (1 : garder l'actuelle — 2 : prendre la nouvelle — Échap : garder)</div>
+    <div id="lootCards" style="display:flex;gap:14px;"></div>
   </div>
 </div></div>
 
@@ -84,7 +91,12 @@ const dist  = (ax,ay,bx,by)=> Math.sqrt(dist2(ax,ay,bx,by));
 
 /* ---------- audio (bips WebAudio) ---------- */
 let AC = null;
-function ensureAudio(){ if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
+function ensureAudio(){
+  if(!AC){
+    try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+    if(AC){ if(AC.resume) AC.resume(); musicNext = AC.currentTime + 0.1; }
+  }
+}
 function sfx(f0, f1, dur, vol, type){
   if(!AC) return;
   const o = AC.createOscillator(), g = AC.createGain();
@@ -104,42 +116,89 @@ const sShoot = ()=> sfx(700,300,.07,.05);
 const sLoot  = ()=> { sfx(520,780,.08,.08); setTimeout(()=>sfx(780,1040,.10,.08),80); };
 const sDash  = ()=> sfx(300,700,.10,.06,'triangle');
 
+/* ---------- musique d'ambiance (chiptune fantasy déjantée) ---------- */
+let musicOn = true, musicStep = 0, musicNext = 0, noiseBuf = null;
+const NOTE = m => 440*Math.pow(2,(m-69)/12);
+const MEL  = [69,72,76,72, 81,79,76,74, 72,76,79,76, 74,77,81,77,
+              76,79,83,79, 84,83,79,76, 77,74,71,74, 69,0,64,0];
+const BASS = [45,0,45,0, 41,0,41,0, 43,0,43,0, 40,0,40,0,
+              45,0,45,0, 41,0,41,0, 43,0,43,0, 40,0,40,0];
+function ensureNoise(){
+  if(noiseBuf || !AC) return;
+  noiseBuf = AC.createBuffer(1, AC.sampleRate*0.1, AC.sampleRate);
+  const d = noiseBuf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+}
+function playNote(m, t, dur, vol, type){
+  if(!m) return;
+  const o=AC.createOscillator(), g=AC.createGain();
+  o.type=type; o.frequency.value=NOTE(m);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t+dur);
+  o.connect(g); g.connect(AC.destination);
+  o.start(t); o.stop(t+dur);
+}
+function playNoise(t, vol, dur){
+  if(!noiseBuf) return;
+  const s=AC.createBufferSource(); s.buffer=noiseBuf;
+  const f=AC.createBiquadFilter(); f.type='highpass'; f.frequency.value=6000;
+  const g=AC.createGain();
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t+dur);
+  s.connect(f); f.connect(g); g.connect(AC.destination);
+  s.start(t); s.stop(t+dur);
+}
+function scheduleMusic(){
+  if(!AC || !musicOn) return;
+  ensureNoise();
+  const spb = 60/150/2;
+  while(musicNext < AC.currentTime + 0.15){
+    const i = musicStep % 32;
+    playNote(MEL[i], musicNext, spb*0.9, 0.028, 'square');
+    playNote(BASS[i], musicNext, spb*1.6, 0.045, 'triangle');
+    if(i%4===0) playNoise(musicNext, 0.05, 0.05);
+    if(i%4===2) playNoise(musicNext, 0.02, 0.03);
+    musicNext += spb; musicStep++;
+  }
+}
+setInterval(scheduleMusic, 40);
+
 /* ---------- armes ---------- */
 const WEAPONS = [
   [ /* palier 0 */
-    {name:"Couteau rouillé",     type:'phys', dmg:6,  cd:340, range:24},
-    {name:"Gourdin de bois",     type:'phys', dmg:10, cd:560, range:25},
-    {name:"Bâton fêlé",          type:'mag',  dmg:7,  cd:460, range:0},
-    {name:"Vieille fronde",      type:'phys', dmg:5,  cd:300, range:0},
-    {name:"Griffe usée",         type:'phys', dmg:4,  cd:220, range:19},
+    {name:"Couteau rouillé",     type:'phys', dmg:6,  cd:340, range:24, cat:'dagger'},
+    {name:"Gourdin de bois",     type:'phys', dmg:10, cd:560, range:25, cat:'club'},
+    {name:"Bâton fêlé",          type:'mag',  dmg:7,  cd:460, range:0,  cat:'staff'},
+    {name:"Vieille fronde",      type:'phys', dmg:5,  cd:300, range:0,  cat:'sling'},
+    {name:"Griffe usée",         type:'phys', dmg:4,  cd:220, range:19, cat:'dagger'},
   ],
   [ /* palier 1 */
-    {name:"Dague d'aventurier",  type:'phys', dmg:9,  cd:280, range:23},
-    {name:"Épée courte",         type:'phys', dmg:13, cd:440, range:26},
-    {name:"Hachette",            type:'phys', dmg:15, cd:600, range:25},
-    {name:"Baguette étincelante",type:'mag',  dmg:10, cd:380, range:0},
-    {name:"Lance de milicien",   type:'phys', dmg:12, cd:520, range:34},
-    {name:"Arc court",           type:'phys', dmg:7,  cd:300, range:0},
+    {name:"Dague d'aventurier",  type:'phys', dmg:9,  cd:280, range:23, cat:'dagger'},
+    {name:"Épée courte",         type:'phys', dmg:13, cd:440, range:26, cat:'sword'},
+    {name:"Hachette",            type:'phys', dmg:15, cd:600, range:25, cat:'axe'},
+    {name:"Baguette étincelante",type:'mag',  dmg:10, cd:380, range:0,  cat:'wand'},
+    {name:"Lance de milicien",   type:'phys', dmg:12, cd:520, range:34, cat:'spear'},
+    {name:"Arc court",           type:'phys', dmg:7,  cd:300, range:0,  cat:'bow'},
   ],
   [ /* palier 2 */
-    {name:"Épée de mercenaire",  type:'phys', dmg:18, cd:470, range:27},
-    {name:"Hache de guerre",     type:'phys', dmg:24, cd:650, range:27},
-    {name:"Arc de chasse",       type:'phys', dmg:13, cd:340, range:0},
-    {name:"Sceptre de braise",   type:'mag',  dmg:17, cd:420, range:0},
-    {name:"Trident",             type:'phys', dmg:20, cd:540, range:33},
-    {name:"Arc long",            type:'phys', dmg:16, cd:480, range:0},
-    {name:"Arc elfique",         type:'phys', dmg:12, cd:360, range:0, pierce:true},
-    {name:"Arc de givre",        type:'phys', dmg:11, cd:380, range:0, slow:true},
-    {name:"Arc de feu",          type:'phys', dmg:13, cd:400, range:0, burn:0.3},
+    {name:"Épée de mercenaire",  type:'phys', dmg:18, cd:470, range:27, cat:'sword'},
+    {name:"Hache de guerre",     type:'phys', dmg:24, cd:650, range:27, cat:'axe'},
+    {name:"Arc de chasse",       type:'phys', dmg:13, cd:340, range:0,  cat:'bow'},
+    {name:"Sceptre de braise",   type:'mag',  dmg:17, cd:420, range:0,  cat:'wand'},
+    {name:"Trident",             type:'phys', dmg:20, cd:540, range:33, cat:'trident'},
+    {name:"Arc long",            type:'phys', dmg:16, cd:480, range:0,  cat:'bow'},
+    {name:"Arc elfique",         type:'phys', dmg:12, cd:360, range:0,  cat:'bow', pierce:true},
+    {name:"Arc de givre",        type:'phys', dmg:11, cd:380, range:0,  cat:'bow', slow:true},
+    {name:"Arc de feu",          type:'phys', dmg:13, cd:400, range:0,  cat:'bow', burn:0.3},
   ],
   [ /* palier 3 */
-    {name:"Lame runique du gobelin", type:'phys', dmg:27, cd:420, range:28},
-    {name:"Hache du Bourreau",       type:'phys', dmg:36, cd:700, range:29},
-    {name:"Baguette du dragon",      type:'mag',  dmg:27, cd:380, range:0},
-    {name:"Sceptre du Nécromant",    type:'mag',  dmg:31, cd:460, range:0},
-    {name:"Faux démoniaque",         type:'phys', dmg:31, cd:520, range:31},
-    {name:"Arc composé",             type:'phys', dmg:24, cd:420, range:0, pierce:true},
-    {name:"Arc de la tempête",       type:'phys', dmg:17, cd:340, range:0, multishot:3},
+    {name:"Lame runique du gobelin", type:'phys', dmg:27, cd:420, range:28, cat:'sword'},
+    {name:"Hache du Bourreau",       type:'phys', dmg:36, cd:700, range:29, cat:'axe'},
+    {name:"Baguette du dragon",      type:'mag',  dmg:27, cd:380, range:0,  cat:'wand'},
+    {name:"Sceptre du Nécromant",    type:'mag',  dmg:31, cd:460, range:0,  cat:'wand'},
+    {name:"Faux démoniaque",         type:'phys', dmg:31, cd:520, range:31, cat:'scythe'},
+    {name:"Arc composé",             type:'phys', dmg:24, cd:420, range:0,  cat:'bow', pierce:true},
+    {name:"Arc de la tempête",       type:'phys', dmg:17, cd:340, range:0,  cat:'bow', multishot:3},
   ],
 ];
 function weaponDPS(w, p){
@@ -210,7 +269,7 @@ const UPGRADES = [
 function openChest(ch){
   ch.open=true; sLoot();
   if(Math.random()<0.45){
-    giveWeapon(makeWeapon(clamp(Math.floor(floorNum/2),0,3)), false);
+    proposeWeapon(makeWeapon(clamp(Math.floor(floorNum/2),0,3)));
     return;
   }
   const opts=[
@@ -235,6 +294,60 @@ function giveWeapon(w, force){
   } else {
     addMsg("Butin : " + w.name + " (moins bonne, jetée)", "#8a8471");
   }
+}
+
+/* ---------- offre d'arme trouvée (comparaison / accepter-refuser) ---------- */
+const WPN_ICONS = {dagger:'🗡',sword:'⚔',axe:'🪓',club:'🏏',spear:'🔱',staff:'🪄',wand:'✨',bow:'🏹',sling:'🌀',scythe:'☠',trident:'🔱'};
+let pendingWeaponQueue = [];
+function weaponCardHtml(w, tag){
+  const eff = Math.round(w.dmg * (w.type==='mag' ? (1+player.pow/50)*(1+player.magMult) : (1+player.str/50)*(1+player.physMult)));
+  const dps = (w.dmg*1000/w.cd).toFixed(1);
+  const effDps = (eff*1000/w.cd).toFixed(1);
+  const fx=[];
+  if(w.pierce) fx.push('Perforant : traverse les ennemis');
+  if(w.slow) fx.push('Givre : ralentit les cibles (2 s)');
+  if(w.burn) fx.push('Feu : brûlure sur la durée');
+  if(w.multishot) fx.push('Tir de '+w.multishot+' flèches en éventail');
+  return '<div class="ico">'+(WPN_ICONS[w.cat]||'🗡')+'</div>'
+    +'<div class="nm">'+w.name+'<br><span style="color:#666;font-weight:normal">('+tag+')</span></div>'
+    +'<div class="ds">Palier '+(w.tier+1)+' • '+(w.type==='mag'?'dégâts magiques':'dégâts physiques')+'<br>'
+    +'Dégâts : '+w.dmg+' (effectif ~'+eff+')<br>'
+    +'Cadence : '+(1000/w.cd).toFixed(1)+'/s<br>'
+    +'DPS : '+dps+' (effectif ~'+effDps+')<br>'
+    +(w.range>0?'Portée : mêlée':'Portée : distance (visée souris)')
+    +(fx.length?'<br>'+fx.join('<br>'):'')+'</div>';
+}
+function proposeWeapon(w){
+  pendingWeaponQueue.push(w);
+  if(state!=='loot') showLootOffer();
+}
+function showLootOffer(){
+  if(!pendingWeaponQueue.length){
+    document.getElementById('lootScreen').classList.remove('show');
+    if(state==='loot') state='play';
+    return;
+  }
+  const found = pendingWeaponQueue[0];
+  const cards = document.getElementById('lootCards');
+  cards.innerHTML =
+    '<div class="card" id="keepCard">'+weaponCardHtml(player.weapon,'votre arme actuelle')+'<div class="key">[1] Garder</div></div>'+
+    '<div class="card" id="takeCard">'+weaponCardHtml(found,'trouvée dans le coffre')+'<div class="key">[2] Prendre</div></div>';
+  document.getElementById('keepCard').onclick = ()=>chooseLoot(false);
+  document.getElementById('takeCard').onclick = ()=>chooseLoot(true);
+  document.getElementById('lootScreen').classList.add('show');
+  state='loot';
+}
+function chooseLoot(take){
+  if(state!=='loot' || !pendingWeaponQueue.length) return;
+  const w = pendingWeaponQueue.shift();
+  if(take){
+    player.weapon = w;
+    addMsg('Nouvelle arme : '+w.name+' !', '#ffd94a');
+    sLoot();
+  } else {
+    addMsg('Arme refusée : '+w.name, '#8a8471');
+  }
+  showLootOffer();
 }
 
 /* ---------- sprites pixel art ---------- */
@@ -339,6 +452,20 @@ SPR.chestOpen = makeSprite([
   '.cccccccc.',
 ],{c:'#8a5a2b',C:'#6e4420',d:'#241608'});
 
+/* sprites d'armes (dessinées pointant vers le haut) */
+const SPRW = {};
+SPRW.dagger  = makeSprite(['.w.','.w.','.w.','yyy','.y.'],{w:'#d8dde2',y:'#c8a23a'});
+SPRW.sword   = makeSprite(['.w.','.w.','.w.','.w.','.w.','.w.','yyy','.y.'],{w:'#d8dde2',y:'#c8a23a'});
+SPRW.axe     = makeSprite(['.gggg..','gwwwwg.','gwwwwg.','.gggs..','...s...','...s...','...s...'],{g:'#9aa0a6',w:'#d8dde2',s:'#8a5a2b'});
+SPRW.club    = makeSprite(['.kkk.','kkkkk','kkkkk','.kkk.','.kkk.','.kkk.'],{k:'#8a5a2b'});
+SPRW.spear   = makeSprite(['.s.','.s.','ttt','.t.','.t.','.t.','.t.','.t.','.t.','.t.'],{s:'#d8dde2',t:'#8a5a2b'});
+SPRW.staff   = makeSprite(['.o.','ooo','.t.','.t.','.t.','.t.','.t.','.t.'],{o:'#c8a2ff',t:'#8a5a2b'});
+SPRW.wand    = makeSprite(['.y.','yyy','.t.','.t.','.t.','.t.'],{y:'#ffd94a',t:'#8a5a2b'});
+SPRW.bow     = makeSprite(['wb...','w.b..','w..b.','w..b.','w...b','w...b','w..b.','w..b.','w.b..','wb...'],{w:'#e8e4d8',b:'#8a5a2b'});
+SPRW.sling   = makeSprite(['s...s','.s.s.','..s..','..p..','.....'],{s:'#8a5a2b',p:'#9aa0a6'});
+SPRW.scythe  = makeSprite(['.gg.....','gggggg..','....s...','....s...','....s...','....s...','....s...','....s...'],{g:'#d8dde2',s:'#5e3a4e'});
+SPRW.trident = makeSprite(['t.t.t','t.t.t','ttttt','.t...','.t...','.t...','.t...','.t...','.t...'],{t:'#d8dde2'});
+
 /* tuiles pré-rendues */
 function makeTile(fn){
   const c=document.createElement('canvas'); c.width=TILE; c.height=TILE;
@@ -406,14 +533,14 @@ const player = {
   x:0,y:0, r:5, dirx:1, diry:0, animT:0, moving:false,
   level:1, xp:0, xpNext:25,
   maxHp:60, hp:60, armor:0, marmor:0, agi:10, pow:0, str:0,
-  regen:0.4, lifesteal:0, thorns:0, healKill:0, crit:5, critMult:2,
+  regen:1, lifesteal:0, thorns:0, healKill:0, crit:5, critMult:2,
   xpMult:0, dashUnlocked:false, dashCdMult:1, dashDamage:false,
   minionCount:0, minionDmgMult:1, boltOnHit:false, boltLevel:0,
   fireball:0, freezeAura:false, poisonAura:0, rage:false,
   shieldOn:false, shieldCd:12, shieldTimer:0, shieldReady:false,
   physMult:0, magMult:0, atkSpeedMult:1, moveMult:1, eliteDmgMult:0,
   weapon: makeWeapon(0),
-  atkCd:0, dashCd:0, dashT:0, dashVx:0, dashVy:0, invulT:0,
+  atkCd:0, atkAnim:0, dashCd:0, dashT:0, dashVx:0, dashVy:0, invulT:0,
 };
 const upgradeCounts = {};
 
@@ -421,7 +548,7 @@ function resetGame(){
   player.level=1; player.xp=0; player.xpNext=25;
   player.maxHp=60; player.hp=60; player.armor=0; player.marmor=0;
   player.agi=10; player.pow=0; player.str=0;
-  player.regen=0.4; player.lifesteal=0; player.thorns=0; player.healKill=0;
+  player.regen=1; player.lifesteal=0; player.thorns=0; player.healKill=0;
   player.crit=5; player.critMult=2; player.xpMult=0;
   player.dashUnlocked=false; player.dashCdMult=1; player.dashDamage=false;
   player.minionCount=0; player.minionDmgMult=1; player.boltOnHit=false; player.boltLevel=0;
@@ -429,8 +556,8 @@ function resetGame(){
   player.shieldOn=false; player.shieldCd=12; player.shieldTimer=0; player.shieldReady=false;
   player.physMult=0; player.magMult=0; player.atkSpeedMult=1; player.moveMult=1; player.eliteDmgMult=0;
   player.weapon = makeWeapon(0);
-  player.atkCd=0; player.dashCd=0; player.dashT=0; player.invulT=0;
-  statsOpen=false; mouse.active=false;
+  player.atkCd=0; player.atkAnim=0; player.dashCd=0; player.dashT=0; player.invulT=0;
+  statsOpen=false; mouse.active=false; pendingWeaponQueue=[];
   for(const k in upgradeCounts) delete upgradeCounts[k];
   floorNum=1; killCount=0; elapsed=0; msgs=[];
   addMsg("Arme de départ : " + player.weapon.name, "#8fd14f");
@@ -447,7 +574,7 @@ function tileAt(px,py){ return getTile(Math.floor(px/TILE), Math.floor(py/TILE))
 
 const ENEMY_TYPES = {
   aventurier:{ hp:22, dmg:6,  type:'phys', speed:62, atkCd:1.0, xp:9,  spr:'adventurer', r:5 },
-  guerrier:  { hp:48, dmg:12, type:'phys', speed:44, atkCd:1.5, xp:15, spr:'warrior',    r:6, armor:8 },
+  guerrier:  { hp:40, dmg:9,  type:'phys', speed:42, atkCd:1.8, xp:15, spr:'warrior',    r:6, armor:5 },
   mage:      { hp:18, dmg:10, type:'mag',  speed:40, atkCd:1.9, xp:13, spr:'mage',       r:5, ranged:true },
   archer:    { hp:16, dmg:8,  type:'phys', speed:52, atkCd:1.6, xp:12, spr:'archer',     r:5, ranged:true },
 };
@@ -588,6 +715,10 @@ addEventListener('keydown', e=>{
     const i = ['Digit1','Digit2','Digit3'].indexOf(e.code);
     if(i>=0) chooseUpgrade(i);
   }
+  else if(state==='loot'){
+    if(e.code==='Digit1'||e.code==='Escape') chooseLoot(false);
+    else if(e.code==='Digit2') chooseLoot(true);
+  }
   if(e.code==='Tab') statsOpen=!statsOpen;
 });
 addEventListener('keyup', e=>{ keys[e.code]=false; });
@@ -611,6 +742,7 @@ function hideOverlays(){
   document.getElementById('titleScreen').classList.remove('show');
   document.getElementById('levelupScreen').classList.remove('show');
   document.getElementById('deadScreen').classList.remove('show');
+  document.getElementById('lootScreen').classList.remove('show');
 }
 
 /* ---------- messages flottants / journal ---------- */
@@ -683,6 +815,7 @@ function tryAttack(){
   if(player.atkCd>0 || state!=='play') return;
   const w = player.weapon;
   player.atkCd = w.cd/1000 / (1+player.agi/100) / player.atkSpeedMult;
+  player.atkAnim = 0.22;
   const ranged = w.range===0;
   if(ranged){
     let dx=player.dirx, dy=player.diry;
@@ -725,6 +858,8 @@ function fireBolt(x,y,dx,dy,type,baseDmg,fromPlayer,speed,fx){
     fromPlayer, life:1.6, crit:res.crit,
     fireball: fromPlayer && Math.random()<player.fireball,
     pierce: !!(fx&&fx.pierce), slow: !!(fx&&fx.slow), burn: fx?fx.burn:0, hit: [],
+    vis: fx ? (fx.cat==='bow'?'arrow' : fx.cat==='sling'?'stone' : 'orb')
+            : (type==='mag' ? 'orb' : 'arrow'),
   });
   if(fromPlayer) sShoot();
 }
@@ -822,6 +957,7 @@ function update(dt){
 
   /* attaque */
   if(player.atkCd>0) player.atkCd-=dt;
+  if(player.atkAnim>0) player.atkAnim-=dt;
   if(keys['Space']||keys['KeyE']||keys['KeyJ']) tryAttack();
   player.invulT=Math.max(0,player.invulT-dt);
 
@@ -884,7 +1020,7 @@ function update(dt){
         if(e.cdT<=0 && dp<230){
           e.cdT=e.atkCd;
           const d=dp||1;
-          fireBolt(e.x,e.y,(player.x-e.x)/d,(player.y-e.y)/d, 'mag', e.dmg, false, 150);
+          fireBolt(e.x,e.y,(player.x-e.x)/d,(player.y-e.y)/d, e.type, e.dmg, false, 150);
         }
       } else {
         if(dp > 14){ mx=(player.x-e.x)/dp; my=(player.y-e.y)/dp; }
@@ -985,6 +1121,43 @@ function moveEntity(ent, vx, vy, dt, isDash){
 }
 
 /* ---------- rendu ---------- */
+function drawWeapon(){
+  const w = player.weapon;
+  const spr = SPRW[w.cat];
+  if(!spr) return;
+  const flip = player.dirx<0;
+  const px = player.x-cam.x, py = player.y-cam.y;
+  const t = player.atkAnim>0 ? 1-(player.atkAnim/0.22) : 0;
+  ctx.save();
+  ctx.translate(px + (flip?-7:7), py+1);
+  if(flip) ctx.scale(-1,1);
+  if(w.cat==='bow'){
+    ctx.rotate(0.1 - t*0.25);
+    ctx.drawImage(spr, -spr.width/2, -spr.height/2);
+    if(t>0){
+      ctx.globalAlpha = 1-t;
+      ctx.fillStyle = '#c8b07a'; ctx.fillRect(-6,-1,8,2);
+      ctx.fillStyle = '#e2e6ea'; ctx.fillRect(2,-1,3,2);
+      ctx.globalAlpha = 1;
+    }
+  } else if(w.cat==='wand' || w.cat==='staff'){
+    ctx.rotate(-0.25 + t*0.5);
+    ctx.drawImage(spr, -spr.width/2, -spr.height/2);
+    if(t>0){
+      ctx.globalAlpha = 0.5+0.5*Math.sin(t*Math.PI);
+      ctx.fillStyle = '#c8a2ff';
+      ctx.fillRect(-2, -spr.height/2-2, 4, 4);
+      ctx.globalAlpha = 1;
+    }
+  } else if(w.cat==='sling'){
+    ctx.rotate(-0.6 + t*2.2);
+    ctx.drawImage(spr, -spr.width/2, -spr.height/2);
+  } else {
+    ctx.rotate(-0.4 + t*1.9);
+    ctx.drawImage(spr, -spr.width/2, -spr.height+2);
+  }
+  ctx.restore();
+}
 function drawSpriteC(spr, x, y, flip, scale){
   scale=scale||1;
   const w=spr.width*scale, h=spr.height*scale;
@@ -1089,6 +1262,7 @@ function render(){
     if(player.invulT>0 && Math.floor(elapsed*20)%2===0) ctx.globalAlpha=0.5;
     drawSpriteC(SPR.goblin, player.x-cam.x, player.y-cam.y+bob, player.dirx<0, 1);
     ctx.globalAlpha=1;
+    drawWeapon();
     if(player.shieldOn && player.shieldReady){
       ctx.strokeStyle='rgba(127,220,255,0.7)';
       ctx.beginPath(); ctx.arc(player.x-cam.x, player.y-cam.y, 9, 0, Math.PI*2); ctx.stroke();
@@ -1098,17 +1272,30 @@ function render(){
   /* projectiles */
   for(const b of bolts){
     const px=b.x-cam.x, py=b.y-cam.y;
-    if(b.fromPlayer){
-      ctx.fillStyle = b.type==='mag' ? '#c8a2ff' : '#ffe9a2';
-      ctx.fillRect(px-2,py-2,4,4);
-      ctx.fillStyle = b.fireball ? '#ff9c40' : '#fff';
-      ctx.fillRect(px-1,py-1,2,2);
+    const ang=Math.atan2(b.vy,b.vx);
+    ctx.save();
+    ctx.translate(px,py); ctx.rotate(ang);
+    if(b.vis==='arrow'){
+      ctx.fillStyle = b.fromPlayer ? '#c8b07a' : '#d2b48c';
+      ctx.fillRect(-5,-1,8,2);
+      ctx.fillStyle = '#e2e6ea'; ctx.fillRect(3,-1,3,2);
+      ctx.fillStyle = b.fromPlayer ? '#8fd14f' : '#b03a2e';
+      ctx.fillRect(-6,-1,2,2);
+      if(b.slow){ ctx.fillStyle='rgba(127,220,255,0.85)'; ctx.fillRect(4,-2,3,4); }
+      if(b.burn){ ctx.fillStyle='rgba(255,156,64,0.85)'; ctx.fillRect(3,-2,3,4); }
+    } else if(b.vis==='stone'){
+      ctx.fillStyle='#9aa0a6'; ctx.fillRect(-2,-2,4,4);
+      ctx.fillStyle='#c8ccd2'; ctx.fillRect(-1,-1,2,2);
     } else {
-      ctx.fillStyle = b.type==='mag' ? '#a26bff' : '#d2b48c';
-      ctx.fillRect(px-2,py-2,4,4);
-      ctx.fillStyle = b.type==='mag' ? '#e8d5ff' : '#f0e2c0';
-      ctx.fillRect(px-1,py-1,2,2);
+      ctx.fillStyle = b.fromPlayer ? '#c8a2ff' : '#a26bff';
+      ctx.fillRect(-3,-3,6,6);
+      ctx.fillStyle = b.fireball ? '#ff9c40' : (b.fromPlayer?'#ffffff':'#e8d5ff');
+      ctx.fillRect(-1,-1,3,3);
+      ctx.globalAlpha=0.35;
+      ctx.fillStyle='#c8a2ff'; ctx.fillRect(-4,-4,8,8);
+      ctx.globalAlpha=1;
     }
+    ctx.restore();
   }
 
   /* textes flottants */
