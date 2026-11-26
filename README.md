@@ -36,13 +36,14 @@ de 200 améliorations réparties en 55 familles et 4 rangs.
   alors (dégâts de base et effectifs, cadence, DPS, palier, effets spéciaux) :
   gardez votre arme (1) ou prenez la nouvelle (2). Sinon : bonus de
   statistique ou soin complet.
-- **7 types d'étages en cycle** : donjons (génération procédurale de salles +
-  couloirs, ambiance sombre), villages (maisons, arbres, palissades),
-  bibliothèques de mage (rayonnages de livres, tables de lecture, ambiance
-  violette, mages en nombre), intérieurs de taverne (comptoir, tonneaux,
-  tables, ambiance chaleureuse, belliqueux), cours de château-fort (muraille,
-  chemins de pierre, donjon central), intérieurs de château-fort (dalles de
-  pierre, piliers) et fermes (champs cultivés clôturés, grange, arbres).
+- **8 types d'étages en cycle** : donjon (salles procédurales + couloirs,
+  ambiance sombre), forêt (bouquets d'arbres et clairières reliées par un
+  sentier), ferme (champs cultivés clôturés, grange, arbres), village
+  (maisons, arbres, palissades), bibliothèque de mage (rayonnages de livres,
+  tables de lecture, ambiance violette, mages en nombre), intérieur de
+  taverne (comptoir, tonneaux, tables, ambiance chaleureuse, belliqueux),
+  cour de château-fort (muraille, chemins de pierre, donjon central) et
+  intérieur de château-fort (dalles de pierre, piliers).
 - **Ennemis** : aventurier (mêlée rapide), guerrier (lent, blindé), mage
   (projectiles magiques à distance), archer (flèches à distance), bébé
   (inoffensif, uniquement dans les villages), paysan (faible, villages et
@@ -73,6 +74,10 @@ de 200 améliorations réparties en 55 familles et 4 rangs.
 
 ## Technique
 
-- Canvas 480×270 mis à l'échelle en `image-rendering: pixelated`.
+- Monde rendu en 480×270 puis agrandi sans lissage ; interface (textes,
+  jauges, panneaux) dessinée par-dessus à la résolution native de l'écran :
+  texte parfaitement net.
 - Sprites et tuiles dessinés en pixel art procédural (aucun asset externe).
+  Le gobelin a un sprite propre à chaque direction (haut, bas, gauche,
+  droite) avec jambes animées en marchant, peau verte et grand nez.
 - Effets sonores générés via WebAudio.

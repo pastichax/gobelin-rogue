@@ -78,8 +78,19 @@
    ============================================================ */
 const TILE = 16, VW = 480, VH = 270;
 const cv = document.getElementById('cv');
-const ctx = cv.getContext('2d');
+const worldCv = document.createElement('canvas');
+worldCv.width = VW; worldCv.height = VH;
+const ctx = worldCv.getContext('2d');
 ctx.imageSmoothingEnabled = false;
+function fitCanvas(){
+  let cw=0, ch=0;
+  try{ cw=cv.clientWidth; ch=cv.clientHeight; }catch(err){}
+  if(typeof cw!=='number' || !cw){ cw=VW*3; ch=VH*3; }
+  const dpr = (typeof devicePixelRatio==='number' && devicePixelRatio>0) ? devicePixelRatio : 1;
+  cv.width = Math.round(cw*dpr); cv.height = Math.round(ch*dpr);
+}
+fitCanvas();
+addEventListener('resize', fitCanvas);
 
 /* ---------- utilitaires ---------- */
 const rnd  = (a,b)=> a + Math.random()*(b-a);
@@ -472,18 +483,91 @@ function makeSprite(rows, pal){
   return c;
 }
 const SPR = {};
-SPR.goblin = makeSprite([
-  '....gggg....',
-  '..gggggggg..',
-  '..gkggggkg..',
-  '..gggwwggg..',
-  '...GrrrrG...',
-  's.gGrrrrGg.s',
-  'ssgggrrgggss',
-  '..gg.gg.gg..',
-  '..gg.gg.gg..',
-  '..Gk.GG.kG..',
-],{g:'#6abe30',G:'#3f7a1e',k:'#1c2e10',r:'#b03a2e',w:'#e8e4d8',s:'#c8c8c8'});
+const GPAL = {g:'#6abe30',G:'#3f7a1e',n:'#8ede55',e:'#4e9423',k:'#1c2e10',r:'#b03a2e',w:'#e8e4d8'};
+SPR.goblinDown = [
+  makeSprite([
+    '...gggggg...',
+    '..gggggggg..',
+    '.egggggggge.',
+    '.egkggggkge.',
+    '..gggggggg..',
+    '..ggnnnngg..',
+    '..ggnnnngg..',
+    '..ggkkkkgg..',
+    '..g.rrrr.g..',
+    '...gg..gg...',
+    '...kk..kk...',
+  ],GPAL),
+  makeSprite([
+    '...gggggg...',
+    '..gggggggg..',
+    '.egggggggge.',
+    '.egkggggkge.',
+    '..gggggggg..',
+    '..ggnnnngg..',
+    '..ggnnnngg..',
+    '..ggkkkkgg..',
+    '..g.rrrr.g..',
+    '..gg....gg..',
+    '..kk....kk..',
+  ],GPAL),
+];
+SPR.goblinUp = [
+  makeSprite([
+    '...gggggg...',
+    '..gggggggg..',
+    '.egggggggge.',
+    '..ggGggGgg..',
+    '..gggggggg..',
+    '..gggggggg..',
+    '..gggggggg..',
+    '..GggggggG..',
+    '..g.rrrr.g..',
+    '...gg..gg...',
+    '...kk..kk...',
+  ],GPAL),
+  makeSprite([
+    '...gggggg...',
+    '..gggggggg..',
+    '.egggggggge.',
+    '..ggGggGgg..',
+    '..gggggggg..',
+    '..gggggggg..',
+    '..gggggggg..',
+    '..GggggggG..',
+    '..g.rrrr.g..',
+    '..gg....gg..',
+    '..kk....kk..',
+  ],GPAL),
+];
+SPR.goblinSide = [
+  makeSprite([
+    '...gggggg...',
+    '..gggggggg..',
+    '.egggggggg..',
+    '..gggggkke..',
+    '..gggggggg..',
+    '..ggggggnnn.',
+    '..ggggggnnn.',
+    '..ggggkkkk..',
+    '..gg.rrrr...',
+    '...gg..gg...',
+    '..kk....kk..',
+  ],GPAL),
+  makeSprite([
+    '...gggggg...',
+    '..gggggggg..',
+    '.egggggggg..',
+    '..gggggkke..',
+    '..gggggggg..',
+    '..ggggggnnn.',
+    '..ggggggnnn.',
+    '..ggggkkkk..',
+    '..gg.rrrr...',
+    '....ggg.....',
+    '...kkk......',
+  ],GPAL),
+];
 SPR.warrior = makeSprite([
   '...aaaaaa...',
   '..aaaaaaaa..',
@@ -731,7 +815,7 @@ let msgs=[];
 let levelupChoices=[];
 
 const player = {
-  x:0,y:0, r:5, dirx:1, diry:0, animT:0, moving:false,
+  x:0,y:0, r:5, dirx:1, diry:0, animT:0, moving:false, face:'down', faceLeft:false, walkT:0,
   level:1, xp:0, xpNext:25,
   maxHp:60, hp:60, armor:0, marmor:0, agi:10, pow:0, str:0,
   regen:1, lifesteal:0, thorns:0, healKill:0, crit:5, critMult:2,
@@ -788,14 +872,14 @@ const ENEMY_TYPES = {
   chevalier: { hp:60, dmg:14, type:'phys', speed:60, atkCd:2.2, xp:26, spr:'chevalier',  r:7, armor:10, charger:true },
 };
 
-const THEME_CYCLE=['dungeon','village','library','tavern','chateau','chateauInt','ferme'];
-const THEME_NAMES={dungeon:'Donjon', village:'Village', library:'Bibliothèque', tavern:'Taverne',
+const THEME_CYCLE=['dungeon','forest','ferme','village','library','tavern','chateau','chateauInt'];
+const THEME_NAMES={dungeon:'Donjon', forest:'Forêt', village:'Village', library:'Bibliothèque', tavern:'Taverne',
   chateau:'Château (cour)', chateauInt:'Château (intérieur)', ferme:'Ferme'};
 function genFloor(){
   enemies=[]; bolts=[]; floaters=[]; minions=[]; poisonTicks=[];
   theme = THEME_CYCLE[(floorNum-1)%THEME_CYCLE.length];
   tiles.fill(theme==='dungeon'||theme==='chateauInt' ? T_DUNWALL :
-             theme==='village'||theme==='ferme'||theme==='chateau' ? T_GRASS : T_WOOD);
+             theme==='village'||theme==='ferme'||theme==='chateau'||theme==='forest' ? T_GRASS : T_WOOD);
   stairsOpen=false;
 
   if(theme==='dungeon'){
@@ -951,6 +1035,43 @@ function genFloor(){
     for(let i=0;i<count;i++){
       const roll=Math.random();
       const kind = roll<0.3?'chevalier': roll<0.55?'guerrier': roll<0.75?'mage': roll<0.9?'aventurier':'pretre';
+      spawnEnemy(false, kind);
+    }
+  } else if(theme==='forest'){
+    /* forêt : bouquets d'arbres et clairières */
+    for(let x=0;x<mapW;x++){ setTile(x,0,T_TREE); setTile(x,mapH-1,T_TREE); }
+    for(let y=0;y<mapH;y++){ setTile(0,y,T_TREE); setTile(mapW-1,y,T_TREE); }
+    for(let i=0;i<26;i++){
+      let tx=rndi(3,mapW-4), ty=rndi(3,mapH-4);
+      const n=rndi(3,8);
+      for(let k=0;k<n;k++){
+        if(getTile(tx,ty)===T_GRASS) setTile(tx,ty,T_TREE);
+        tx=clamp(tx+rndi(-1,1),2,mapW-3); ty=clamp(ty+rndi(-1,1),2,mapH-3);
+      }
+    }
+    const midy=(mapH>>1);
+    player.x=3*TILE+8; player.y=midy*TILE+8;
+    for(let yy=midy-2; yy<=midy+2; yy++)
+      for(let xx=2; xx<=5; xx++) setTile(xx,yy,T_GRASS);
+    let sx,sy,tries=0;
+    do{ sx=rndi(mapW-10,mapW-4); sy=rndi(2,mapH-3); tries++; }
+    while(isSolid(sx*TILE+8,sy*TILE+8) && tries<300);
+    for(let yy=sy-1; yy<=sy+1; yy++)
+      for(let xx=sx-1; xx<=sx+1; xx++)
+        if(xx>0&&yy>0&&xx<mapW-1&&yy<mapH-1) setTile(xx,yy,T_GRASS);
+    for(let x=3; x<=sx; x++) setTile(x,midy,T_GRASS);
+    for(let y=Math.min(midy,sy); y<=Math.max(midy,sy); y++) setTile(sx,y,T_GRASS);
+    setTile(sx,sy,T_STAIRS);
+    stairsPos={x:sx*TILE+8, y:sy*TILE+8};
+    const count = 6 + floorNum;
+    for(let i=0;i<floorNum;i++){
+      const roll=Math.random();
+      const kind = roll<0.45?'aventurier': roll<0.75?'archer':'guerrier';
+      spawnEnemy(true, kind);
+    }
+    for(let i=0;i<count;i++){
+      const roll=Math.random();
+      const kind = roll<0.4?'aventurier': roll<0.65?'archer': roll<0.85?'guerrier':'pretre';
       spawnEnemy(false, kind);
     }
   } else if(theme==='ferme'){
@@ -1205,6 +1326,8 @@ function tryAttack(){
       const d=dist(player.x,player.y,mouse.x,mouse.y)||1;
       dx=(mouse.x-player.x)/d; dy=(mouse.y-player.y)/d;
     }
+    if(Math.abs(dx)>Math.abs(dy)){ player.face='side'; player.faceLeft=dx<0; }
+    else player.face = dy<0 ? 'up' : 'down';
     const shots = w.multishot||1;
     for(let s=0;s<shots;s++){
       const off = shots>1 ? (s-(shots-1)/2)*0.16 : 0;
@@ -1212,6 +1335,8 @@ function tryAttack(){
       fireBolt(player.x, player.y, dx*ca-dy*sa, dx*sa+dy*ca, w.type, w.dmg, true, 190, w);
     }
   } else {
+    if(Math.abs(player.dirx)>Math.abs(player.diry)){ player.face='side'; player.faceLeft=player.dirx<0; }
+    else player.face = player.diry<0 ? 'up' : 'down';
     const reach = w.range + 6;
     for(const e of enemies){
       const d = dist(player.x,player.y,e.x,e.y);
@@ -1318,8 +1443,12 @@ function update(dt){
   if(keys['KeyA']||keys['KeyQ']||keys['ArrowLeft']) dx-=1;
   if(keys['KeyD']||keys['ArrowRight']) dx+=1;
   if(dx||dy){ const l=Math.hypot(dx,dy); dx/=l; dy/=l; player.dirx=dx; player.diry=dy; }
+  if(dx||dy){
+    if(Math.abs(dx)>Math.abs(dy)){ player.face='side'; player.faceLeft=dx<0; }
+    else player.face = dy<0 ? 'up' : 'down';
+  }
   player.moving = !!(dx||dy);
-  if(player.moving) player.animT+=dt;
+  if(player.moving){ player.animT+=dt; player.walkT+=dt; }
 
   /* dash */
   if(player.dashCd>0) player.dashCd-=dt;
@@ -1641,11 +1770,12 @@ function drawSpriteC(spr, x, y, flip, scale){
   ctx.drawImage(spr, -w/2, -h/2, w, h);
   ctx.restore();
 }
-function bar(x,y,w,h,ratio,fg,bg){
-  ctx.fillStyle=bg; ctx.fillRect(x,y,w,h);
-  ctx.fillStyle=fg; ctx.fillRect(x,y,Math.round(w*clamp(ratio,0,1)),h);
+function bar(c,x,y,w,h,ratio,fg,bg){
+  c.fillStyle=bg; c.fillRect(x,y,w,h);
+  c.fillStyle=fg; c.fillRect(x,y,Math.round(w*clamp(ratio,0,1)),h);
 }
-function render(){
+let hudTexts=[];
+function renderWorld(){
   ctx.fillStyle='#000'; ctx.fillRect(0,0,VW,VH);
   if(state==='title'){ renderTitleArt(); return; }
 
@@ -1712,15 +1842,12 @@ function render(){
   ctx.fillRect(Math.round(player.x-cam.x-5), Math.round(player.y-cam.y+4), 10, 3);
 
   /* barres de vie + niveau des ennemis */
-  ctx.font='6px monospace';
   for(const e of enemies){
     if(e.dead) continue;
-    ctx.textAlign='center';
-    ctx.fillStyle = e.elite ? '#ffd94a' : '#b8b2a0';
-    ctx.fillText('niv '+e.lvl, e.x-cam.x, e.y-cam.y-e.r-(e.elite?19:13));
+    hudTexts.push({t:'niv '+e.lvl, x:e.x-cam.x, y:e.y-cam.y-e.r-(e.elite?19:13), c: e.elite?'#ffd94a':'#b8b2a0'});
     if(e.hp<e.maxHp){
       const px=e.x-cam.x-7, py=e.y-cam.y-e.r-(e.elite?9:8);
-      bar(px,py,14,2,e.hp/e.maxHp, e.elite?'#ff5050':'#e05555','#222');
+      bar(ctx,px,py,14,2,e.hp/e.maxHp, e.elite?'#ff5050':'#e05555','#222');
     }
   }
 
@@ -1762,7 +1889,9 @@ function render(){
     const bob = player.moving ? (Math.sin(player.animT*12)>0?-1:0) : 0;
     if(player.invulT>0 && Math.floor(elapsed*20)%2===0) ctx.globalAlpha=0.5;
     drawMeleeArc();
-    drawSpriteC(SPR.goblin, player.x-cam.x, player.y-cam.y+bob, player.dirx<0, 1);
+    const gset = player.face==='up' ? SPR.goblinUp : player.face==='side' ? SPR.goblinSide : SPR.goblinDown;
+    const gframe = player.moving ? (Math.floor(player.walkT*8)%2) : 0;
+    drawSpriteC(gset[gframe], player.x-cam.x, player.y-cam.y+bob, player.face==='side' && player.faceLeft, 1);
     ctx.globalAlpha=1;
     drawWeapon();
     if(player.shieldOn && player.shieldReady){
@@ -1801,13 +1930,9 @@ function render(){
   }
 
   /* textes flottants */
-  ctx.font='7px monospace'; ctx.textAlign='center';
   for(const f of floaters){
-    ctx.globalAlpha=clamp(f.life/0.8,0,1);
-    ctx.fillStyle=f.color;
-    ctx.fillText(f.txt, f.x-cam.x, f.y-cam.y);
+    hudTexts.push({t:f.txt, x:f.x-cam.x, y:f.y-cam.y, c:f.color, a:clamp(f.life/0.8,0,1)});
   }
-  ctx.globalAlpha=1;
 
   /* ambiance : vignette */
   if(theme==='dungeon'||theme==='library'){
@@ -1822,10 +1947,30 @@ function render(){
     ctx.fillStyle=g; ctx.fillRect(0,0,VW,VH);
   }
 
-  renderHUD();
-  if(statsOpen) renderStats();
 }
-function renderStats(){
+function render(){
+  hudTexts=[];
+  renderWorld();
+  const c=cv.getContext('2d');
+  c.setTransform(1,0,0,1,0,0);
+  c.imageSmoothingEnabled=false;
+  c.fillStyle='#000'; c.fillRect(0,0,cv.width,cv.height);
+  c.drawImage(worldCv,0,0,cv.width,cv.height);
+  if(state!=='title'){
+    const S=cv.width/VW;
+    c.setTransform(S,0,0,S,0,0);
+    c.font='6px monospace'; c.textAlign='center';
+    for(const h of hudTexts){
+      c.globalAlpha=h.a===undefined?1:h.a;
+      c.fillStyle=h.c;
+      c.fillText(h.t,h.x,h.y);
+    }
+    c.globalAlpha=1;
+    renderHUD(c);
+    if(statsOpen) renderStats(c);
+  }
+}
+function renderStats(c){
   const lines=[
     'GOBELIN — niv '+player.level,
     'PV '+Math.ceil(player.hp)+'/'+player.maxHp+' (+'+player.regen.toFixed(1)+'/s)',
@@ -1842,63 +1987,63 @@ function renderStats(){
   const all=lines.concat(shown.length?['Améliorations :'].concat(shown):[]);
   const w=200, h=12+all.length*9;
   const x=(VW-w)/2, y=clamp((VH-h)/2,20,VH-h-20);
-  ctx.fillStyle='rgba(8,8,16,0.93)'; ctx.fillRect(x,y,w,h);
-  ctx.strokeStyle='#4a4f6e'; ctx.lineWidth=1; ctx.strokeRect(x+0.5,y+0.5,w-1,h-1);
-  ctx.font='7px monospace'; ctx.textAlign='left';
+  c.fillStyle='rgba(8,8,16,0.93)'; c.fillRect(x,y,w,h);
+  c.strokeStyle='#4a4f6e'; c.lineWidth=1; c.strokeRect(x+0.5,y+0.5,w-1,h-1);
+  c.font='7px monospace'; c.textAlign='left';
   all.forEach((t,i)=>{
-    ctx.fillStyle = i===0 ? '#8fd14f' : (i===lines.length ? '#ffd94a' : '#d8d4c4');
-    ctx.fillText(t, x+8, y+15+i*9);
+    c.fillStyle = i===0 ? '#8fd14f' : (i===lines.length ? '#ffd94a' : '#d8d4c4');
+    c.fillText(t, x+8, y+15+i*9);
   });
 }
 function renderTitleArt(){
-  drawSpriteC(SPR.goblin, VW/2, 96, false, 6);
+  drawSpriteC(SPR.goblinDown[0], VW/2, 96, false, 6);
   drawSpriteC(SPR.warrior, VW/2-90, 110, false, 2);
   drawSpriteC(SPR.mage, VW/2+90, 110, true, 2);
   drawSpriteC(SPR.adventurer, VW/2-60, 112, false, 2);
   drawSpriteC(SPR.adventurer, VW/2+60, 112, true, 2);
 }
-function renderHUD(){
+function renderHUD(c){
   /* barre de vie */
-  bar(6,6,80,6, player.hp/player.maxHp, '#4caf50', '#1a1a24');
-  ctx.fillStyle='#e8e4d8'; ctx.font='7px monospace'; ctx.textAlign='left';
-  ctx.fillText(Math.ceil(player.hp)+"/"+player.maxHp+" PV", 6, 20);
+  bar(c,6,6,80,6, player.hp/player.maxHp, '#4caf50', '#1a1a24');
+  c.fillStyle='#e8e4d8'; c.font='7px monospace'; c.textAlign='left';
+  c.fillText(Math.ceil(player.hp)+"/"+player.maxHp+" PV", 6, 20);
 
   /* XP */
-  bar(6, VH-14, 120, 4, player.xp/player.xpNext, '#5c9ce0', '#1a1a24');
-  ctx.fillStyle='#9fd7ff';
-  ctx.fillText("Niv "+player.level, 6, VH-18);
+  bar(c,6, VH-14, 120, 4, player.xp/player.xpNext, '#5c9ce0', '#1a1a24');
+  c.fillStyle='#9fd7ff';
+  c.fillText("Niv "+player.level, 6, VH-18);
 
   /* étage + kills */
-  ctx.textAlign='right';
-  ctx.fillStyle='#e8e4d8';
-  ctx.fillText(THEME_NAMES[theme]+" "+floorNum, VW-6, 12);
-  ctx.fillStyle='#9a957f';
-  ctx.fillText("☠ "+killCount, VW-6, 22);
+  c.textAlign='right';
+  c.fillStyle='#e8e4d8';
+  c.fillText(THEME_NAMES[theme]+" "+floorNum, VW-6, 12);
+  c.fillStyle='#9a957f';
+  c.fillText("☠ "+killCount, VW-6, 22);
   if(!stairsOpen){
-    ctx.fillStyle='#e05555';
-    ctx.fillText("Ennemis restants : "+enemies.filter(e=>!e.dead).length, VW-6, 32);
+    c.fillStyle='#e05555';
+    c.fillText("Ennemis restants : "+enemies.filter(e=>!e.dead).length, VW-6, 32);
   } else {
-    ctx.fillStyle='#8fd14f';
-    ctx.fillText("Escalier ouvert !", VW-6, 32);
+    c.fillStyle='#8fd14f';
+    c.fillText("Escalier ouvert !", VW-6, 32);
   }
 
   /* arme */
-  ctx.textAlign='center';
-  ctx.fillStyle='#ffd94a'; ctx.font='7px monospace';
-  ctx.fillText(player.weapon.name+" ("+ (player.weapon.type==='mag'?"magique":"physique") +")", VW/2, VH-8);
+  c.textAlign='center';
+  c.fillStyle='#ffd94a'; c.font='7px monospace';
+  c.fillText(player.weapon.name+" ("+ (player.weapon.type==='mag'?"magique":"physique") +")", VW/2, VH-8);
 
   /* stats compactes */
-  ctx.textAlign='left'; ctx.fillStyle='#8a8471'; ctx.font='7px monospace';
-  ctx.fillText("FOR "+player.str+"  POU "+player.pow+"  ARM "+player.armor+"  AM "+player.marmor+"  AGI "+player.agi, 6, VH-24);
+  c.textAlign='left'; c.fillStyle='#8a8471'; c.font='7px monospace';
+  c.fillText("FOR "+player.str+"  POU "+player.pow+"  ARM "+player.armor+"  AM "+player.marmor+"  AGI "+player.agi, 6, VH-24);
 
   /* journal */
-  ctx.textAlign='right';
+  c.textAlign='right';
   msgs.forEach((m,i)=>{
-    ctx.globalAlpha=clamp(m.life,0,1);
-    ctx.fillStyle=m.c;
-    ctx.fillText(m.t, VW-6, 44+i*9);
+    c.globalAlpha=clamp(m.life,0,1);
+    c.fillStyle=m.c;
+    c.fillText(m.t, VW-6, 44+i*9);
   });
-  ctx.globalAlpha=1;
+  c.globalAlpha=1;
 }
 
 /* ---------- boucle ---------- */
