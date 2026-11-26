@@ -45,6 +45,9 @@ chacune des trois directions de marche.
   (réduction magique), agilité (vitesse de déplacement et d'attaque), pouvoir
   (dégâts magiques), force (dégâts physiques). Régénération de base de 1 PV/s,
   accélérable via plusieurs améliorations.
+- **Boule de feu** : les projectiles du joueur peuvent déclencher une explosion
+  à l'impact (60 % des dégâts magiques, rayon 26 px) — flash radial + anneau
+  incandescent, et lueur orange sur le projectile lui-même.
 - **Coffres** : 1 à 2 coffres par étage ; marchez dessus pour ouvrir. Ils
   contiennent une arme dans ~75 % des cas, et un écran de comparaison s'affiche
   alors (dégâts de base et effectifs, cadence, DPS avec les caractéristiques de
