@@ -7,7 +7,8 @@ Ouvrez simplement `index.html` dans un navigateur.
 
 Vous êtes un gobelin. Des aventuriers, guerriers et magiciens ont envahi vos
 donjons et vos villages : éliminez-les tous, gagnez des niveaux, et choisissez
-à chaque niveau une amélioration parmi 3 tirées au hasard d'un pool de 54.
+à chaque niveau une amélioration parmi 3 tirées au hasard d'un pool de plus
+de 200 améliorations réparties en 55 familles et 4 rangs.
 
 ## Contrôles
 
@@ -35,28 +36,38 @@ donjons et vos villages : éliminez-les tous, gagnez des niveaux, et choisissez
   alors (dégâts de base et effectifs, cadence, DPS, palier, effets spéciaux) :
   gardez votre arme (1) ou prenez la nouvelle (2). Sinon : bonus de
   statistique ou soin complet.
-- **4 types d'étages en cycle** : donjons (génération procédurale de salles +
+- **7 types d'étages en cycle** : donjons (génération procédurale de salles +
   couloirs, ambiance sombre), villages (maisons, arbres, palissades),
   bibliothèques de mage (rayonnages de livres, tables de lecture, ambiance
-  violette, mages en nombre) et intérieurs de taverne (comptoir, tonneaux,
-  tables, ambiance chaleureuse, belliqueux).
+  violette, mages en nombre), intérieurs de taverne (comptoir, tonneaux,
+  tables, ambiance chaleureuse, belliqueux), cours de château-fort (muraille,
+  chemins de pierre, donjon central), intérieurs de château-fort (dalles de
+  pierre, piliers) et fermes (champs cultivés clôturés, grange, arbres).
 - **Ennemis** : aventurier (mêlée rapide), guerrier (lent, blindé), mage
-  (projectiles magiques à distance), archer (flèches à distance), plus des
-  **élites** (couronnées, bien plus dures) qui lâchent une arme du palier
-  supérieur : il y en a autant que le numéro de l'étage (1 à l'étage 1,
-  2 à l'étage 2…), et elles apparaissent toujours loin du joueur. Chaque
-  ennemi affiche son niveau au-dessus de lui, et les ennemis ne se
-  chevauchent pas entre eux.
+  (projectiles magiques à distance), archer (flèches à distance), bébé
+  (inoffensif, uniquement dans les villages), paysan (faible, villages et
+  tavernes), prêtre (rare, présent partout : soigne les autres ennemis mais
+  jamais lui-même) et chevalier (rapide, attaque par charge de lance en ligne
+  droite, tourne difficilement), plus des **élites** (couronnées, bien plus
+  dures) qui lâchent une arme à comparer : il y en a autant que le numéro de
+  l'étage (1 à l'étage 1, 2 à l'étage 2…), et elles apparaissent toujours
+  loin du joueur. Chaque ennemi affiche son niveau au-dessus de lui, et les
+  ennemis ne se chevauchent pas entre eux.
 - **Armes** : 27 armes en 4 paliers (mêlée et distance, physiques ou magiques).
   Les arcs ont des effets variés : perforant (traverse les ennemis), givre
   (ralentit), feu (brûlure), triple tir (Arc de la tempête). Une arme de départ
   aléatoire, de meilleures via l'amélioration « Coffre d'armurier », les coffres
-  ou en tuant une élite (équipée seulement si elle est meilleure). Mêlée :
-  attaque orientée selon le personnage, avec un arc de frappe animé couvrant
-  la zone touchée ; distance : tir vers la souris.
-- **Améliorations (55)** : statistiques, compétences (dash, esprits compagnons,
-  projectiles arcaniques, boule de feu, auras de gel/poison, bouclier runique,
-  vol de vie, critiques, régénération…) et équipement.
+  ou en tuant une élite. Toute arme trouvée (coffre, élite, amélioration
+  « Coffre d'armurier ») ouvre un écran de comparaison : gardez la vôtre (1)
+  ou prenez la nouvelle (2). Mêlée : attaque orientée selon le personnage,
+  avec un arc de frappe animé couvrant la zone touchée ; distance : tir vers
+  la souris. L'arme actuellement équipée ne peut jamais retomber.
+- **Améliorations à rangs** : 55 familles (statistiques, compétences et
+  équipement), chacune déclinée en 4 rangs — Basique, Amélioré, Puissant,
+  Épique — des versions de plus en plus fortes. Un rang n'apparaît qu'après
+  avoir obtenu le rang immédiatement inférieur, et les rangs supérieurs ont
+  un taux d'apparition plus faible (poids 100 % / 70 % / 50 % / 35 %).
+  Chaque rang ne peut être pris qu'une fois.
 - **Objectif** : tuer tous les ennemis d'un étage pour ouvrir l'escalier, et
   descendre le plus loin possible.
 
