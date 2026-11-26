@@ -601,7 +601,7 @@ function die(){
 function tryAttack(){
   if(player.atkCd>0 || state!=='play') return;
   const w = player.weapon;
-  player.atkCd = w.cd / (1+player.agi/100) / player.atkSpeedMult;
+  player.atkCd = w.cd/1000 / (1+player.agi/100) / player.atkSpeedMult;
   const ranged = w.range===0;
   if(ranged){
     fireBolt(player.x, player.y, player.dirx, player.diry, w.type, w.dmg, true, 190);
