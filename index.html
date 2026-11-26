@@ -45,8 +45,9 @@
     <h1>GOBELIN&nbsp;ROGUE</h1>
     <p>Vous êtes un gobelin affamé. Les aventuriers, guerriers et magiciens<br>
        ont envahi vos donjons et vos villages. Dévorez-les tous.</p>
-    <p>ZQSD / WASD / Flèches : se déplacer &nbsp;•&nbsp; ESPACE / E / Clic : attaquer<br>
-       MAJ : dash &nbsp;•&nbsp; TAB : caractéristiques</p>
+    <p>ZQSD / WASD / Flèches : se déplacer &nbsp;•&nbsp; ESPACE / E : attaquer (mêlée)<br>
+       Clic / visée souris : arme de distance &nbsp;•&nbsp; MAJ : dash<br>
+       TAB : caractéristiques &nbsp;•&nbsp; Marchez sur les coffres pour les ouvrir</p>
     <p class="start">— APPUYEZ SUR ENTRÉE —</p>
   </div>
 
@@ -118,6 +119,7 @@ const WEAPONS = [
     {name:"Hachette",            type:'phys', dmg:15, cd:600, range:25},
     {name:"Baguette étincelante",type:'mag',  dmg:10, cd:380, range:0},
     {name:"Lance de milicien",   type:'phys', dmg:12, cd:520, range:34},
+    {name:"Arc court",           type:'phys', dmg:7,  cd:300, range:0},
   ],
   [ /* palier 2 */
     {name:"Épée de mercenaire",  type:'phys', dmg:18, cd:470, range:27},
@@ -125,6 +127,10 @@ const WEAPONS = [
     {name:"Arc de chasse",       type:'phys', dmg:13, cd:340, range:0},
     {name:"Sceptre de braise",   type:'mag',  dmg:17, cd:420, range:0},
     {name:"Trident",             type:'phys', dmg:20, cd:540, range:33},
+    {name:"Arc long",            type:'phys', dmg:16, cd:480, range:0},
+    {name:"Arc elfique",         type:'phys', dmg:12, cd:360, range:0, pierce:true},
+    {name:"Arc de givre",        type:'phys', dmg:11, cd:380, range:0, slow:true},
+    {name:"Arc de feu",          type:'phys', dmg:13, cd:400, range:0, burn:0.3},
   ],
   [ /* palier 3 */
     {name:"Lame runique du gobelin", type:'phys', dmg:27, cd:420, range:28},
@@ -132,6 +138,8 @@ const WEAPONS = [
     {name:"Baguette du dragon",      type:'mag',  dmg:27, cd:380, range:0},
     {name:"Sceptre du Nécromant",    type:'mag',  dmg:31, cd:460, range:0},
     {name:"Faux démoniaque",         type:'phys', dmg:31, cd:520, range:31},
+    {name:"Arc composé",             type:'phys', dmg:24, cd:420, range:0, pierce:true},
+    {name:"Arc de la tempête",       type:'phys', dmg:17, cd:340, range:0, multishot:3},
   ],
 ];
 function weaponDPS(w, p){
@@ -160,6 +168,7 @@ const UPGRADES = [
  {n:"Biceps de gargouille", i:"👊", d:"+6 force",                      max:3, f:p=>{p.str+=6;}},
  {n:"Pierre à aiguiser",    i:"👊", d:"+5 force, +3 armure",           max:2, f:p=>{p.str+=5;p.armor+=3;}},
  {n:"Régénération",         i:"🌿", d:"+0,6 PV par seconde",           max:4, f:p=>{p.regen+=0.6;}},
+ {n:"Sève de vie",          i:"🌿", d:"+1 PV par seconde",             max:3, f:p=>{p.regen+=1;}},
  {n:"Écorce vivante",       i:"🌿", d:"+1,5 PV/s et +2 armure",        max:2, f:p=>{p.regen+=1.5;p.armor+=2;}},
  {n:"Totem de vie",         i:"🌿", d:"+20 PV max et +2 PV/s",         max:1, f:p=>{p.maxHp+=20;p.hp+=20;p.regen+=2;}},
  {n:"Faim insatiable",      i:"🩸", d:"Vol de vie : +6% des dégâts",   max:3, f:p=>{p.lifesteal+=0.06;}},
@@ -198,6 +207,25 @@ const UPGRADES = [
  {n:"Coffre d'armurier",    i:"🎁", d:"Recevoir une arme du palier supérieur", max:3,
     f:p=>{ const t=Math.min(3,p.weapon.tier+1); giveWeapon(makeWeapon(t), true); }},
 ];
+function openChest(ch){
+  ch.open=true; sLoot();
+  if(Math.random()<0.45){
+    giveWeapon(makeWeapon(clamp(Math.floor(floorNum/2),0,3)), false);
+    return;
+  }
+  const opts=[
+    {t:'+8 PV max',        f:()=>{player.maxHp+=8;player.hp+=8;}},
+    {t:'+2 armure',        f:()=>{player.armor+=2;}},
+    {t:'+2 armure magique',f:()=>{player.marmor+=2;}},
+    {t:'+2 force',         f:()=>{player.str+=2;}},
+    {t:'+2 pouvoir',       f:()=>{player.pow+=2;}},
+    {t:'+2 agilité',       f:()=>{player.agi+=2;}},
+    {t:'soin complet',     f:()=>{player.hp=player.maxHp;}},
+  ];
+  const o=pick(opts); o.f();
+  addMsg('Coffre : '+o.t, '#ffd94a');
+}
+
 function giveWeapon(w, force){
   const better = force || weaponDPS(w, player) > weaponDPS(player.weapon, player);
   if(better){
@@ -257,6 +285,18 @@ SPR.adventurer = makeSprite([
   '..bb..bb....',
   '..kk..kk....',
 ],{h:'#4e342e',s:'#d8a47f',k:'#1a1a1a',b:'#8d6e63'});
+SPR.archer = makeSprite([
+  '...hhhhh....',
+  '..hhhhhhh...',
+  '...sssss....',
+  '....skk.....',
+  '..ccccccc...',
+  'w.ccccccc...',
+  'w.ccccccc...',
+  'w.cccccc....',
+  '..cc..cc....',
+  '..CC..CC....',
+],{h:'#3a5c2e',s:'#d8a47f',k:'#1a1a1a',c:'#4e6b3a',C:'#374d28',w:'#c8b07a'});
 SPR.mage = makeSprite([
   '....mmmm....',
   '...mmmmmm...',
@@ -281,6 +321,23 @@ SPR.crown = makeSprite([
   'y.y.y.y',
   'yyyyyyy',
 ],{y:'#ffd94a'});
+SPR.chest = makeSprite([
+  '.cccccccc.',
+  'cCccccccCc',
+  'cccccccccc',
+  'cccyyyyccc',
+  'cCccccccCc',
+  '.cccccccc.',
+],{c:'#8a5a2b',C:'#6e4420',y:'#ffd94a'});
+SPR.chestOpen = makeSprite([
+  '.cccccccc.',
+  'cCddddddCc',
+  'cCddddddCc',
+  'cCddddddCc',
+  'cccccccccc',
+  'cCccccccCc',
+  '.cccccccc.',
+],{c:'#8a5a2b',C:'#6e4420',d:'#241608'});
 
 /* tuiles pré-rendues */
 function makeTile(fn){
@@ -338,6 +395,8 @@ let state='title';
 let mapW=44, mapH=32, tiles=new Uint8Array(mapW*mapH), theme='dungeon';
 let stairsPos={x:0,y:0}, stairsOpen=false;
 let enemies=[], bolts=[], floaters=[], minions=[], poisonTicks=[];
+let chests=[], statsOpen=false;
+const mouse={x:0,y:0,active:false};
 let cam={x:0,y:0};
 let floorNum=1, killCount=0, elapsed=0;
 let msgs=[];
@@ -347,7 +406,7 @@ const player = {
   x:0,y:0, r:5, dirx:1, diry:0, animT:0, moving:false,
   level:1, xp:0, xpNext:25,
   maxHp:60, hp:60, armor:0, marmor:0, agi:10, pow:0, str:0,
-  regen:0, lifesteal:0, thorns:0, healKill:0, crit:5, critMult:2,
+  regen:0.4, lifesteal:0, thorns:0, healKill:0, crit:5, critMult:2,
   xpMult:0, dashUnlocked:false, dashCdMult:1, dashDamage:false,
   minionCount:0, minionDmgMult:1, boltOnHit:false, boltLevel:0,
   fireball:0, freezeAura:false, poisonAura:0, rage:false,
@@ -362,7 +421,7 @@ function resetGame(){
   player.level=1; player.xp=0; player.xpNext=25;
   player.maxHp=60; player.hp=60; player.armor=0; player.marmor=0;
   player.agi=10; player.pow=0; player.str=0;
-  player.regen=0; player.lifesteal=0; player.thorns=0; player.healKill=0;
+  player.regen=0.4; player.lifesteal=0; player.thorns=0; player.healKill=0;
   player.crit=5; player.critMult=2; player.xpMult=0;
   player.dashUnlocked=false; player.dashCdMult=1; player.dashDamage=false;
   player.minionCount=0; player.minionDmgMult=1; player.boltOnHit=false; player.boltLevel=0;
@@ -371,6 +430,7 @@ function resetGame(){
   player.physMult=0; player.magMult=0; player.atkSpeedMult=1; player.moveMult=1; player.eliteDmgMult=0;
   player.weapon = makeWeapon(0);
   player.atkCd=0; player.dashCd=0; player.dashT=0; player.invulT=0;
+  statsOpen=false; mouse.active=false;
   for(const k in upgradeCounts) delete upgradeCounts[k];
   floorNum=1; killCount=0; elapsed=0; msgs=[];
   addMsg("Arme de départ : " + player.weapon.name, "#8fd14f");
@@ -389,6 +449,7 @@ const ENEMY_TYPES = {
   aventurier:{ hp:22, dmg:6,  type:'phys', speed:62, atkCd:1.0, xp:9,  spr:'adventurer', r:5 },
   guerrier:  { hp:48, dmg:12, type:'phys', speed:44, atkCd:1.5, xp:15, spr:'warrior',    r:6, armor:8 },
   mage:      { hp:18, dmg:10, type:'mag',  speed:40, atkCd:1.9, xp:13, spr:'mage',       r:5, ranged:true },
+  archer:    { hp:16, dmg:8,  type:'phys', speed:52, atkCd:1.6, xp:12, spr:'archer',     r:5, ranged:true },
 };
 
 function genFloor(){
@@ -423,7 +484,7 @@ function genFloor(){
     spawnEnemy(true, 'guerrier');
     for(let i=0;i<count;i++){
       const roll=Math.random();
-      const kind = roll<0.5?'aventurier': roll<0.75?'guerrier':'mage';
+      const kind = roll<0.4?'aventurier': roll<0.62?'guerrier': roll<0.82?'mage':'archer';
       spawnEnemy(Math.random()<0.12, kind, rooms.slice(1));
     }
   } else {
@@ -462,12 +523,24 @@ function genFloor(){
     spawnEnemy(true, 'guerrier');
     for(let i=0;i<count;i++){
       const roll=Math.random();
-      const kind = roll<0.45?'aventurier': roll<0.7?'guerrier':'mage';
+      const kind = roll<0.35?'aventurier': roll<0.58?'guerrier': roll<0.78?'mage':'archer';
       spawnEnemy(Math.random()<0.12, kind);
     }
   }
   for(let i=0;i<player.minionCount;i++) minions.push(makeMinion(i));
+  placeChests();
   addMsg(theme==='dungeon' ? "Étage "+floorNum+" — Donjon" : "Étage "+floorNum+" — Village", "#9fd7ff");
+}
+
+function placeChests(){
+  chests=[];
+  const n = rndi(2,4);
+  for(let i=0;i<n;i++){
+    let x,y,tries=0;
+    do{ x=rndi(1,mapW-2); y=rndi(1,mapH-2); tries++; }
+    while((isSolid(x*TILE+8,y*TILE+8) || dist(x*TILE+8,y*TILE+8,player.x,player.y)<80) && tries<300);
+    chests.push({x:x*TILE+8, y:y*TILE+8, open:false});
+  }
 }
 
 function spawnEnemy(elite, kind, roomList){
@@ -494,6 +567,7 @@ function spawnEnemy(elite, kind, roomList){
     type: base.type, speed: base.speed*(elite?0.9:1),
     atkCd: base.atkCd, cdT: rnd(0,0.8), xp: Math.round(base.xp*(elite?4:1)),
     spr: base.spr, armor: base.armor||0,
+    lvl: floorNum + (elite?2:0),
     aggro:false, wanderT:0, wdx:0, wdy:0, flip:false, hurtT:0, slowT:0, poisonT:0,
   });
 }
@@ -514,8 +588,15 @@ addEventListener('keydown', e=>{
     const i = ['Digit1','Digit2','Digit3'].indexOf(e.code);
     if(i>=0) chooseUpgrade(i);
   }
+  if(e.code==='Tab') statsOpen=!statsOpen;
 });
 addEventListener('keyup', e=>{ keys[e.code]=false; });
+cv.addEventListener('mousemove', e=>{
+  const r=cv.getBoundingClientRect();
+  mouse.x=(e.clientX-r.left)/r.width*VW + cam.x;
+  mouse.y=(e.clientY-r.top)/r.height*VH + cam.y;
+  mouse.active=true;
+});
 cv.addEventListener('mousedown', e=>{
   ensureAudio();
   if(state!=='play') return;
@@ -604,7 +685,17 @@ function tryAttack(){
   player.atkCd = w.cd/1000 / (1+player.agi/100) / player.atkSpeedMult;
   const ranged = w.range===0;
   if(ranged){
-    fireBolt(player.x, player.y, player.dirx, player.diry, w.type, w.dmg, true, 190);
+    let dx=player.dirx, dy=player.diry;
+    if(mouse.active){
+      const d=dist(player.x,player.y,mouse.x,mouse.y)||1;
+      dx=(mouse.x-player.x)/d; dy=(mouse.y-player.y)/d;
+    }
+    const shots = w.multishot||1;
+    for(let s=0;s<shots;s++){
+      const off = shots>1 ? (s-(shots-1)/2)*0.16 : 0;
+      const ca=Math.cos(off), sa=Math.sin(off);
+      fireBolt(player.x, player.y, dx*ca-dy*sa, dx*sa+dy*ca, w.type, w.dmg, true, 190, w);
+    }
   } else {
     const reach = w.range + 6;
     for(const e of enemies){
@@ -617,17 +708,23 @@ function tryAttack(){
       if(res.crit) sfx(500,900,.08,.08);
     }
     if(player.boltOnHit){
-      fireBolt(player.x, player.y, player.dirx, player.diry, 'mag', 4+player.pow*0.5, true, 160);
+      let bdx=player.dirx, bdy=player.diry;
+      if(mouse.active){
+        const d=dist(player.x,player.y,mouse.x,mouse.y)||1;
+        bdx=(mouse.x-player.x)/d; bdy=(mouse.y-player.y)/d;
+      }
+      fireBolt(player.x, player.y, bdx, bdy, 'mag', 4+player.pow*0.5, true, 160, null);
     }
   }
   sHit();
 }
-function fireBolt(x,y,dx,dy,type,baseDmg,fromPlayer,speed){
+function fireBolt(x,y,dx,dy,type,baseDmg,fromPlayer,speed,fx){
   const res = fromPlayer ? playerDamage(baseDmg, type, null) : {d:baseDmg, crit:false};
   bolts.push({
     x,y, vx:dx*speed, vy:dy*speed, type, dmg:res.d,
     fromPlayer, life:1.6, crit:res.crit,
     fireball: fromPlayer && Math.random()<player.fireball,
+    pierce: !!(fx&&fx.pierce), slow: !!(fx&&fx.slow), burn: fx?fx.burn:0, hit: [],
   });
   if(fromPlayer) sShoot();
 }
@@ -745,6 +842,11 @@ function update(dt){
     }
   }
 
+  /* coffres */
+  for(const ch of chests){
+    if(!ch.open && dist(player.x,player.y,ch.x,ch.y)<12) openChest(ch);
+  }
+
   /* escalier */
   if(!stairsOpen && enemies.every(e=>e.dead)) stairsOpen=true;
   if(stairsOpen && dist(player.x,player.y,stairsPos.x,stairsPos.y)<10){
@@ -758,6 +860,14 @@ function update(dt){
   for(const e of enemies){
     if(e.dead) continue;
     e.hurtT=Math.max(0,e.hurtT-dt);
+    if(e.burnT>0){
+      e.burnT-=dt;
+      e.burnAcc=(e.burnAcc||0)+e.burnDps*dt;
+      if(e.burnAcc>=1){
+        const bd=Math.floor(e.burnAcc); e.burnAcc-=bd;
+        hurtEnemy(e, bd, 'mag', false);
+      }
+    }
     const slow = e.slowT>0 ? 0.6 : 1;
     if(e.slowT>0) e.slowT-=dt;
     const dp = dist(e.x,e.y,player.x,player.y);
@@ -825,8 +935,11 @@ function update(dt){
     if(b.fromPlayer){
       for(const e of enemies){
         if(e.dead) continue;
+        if(b.hit.includes(e)) continue;
         if(dist(b.x,b.y,e.x,e.y) < e.r+2){
           hurtEnemy(e, b.dmg, b.type, true);
+          if(b.slow) e.slowT=2;
+          if(b.burn){ e.burnT=2.5; e.burnDps=b.dmg*b.burn; }
           if(b.fireball){
             sfx(200,60,.2,.12,'sawtooth');
             addFloater(b.x,b.y-8,"🔥",'#ff9c40');
@@ -838,7 +951,7 @@ function update(dt){
               }
             }
           }
-          b.life=0; break;
+          if(b.pierce){ b.hit.push(e); } else { b.life=0; break; }
         }
       }
     } else {
@@ -909,17 +1022,32 @@ function render(){
     }
   }
 
+  /* coffres */
+  for(const ch of chests){
+    if(!ch.open){
+      ctx.strokeStyle='rgba(255,217,74,'+(0.3+0.2*Math.sin(elapsed*3)).toFixed(2)+')';
+      ctx.strokeRect(ch.x-cam.x-6.5, ch.y-cam.y-9.5, 13, 10);
+    }
+    drawSpriteC(ch.open?SPR.chestOpen:SPR.chest, ch.x-cam.x, ch.y-cam.y-3, false, 1);
+  }
+
   /* ombres */
   ctx.fillStyle='rgba(0,0,0,0.3)';
   for(const e of enemies){ if(e.dead) continue;
     ctx.fillRect(Math.round(e.x-cam.x-5), Math.round(e.y-cam.y+e.r-2), 10, 3); }
   ctx.fillRect(Math.round(player.x-cam.x-5), Math.round(player.y-cam.y+4), 10, 3);
 
-  /* barres de vie ennemis */
+  /* barres de vie + niveau des ennemis */
+  ctx.font='6px monospace';
   for(const e of enemies){
-    if(e.dead || e.hp>=e.maxHp) continue;
-    const px=e.x-cam.x-7, py=e.y-cam.y-e.r-8;
-    bar(px,py,14,2,e.hp/e.maxHp, e.elite?'#ff5050':'#e05555','#222');
+    if(e.dead) continue;
+    ctx.textAlign='center';
+    ctx.fillStyle = e.elite ? '#ffd94a' : '#b8b2a0';
+    ctx.fillText('niv '+e.lvl, e.x-cam.x, e.y-cam.y-e.r-(e.elite?19:13));
+    if(e.hp<e.maxHp){
+      const px=e.x-cam.x-7, py=e.y-cam.y-e.r-(e.elite?9:8);
+      bar(px,py,14,2,e.hp/e.maxHp, e.elite?'#ff5050':'#e05555','#222');
+    }
   }
 
   /* ennemis */
@@ -928,7 +1056,7 @@ function render(){
     const spr=SPR[e.spr];
     const bob = Math.sin((e.animT||0)*10)>0 ? 0 : -1;
     const sc = e.elite?1.4:1;
-    if(e.elite) drawSpriteC(SPR.crown, e.x-cam.x, e.y-cam.y-e.r-11, false, 1);
+    if(e.elite) drawSpriteC(SPR.crown, e.x-cam.x, e.y-cam.y-e.r-13, false, 1);
     if(e.hurtT>0){
       ctx.save(); ctx.globalAlpha=0.85;
       drawSpriteC(spr, e.x-cam.x, e.y-cam.y+bob, e.flip, sc);
@@ -976,8 +1104,10 @@ function render(){
       ctx.fillStyle = b.fireball ? '#ff9c40' : '#fff';
       ctx.fillRect(px-1,py-1,2,2);
     } else {
-      ctx.fillStyle='#a26bff'; ctx.fillRect(px-2,py-2,4,4);
-      ctx.fillStyle='#e8d5ff'; ctx.fillRect(px-1,py-1,2,2);
+      ctx.fillStyle = b.type==='mag' ? '#a26bff' : '#d2b48c';
+      ctx.fillRect(px-2,py-2,4,4);
+      ctx.fillStyle = b.type==='mag' ? '#e8d5ff' : '#f0e2c0';
+      ctx.fillRect(px-1,py-1,2,2);
     }
   }
 
@@ -999,6 +1129,32 @@ function render(){
   }
 
   renderHUD();
+  if(statsOpen) renderStats();
+}
+function renderStats(){
+  const lines=[
+    'GOBELIN — niv '+player.level,
+    'PV '+Math.ceil(player.hp)+'/'+player.maxHp+' (+'+player.regen.toFixed(1)+'/s)',
+    'Force '+player.str+'   Pouvoir '+player.pow,
+    'Armure '+player.armor+'   Armure mag. '+player.marmor,
+    'Agilité '+player.agi+'   Critique '+player.crit+'%',
+    'Vol de vie '+(player.lifesteal*100).toFixed(0)+'%   Épines '+(player.thorns*100).toFixed(0)+'%',
+    'Arme : '+player.weapon.name,
+  ];
+  const ups=Object.keys(upgradeCounts).map(n=>n+' x'+upgradeCounts[n]);
+  const maxUps=10;
+  const shown=ups.slice(0,maxUps);
+  if(ups.length>maxUps) shown.push('… +'+(ups.length-maxUps)+' autres');
+  const all=lines.concat(shown.length?['Améliorations :'].concat(shown):[]);
+  const w=200, h=12+all.length*9;
+  const x=(VW-w)/2, y=clamp((VH-h)/2,20,VH-h-20);
+  ctx.fillStyle='rgba(8,8,16,0.93)'; ctx.fillRect(x,y,w,h);
+  ctx.strokeStyle='#4a4f6e'; ctx.lineWidth=1; ctx.strokeRect(x+0.5,y+0.5,w-1,h-1);
+  ctx.font='7px monospace'; ctx.textAlign='left';
+  all.forEach((t,i)=>{
+    ctx.fillStyle = i===0 ? '#8fd14f' : (i===lines.length ? '#ffd94a' : '#d8d4c4');
+    ctx.fillText(t, x+8, y+15+i*9);
+  });
 }
 function renderTitleArt(){
   drawSpriteC(SPR.goblin, VW/2, 96, false, 6);
