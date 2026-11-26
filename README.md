@@ -49,8 +49,10 @@ de 200 améliorations réparties en 55 familles et 4 rangs.
 - **Ennemis** : aventurier (mêlée rapide), guerrier (lent, blindé), mage
   (projectiles magiques à distance), archer (flèches à distance), bébé
   (inoffensif, uniquement dans les villages), paysan (faible, villages et
-  tavernes), prêtre (rare, présent partout : soigne les autres ennemis mais
-  jamais lui-même) et chevalier (à cheval, rapide, attaque par charge de lance
+  tavernes), prêtre (rare, présent partout : soigne les autres ennemis à
+  courte portée mais jamais lui-même, et lance aussi de lents projectiles
+  magiques peu puissants) et chevalier (à cheval, rapide, attaque par charge
+  de lance
   en ligne
   droite, tourne difficilement), plus des **élites** (couronnées, bien plus
   dures, reconnaissables à leur teinte rougeâtre) qui lâchent une arme à
@@ -78,7 +80,9 @@ de 200 améliorations réparties en 55 familles et 4 rangs.
   prenez la nouvelle (2). Mêlée : attaque orientée selon le personnage, avec
   un arc de frappe animé (doré ou violet pour le magique) couvrant la zone
   touchée ; distance : tir vers la souris. L'arme actuellement équipée ne peut
-  jamais retomber.
+  jamais retomber. Les rangs d'armes utilisent le même code couleur que les
+  améliorations (gris, bleu, violet, or), visible sur les cartes de comparaison
+  et dans le HUD.
 - **Améliorations à rangs** : 55 familles (statistiques, compétences et
   équipement), chacune déclinée en 4 rangs — Basique, Amélioré, Puissant,
   Épique — des versions de plus en plus fortes. Un rang n'apparaît qu'après

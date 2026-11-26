@@ -459,6 +459,8 @@ function showLootOffer(){
   cards.innerHTML =
     '<div class="card" id="keepCard">'+weaponCardHtml(player.weapon,'votre arme actuelle')+'<div class="key">[1] Garder</div></div>'+
     '<div class="card" id="takeCard">'+weaponCardHtml(entry.w,entry.src)+'<div class="key">[2] Prendre</div></div>';
+  document.getElementById('keepCard').style.borderColor = RANK_META[player.weapon.rank].col;
+  document.getElementById('takeCard').style.borderColor = RANK_META[entry.w.rank].col;
   document.getElementById('keepCard').onclick = ()=>chooseLoot(false);
   document.getElementById('takeCard').onclick = ()=>chooseLoot(true);
   document.getElementById('lootScreen').classList.add('show');
@@ -833,6 +835,7 @@ const player = {
   physMult:0, magMult:0, atkSpeedMult:1, moveMult:1, eliteDmgMult:0,
   weapon: makeWeapon(0),
   atkCd:0, atkAnim:0, dashCd:0, dashT:0, dashVx:0, dashVy:0, invulT:0,
+  kbx:0, kby:0,
 };
 const upgradeCounts = {};
 
@@ -852,7 +855,7 @@ function resetGame(){
   player.physMult=0; player.magMult=0; player.atkSpeedMult=1; player.moveMult=1; player.eliteDmgMult=0;
   player.weapon = makeWeapon(0);
   gameReady=true;
-  player.atkCd=0; player.atkAnim=0; player.dashCd=0; player.dashT=0; player.invulT=0;
+  player.atkCd=0; player.atkAnim=0; player.dashCd=0; player.dashT=0; player.invulT=0; player.kbx=0; player.kby=0;
   statsOpen=false; mouse.active=false; pendingWeaponQueue=[];
   for(const k in upgradeCounts) delete upgradeCounts[k];
   floorNum=1; killCount=0; elapsed=0; msgs=[];
@@ -875,7 +878,7 @@ const ENEMY_TYPES = {
   archer:    { hp:16, dmg:8,  type:'phys', speed:52, atkCd:1.6, xp:12, spr:'archer',     r:5, ranged:true },
   bebe:      { hp:6,  dmg:0,  type:'phys', speed:30, atkCd:9,   xp:3,  spr:'bebe',       r:4, passive:true },
   paysan:    { hp:14, dmg:4,  type:'phys', speed:36, atkCd:1.4, xp:6,  spr:'paysan',     r:5 },
-  pretre:    { hp:22, dmg:5,  type:'mag',  speed:44, atkCd:2.0, xp:16, spr:'pretre',     r:5, healer:true },
+  pretre:    { hp:22, dmg:4,  type:'mag',  speed:44, atkCd:2.4, xp:16, spr:'pretre',     r:5, healer:true, ranged:true, boltSpeed:95 },
   chevalier: { hp:60, dmg:14, type:'phys', speed:60, atkCd:2.2, xp:26, spr:'chevalier',  r:7, armor:10, charger:true },
 };
 
@@ -1297,10 +1300,15 @@ function playerDamage(base, type, target){
   if(Math.random()*100 < player.crit){ d*=player.critMult; crit=true; }
   return {d, crit};
 }
-function hurtEnemy(e, dmg, type, showText){
+function hurtEnemy(e, dmg, type, showText, kb){
   const red = type==='mag' ? 0 : (e.armor||0);
   const total = Math.max(1, Math.round(dmg - red));
   e.hp -= total; e.hurtT=0.12; e.aggro=true;
+  if(kb!==false && !(ENEMY_TYPES[e.kind]||{}).passive){
+    const d=dist(player.x,player.y,e.x,e.y)||1;
+    const k=e.elite?90:140;
+    e.kbx=(e.x-player.x)/d*k; e.kby=(e.y-player.y)/d*k;
+  }
   if(showText) addFloater(e.x, e.y-10, ""+total, total>=player.critMult*10?'#ffd94a':'#fff');
   if(player.lifesteal>0){
     player.hp = Math.min(player.maxHp, player.hp + total*player.lifesteal);
@@ -1348,6 +1356,10 @@ function hurtPlayer(dmg, type, src){
   const red = type==='mag' ? player.marmor : player.armor;
   const total = Math.max(1, Math.round(dmg * 100/(100+red)));
   player.hp -= total; player.invulT=0.35;
+  if(src){
+    const d=dist(player.x,player.y,src.x,src.y)||1;
+    player.kbx=(player.x-src.x)/d*80; player.kby=(player.y-src.y)/d*80;
+  }
   addFloater(player.x, player.y-12, "-"+total, "#ff6b6b");
   sHurt();
   if(src && player.thorns>0){
@@ -1527,6 +1539,14 @@ function update(dt){
     sDash();
   }
 
+  /* recul du joueur */
+  if(player.kbx||player.kby){
+    moveEntity(player, player.kbx, player.kby, dt);
+    const dec=Math.min(1,dt*8);
+    player.kbx-=player.kbx*dec; player.kby-=player.kby*dec;
+    if(Math.abs(player.kbx)<4 && Math.abs(player.kby)<4){ player.kbx=0; player.kby=0; }
+  }
+
   /* attaque */
   if(player.atkCd>0) player.atkCd-=dt;
   if(player.atkAnim>0) player.atkAnim-=dt;
@@ -1546,7 +1566,7 @@ function update(dt){
         e.poisonAcc=(e.poisonAcc||0)+player.poisonAura*3*dt;
         if(e.poisonAcc>=1){
           const dmg=Math.floor(e.poisonAcc); e.poisonAcc-=dmg;
-          hurtEnemy(e, dmg, 'mag', false);
+          hurtEnemy(e, dmg, 'mag', false, false);
         }
       }
     }
@@ -1570,12 +1590,18 @@ function update(dt){
   for(const e of enemies){
     if(e.dead) continue;
     e.hurtT=Math.max(0,e.hurtT-dt);
+    if(e.kbx||e.kby){
+      moveEntity(e, e.kbx, e.kby, dt);
+      const dec=Math.min(1,dt*8);
+      e.kbx-=e.kbx*dec; e.kby-=e.kby*dec;
+      if(Math.abs(e.kbx)<4 && Math.abs(e.kby)<4){ e.kbx=0; e.kby=0; }
+    }
     if(e.burnT>0){
       e.burnT-=dt;
       e.burnAcc=(e.burnAcc||0)+e.burnDps*dt;
       if(e.burnAcc>=1){
         const bd=Math.floor(e.burnAcc); e.burnAcc-=bd;
-        hurtEnemy(e, bd, 'mag', false);
+        hurtEnemy(e, bd, 'mag', false, false);
       }
     }
     const slow = e.slowT>0 ? (e.slowPow||0.6) : 1;
@@ -1595,11 +1621,11 @@ function update(dt){
           const dd=dist2(e.x,e.y,o.x,o.y);
           if(dd<bd){ bd=dd; tgt=o; }
         }
-        if(tgt && bd<140*140){
+        if(tgt && bd<50*50){
           healed=true;
           const dd=Math.sqrt(bd)||1;
-          if(dd>30){ mx=(tgt.x-e.x)/dd; my=(tgt.y-e.y)/dd; }
-          tgt.hp=Math.min(tgt.maxHp, tgt.hp+9*dt);
+          if(dd>20){ mx=(tgt.x-e.x)/dd; my=(tgt.y-e.y)/dd; }
+          tgt.hp=Math.min(tgt.maxHp, tgt.hp+4*dt);
           if(Math.random()<dt*4) addFloater(tgt.x, tgt.y-tgt.r-6, '+', '#8fd14f');
         }
       }
@@ -1634,7 +1660,7 @@ function update(dt){
         if(e.cdT<=0 && dp<230){
           e.cdT=e.atkCd;
           const d=dp||1;
-          fireBolt(e.x,e.y,(player.x-e.x)/d,(player.y-e.y)/d, e.type, e.dmg, false, 150);
+          fireBolt(e.x,e.y,(player.x-e.x)/d,(player.y-e.y)/d, e.type, e.dmg, false, e.boltSpeed||150);
         }
       } else {
         if(dp > 14){ mx=(player.x-e.x)/dp; my=(player.y-e.y)/dp; }
@@ -1736,8 +1762,8 @@ function update(dt){
   floaters = floaters.filter(f=>f.life>0);
 
   /* caméra */
-  cam.x = clamp(player.x - VW/2, 0, mapW*TILE - VW);
-  cam.y = clamp(player.y - VH/2, 0, mapH*TILE - VH);
+  cam.x = Math.round(clamp(player.x - VW/2, 0, mapW*TILE - VW));
+  cam.y = Math.round(clamp(player.y - VH/2, 0, mapH*TILE - VH));
 }
 
 function moveEntity(ent, vx, vy, dt, isDash){
@@ -2030,7 +2056,7 @@ function renderStats(c){
     'Armure '+player.armor+'   Armure mag. '+player.marmor,
     'Agilité '+player.agi+'   Critique '+player.crit+'%',
     'Vol de vie '+(player.lifesteal*100).toFixed(0)+'%   Épines '+(player.thorns*100).toFixed(0)+'%',
-    'Arme : '+player.weapon.name,
+    'Arme : '+player.weapon.name+' ['+RANK_META[player.weapon.rank].label+']',
   ];
   const ups=Object.keys(upgradeCounts).map(n=>n+' x'+upgradeCounts[n]);
   const maxUps=10;
@@ -2081,7 +2107,7 @@ function renderHUD(c){
 
   /* arme */
   c.textAlign='center';
-  c.fillStyle='#ffd94a'; c.font='7px monospace';
+  c.fillStyle=RANK_META[player.weapon.rank].col; c.font='7px monospace';
   c.fillText(player.weapon.name+" ("+ (player.weapon.type==='mag'?"magique":"physique") +")", VW/2, VH-8);
 
   /* stats compactes */
