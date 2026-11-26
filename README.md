@@ -10,6 +10,15 @@ donjons et vos villages : éliminez-les tous, gagnez des niveaux, et choisissez
 à chaque niveau une amélioration parmi 3 tirées au hasard d'un pool de plus
 de 230 améliorations réparties en 55 familles et 5 rangs (jusqu'à Légendaire).
 
+Sur l'écran d'accueil (et après chaque partie), un panneau **VOTRE GOBELIN**
+permet de le personnaliser : couleur de cheveux (7 teintes), accessoire de
+tête (casque, bandana, chapeau de mage, chapeau de fête, couronne, casquette),
+visage (lunettes, monocle, moustache, cache-œil, lunettes-moustaches à faux
+nez) et tenue (cape, nœud papillon, collier de dents, écharpe, string vert
+fluo, gobelin nu avec entrejambe flouté). Apparence purement cosmétique :
+aucun effet sur les statistiques ni sur le gameplay ; vos choix sont
+mémorisés d'une partie à l'autre.
+
 ## Contrôles
 
 | Touche | Action |
@@ -55,7 +64,8 @@ de 230 améliorations réparties en 55 familles et 5 rangs (jusqu'à Légendaire
   tavernes, fourche en main), prêtre (rare, présent partout : soigne les
   autres ennemis à courte portée mais jamais lui-même, illumine ses
   cobayes d'une lueur verte pendant toute la durée du soin ; seul le
-  prêtre élite attaque, avec de lents projectiles), chevalier (à cheval, rapide,
+  prêtre élite attaque, avec de lents projectiles), chevalier (à cheval,
+  grand sprite très détaillé, rapide,
   attaque par charge de lance en ligne droite, tourne difficilement),
   **chien** (attaque en meutes, très rapide, morsure qui fait saigner sur la
   durée), **barde** (taverne et villages : projectile magique lent et large

@@ -38,6 +38,18 @@
     background:#8fd14f; border:none; cursor:pointer; box-shadow:0 3px 0 #4a7a2a; }
   .selBtn:disabled { background:#3a3f58; color:#8a8fa6; box-shadow:0 3px 0 #23273a; cursor:default; }
   .selBtn:not(:disabled):hover { background:#a8e368; }
+  #customPanel { position:absolute; right:10px; top:50%; transform:translateY(-50%);
+    display:none; flex-direction:column; align-items:center; gap:3px;
+    background:rgba(8,8,16,0.92); border:3px solid #4a4f6e; padding:10px 12px; z-index:5; }
+  #customPanel.show { display:flex; }
+  #customPanel h3 { margin:0 0 4px 0; color:#ffd94a; font-size:16px; letter-spacing:1px; }
+  #custCv { width:120px; height:120px; image-rendering:pixelated; background:#12121e; border:2px solid #2a2a3a; }
+  .custRow { display:flex; align-items:center; gap:6px; font-size:12px; color:#d8d4c4; }
+  .custRow span { width:160px; text-align:center; }
+  .cyc { width:22px; height:22px; background:#3a3f58; color:#e8e4d8; border:1px solid #565c78;
+    cursor:pointer; font:bold 13px "Courier New", monospace; padding:0; }
+  .cyc:hover { background:#4a4f6e; }
+  #customPanel .hint { margin:6px 0 0 0; font-size:10px; color:#9a957f; max-width:220px; }
   #deadScreen { background:rgba(20,4,4,.85); }
   #deadScreen h1 { color:#e05555; font-size:36px; text-shadow:3px 3px 0 #000; }
   #deadScreen p { font-size:15px; color:#d8c8c0; margin:4px 0; }
@@ -78,6 +90,16 @@
     <div class="sub">Sélectionnez puis validez (1 : actuelle — 2 : nouvelle — Entrée : valider)</div>
     <div id="lootCards" style="display:flex;gap:14px;"></div>
     <button id="lootConfirm" class="selBtn" disabled>Valider</button>
+  </div>
+
+  <div id="customPanel">
+    <h3>VOTRE GOBELIN</h3>
+    <canvas id="custCv" width="120" height="120"></canvas>
+    <div class="custRow"><button class="cyc" id="hairPrev">‹</button><span id="hairLbl">Cheveux</span><button class="cyc" id="hairNext">›</button></div>
+    <div class="custRow"><button class="cyc" id="headPrev">‹</button><span id="headLbl">Tête</span><button class="cyc" id="headNext">›</button></div>
+    <div class="custRow"><button class="cyc" id="facePrev">‹</button><span id="faceLbl">Visage</span><button class="cyc" id="faceNext">›</button></div>
+    <div class="custRow"><button class="cyc" id="wearPrev">‹</button><span id="wearLbl">Tenue</span><button class="cyc" id="wearNext">›</button></div>
+    <p class="hint">Apparence purement cosmétique — aucun effet sur les statistiques ou le gameplay.</p>
   </div>
 </div></div>
 
@@ -735,18 +757,25 @@ SPR.pretre = makeSprite([
   '..ww..ww...',
 ],{w:'#e8e4d8',s:'#d8a47f',k:'#1a1a1a',g:'#ffd94a'});
 SPR.chevalier = makeSprite([
-  '.....mmmm.......',
-  '....mmAAmm......',
-  '....mAssAm......',
-  '....mmmmmm......',
-  '...mmmmmmmm.....',
-  '..hhhhhhhh.LLLL.',
-  '.hhhhhhhhhhL....',
-  '.hAhhhhhhAhh....',
-  '.hhhhhhhhhhh....',
-  '..hh..hh..hh....',
-  '..kk..kk..kk....',
-],{m:'#b8c0cc',A:'#565c66',s:'#2a2f3a',h:'#8a5a2b',k:'#3a2a16',L:'#d8dde2'});
+  '............rr..............',
+  '.............r..............',
+  '...........mmmmm............',
+  '...........mmssm............',
+  '...........mmmmm............',
+  '.........mmmmmmmmm......LLL.',
+  '.........mmmmmmmAAttttttLLLL',
+  '..........AmmmmmddddddddLLLL',
+  '..........mmmmmmm..HHhhhLLL.',
+  '..........yyyyyy..Hhhhhhshh.',
+  'TTT........AAAA..Hhhhhhhhhh.',
+  'TTT..hhhhRRRAARhHHhhhh......',
+  'TTThhhhhhhhhhhhhhhhhhh......',
+  '.TThhhhhhhhhhhhhhhhhhh......',
+  '...hhhhhhhhhhhhhhhhhhh......',
+  '......hh.hh....hh.hh........',
+  '......hh.hh....hh.hh........',
+  '......kk.kk....kk.kk........',
+],{m:'#b8c0cc',A:'#565c66',s:'#2a2f3a',h:'#8a5a2b',H:'#6e4420',T:'#4a2d16',k:'#3a2a16',r:'#b03a2e',R:'#b03a2e',y:'#ffd94a',t:'#8a5a2b',d:'#6e4826',L:'#e2e6ea'});
 SPR.assassin = makeSprite([
   '...hh.....',
   '..hhhhh...',
@@ -873,6 +902,136 @@ const HELD = {
   paysan: SPR.pitchfork, guerrier: SPRW.sword, archer: SPRW.bow, assassin: SPRW.dagger,
   chien: SPR.bone,
 };
+
+/* ---------- personnalisation du gobelin (purement cosmétique) ---------- */
+const HAIR_COLORS = [
+  {n:'Blanc', c:'#e8e4d8'}, {n:'Noir', c:'#2a2f3a'}, {n:'Roux', c:'#b03a2e'},
+  {n:'Blond', c:'#c8a23a'}, {n:'Bleu', c:'#7fdcff'}, {n:'Rose', c:'#ff9ad5'},
+  {n:'Vert',  c:'#8fd14f'},
+];
+const HEAD_OPTS = ['none','casque','bandana','mage','fete','couronne','casquette'];
+const HEAD_NAMES = {none:'Aucun', casque:'Casque', bandana:'Bandana', mage:'Chapeau de mage', fete:'Chapeau de fête', couronne:'Couronne', casquette:'Casquette'};
+const FACE_OPTS = ['none','lunettes','monocle','moustache','patch','groucho'];
+const FACE_NAMES = {none:'Aucun', lunettes:'Lunettes', monocle:'Monocle', moustache:'Moustache', patch:'Cache-œil', groucho:'Lunettes-moustache'};
+const WEAR_OPTS = ['none','cape','noeud','collier','echarpe','string','nu'];
+const WEAR_NAMES = {none:'Tenue de base', cape:'Cape', noeud:'Nœud papillon', collier:'Collier de dents', echarpe:'Écharpe', string:'String vert fluo', nu:'Nature (flouté)'};
+const CUSTOM = { hair:0, head:'none', face:'none', wear:'none' };
+function loadCustom(){ try{ const s=localStorage.getItem('gobCustom'); if(s) Object.assign(CUSTOM, JSON.parse(s)); }catch(err){} }
+function saveCustom(){ try{ localStorage.setItem('gobCustom', JSON.stringify(CUSTOM)); }catch(err){} }
+const GOBLIN_BASE = {};
+for(const k of ['goblinDown','goblinUp','goblinSide']) GOBLIN_BASE[k] = SPR[k].slice();
+function cloneCv(src){
+  const c=document.createElement('canvas'); c.width=src.width; c.height=src.height;
+  c.getContext('2d').drawImage(src,0,0); return c;
+}
+function stamp(c, rows, pal, oy){
+  const g=c.getContext('2d');
+  for(let y=0;y<rows.length;y++) for(let x=0;x<rows[y].length;x++){
+    const ch=rows[y][x];
+    if(ch!=='.' && pal[ch]){ g.fillStyle=pal[ch]; g.fillRect(x, oy+y, 1, 1); }
+  }
+}
+const CUST_OVERLAYS = {
+  hairTop : ['...CCCCCC...', '..CC....CC..'],
+  hairBack: ['...CCCCCC...', '..CCCCCCCC..', '..CCCCCCCC..'],
+  helmet_down:['..MMMMMMMM..','..MMMMMMMM..','..DMDDDDMD..'],
+  helmet_side:['..MMMMMMMM..','..MMMMMMMM..','..DMDDDDMD..'],
+  helmet_up:  ['..MMMMMMMM..','..MMMMMMMM..','..DDDDDDDD..'],
+  bandana_down:['..RRRRRRRR..','.R........R.'],
+  bandana_side:['..RRRRRRRR..','.R........R.'],
+  bandana_up:  ['..RRRRRRRR..','.R........R.'],
+  mage_down: ['.....PP.....','....PPPP....','...PPPPPP...'],
+  mage_side: ['.....PP.....','....PPPP....','...PPPPPP...'],
+  mage_up:   ['.....PP.....','....PPPP....','...PPPPPP...'],
+  fete_down: ['.....WW.....','.....YY.....','....YYYY....'],
+  fete_side: ['.....WW.....','.....YY.....','....YYYY....'],
+  fete_up:   ['.....WW.....','.....YY.....','....YYYY....'],
+  couronne_down:['..Y.Y.Y.Y...','..YYYYYYYY..'],
+  couronne_up:  ['..Y.Y.Y.Y...','..YYYYYYYY..','..YYYYYYYY..'],
+  couronne_side:['..Y.Y.Y.Y...','..YYYYYYYY..'],
+  casquette_down:['..BBBBBBBB..','..BBBBBBBB..','...DDDDDD...'],
+  casquette_side:['..BBBBBBBB..','..BBBBBBBB..','........DDDD'],
+  casquette_up:  ['..BBBBBBBB..','..BBBBBBBB..'],
+  glasses_down:['...KWKKKWK..','...K.....K..'],
+  glasses_side:['..KKKKKWK...'],
+  monocle_down:['.......KW...','........G...','........G...'],
+  monocle_side:['......KW....','.......G....','.......G....'],
+  moustache_down:['...K....K...','....KKKK....'],
+  moustache_side:['.........KK.','.......KKKK.'],
+  patch_down:['...KKKKKK...','.......KK...','.......KK...'],
+  patch_side:['...KKKK.....','......KKK...','......KKK...'],
+  groucho_down:['...KWKKKWK..','............','.....FF.....','..K..FF..K..','..KKKKKKKK..'],
+  groucho_side:['..KKKKKWK...','............','.......FF...','.......FF.K.','.....KKKKKK.'],
+  cape_down:['..R......R..','..R......R..','..R......R..','.R........R.'],
+  cape_side:['..RR........','..RR........','.RRR........','.RRR........'],
+  cape_up:  ['...RRRRRR...','...RRRRRR...','...RRRRRR...','...RRRRRR...','...RRRRRR...','...R.R.R....'],
+  noeud_down:['.....RR.....','.....RW.....'],
+  noeud_side:['.....RW.....','.....RR.....'],
+  collier_down:['....W.W.....','.....W......'],
+  collier_side:['......W.....','.......W....'],
+  echarpe_down:['...BBBBBB...','........B...','........BB..'],
+  echarpe_side:['......BBBB..','.........BB.'],
+  string_down:['...N....N...','....NNNN....'],
+  string_side:['.....N......','.....NNNN...'],
+  string_up:  ['.....NN.....','....NNNN....'],
+  nu_down:['....XXXX....','....ZXZX....'],
+  nu_side:['.....XXXX...','.....ZXZ....'],
+  nu_up:  ['....XXXX....','....ZXZX....'],
+};
+function customizeFrame(base, view){
+  const c = cloneCv(base);
+  if(CUSTOM.head==='none')
+    stamp(c, view==='up' ? CUST_OVERLAYS.hairBack : CUST_OVERLAYS.hairTop, {C:HAIR_COLORS[CUSTOM.hair].c}, 0);
+  const hov = CUST_OVERLAYS[CUSTOM.head+'_'+view];
+  if(hov) stamp(c, hov, {M:'#b8c0cc',D:'#565c66',R:'#b03a2e',P:'#7a4a9e',Y:'#ffd94a',W:'#e8e4d8',B:'#4a7ac9'}, 0);
+  const fov = CUST_OVERLAYS[CUSTOM.face+'_'+view];
+  if(fov) stamp(c, fov, {K:'#2a2f3a',W:'#e8e4d8',G:'#c8a23a',F:'#d8a47f'}, 0);
+  const wov = CUST_OVERLAYS[CUSTOM.wear+'_'+view];
+  if(wov) stamp(c, wov, {R:'#b03a2e',W:'#e8e4d8',B:'#4a7ac9',N:'#39ff14',X:'#8a8f78',Z:'#5c6050'}, 0);
+  return c;
+}
+function rebuildPlayerSprites(){
+  for(const k of ['goblinDown','goblinUp','goblinSide']){
+    const view = k==='goblinUp' ? 'up' : k==='goblinSide' ? 'side' : 'down';
+    SPR[k] = GOBLIN_BASE[k].map(base=>customizeFrame(base, view));
+  }
+}
+function refreshCustomUI(){
+  document.getElementById('hairLbl').textContent = 'Cheveux : '+HAIR_COLORS[CUSTOM.hair].n;
+  document.getElementById('headLbl').textContent = 'Tête : '+HEAD_NAMES[CUSTOM.head];
+  document.getElementById('faceLbl').textContent = 'Visage : '+FACE_NAMES[CUSTOM.face];
+  document.getElementById('wearLbl').textContent = 'Tenue : '+WEAR_NAMES[CUSTOM.wear];
+}
+function customChanged(){ saveCustom(); rebuildPlayerSprites(); refreshCustomUI(); }
+document.getElementById('hairPrev').onclick = ()=>{ CUSTOM.hair=(CUSTOM.hair+HAIR_COLORS.length-1)%HAIR_COLORS.length; customChanged(); };
+document.getElementById('hairNext').onclick = ()=>{ CUSTOM.hair=(CUSTOM.hair+1)%HAIR_COLORS.length; customChanged(); };
+document.getElementById('headPrev').onclick = ()=>cycleCustom('head', HEAD_OPTS, -1);
+document.getElementById('headNext').onclick = ()=>cycleCustom('head', HEAD_OPTS, 1);
+document.getElementById('facePrev').onclick = ()=>cycleCustom('face', FACE_OPTS, -1);
+document.getElementById('faceNext').onclick = ()=>cycleCustom('face', FACE_OPTS, 1);
+document.getElementById('wearPrev').onclick = ()=>cycleCustom('wear', WEAR_OPTS, -1);
+document.getElementById('wearNext').onclick = ()=>cycleCustom('wear', WEAR_OPTS, 1);
+function cycleCustom(key, opts, d){
+  const i = opts.indexOf(CUSTOM[key]);
+  CUSTOM[key] = opts[(i + d + opts.length) % opts.length];
+  customChanged();
+}
+function updateCustomPanel(){
+  const show = (state==='title' || state==='dead');
+  document.getElementById('customPanel').classList.toggle('show', show);
+  if(show) drawCustomPreview();
+}
+function drawCustomPreview(){
+  const el=document.getElementById('custCv');
+  const g=el.getContext('2d');
+  g.imageSmoothingEnabled=false;
+  g.clearRect(0,0,120,120);
+  const f = Math.floor(Date.now()/450)%2;
+  g.drawImage(SPR.goblinDown[f], 6, 10, 108, 99);
+}
+loadCustom();
+rebuildPlayerSprites();
+refreshCustomUI();
 
 /* tuiles pré-rendues */
 function makeTile(fn){
@@ -1039,7 +1198,7 @@ const ENEMY_TYPES = {
   bebe:      { hp:6,  dmg:0,  type:'phys', speed:30, atkCd:9,   xp:3,  spr:'bebe',       r:4, passive:true },
   paysan:    { hp:14, dmg:4,  type:'phys', speed:36, atkCd:1.4, xp:6,  spr:'paysan',     r:5 },
   pretre:    { hp:22, dmg:4,  type:'mag',  speed:44, atkCd:2.4, xp:16, spr:'pretre',     r:5, healer:true, ranged:true, boltSpeed:95 },
-  chevalier: { hp:60, dmg:14, type:'phys', speed:60, atkCd:2.2, xp:26, spr:'chevalier',  r:7, armor:10, charger:true },
+  chevalier: { hp:60, dmg:14, type:'phys', speed:60, atkCd:2.2, xp:26, spr:'chevalier',  r:8, armor:10, charger:true },
   chien:     { hp:12, dmg:3,  type:'phys', speed:88, atkCd:1.2, xp:8,  spr:'chien',     r:4, bleeder:true },
   barde:     { hp:16, dmg:4,  type:'mag',  speed:40, atkCd:4.0, xp:14, spr:'barde',     r:5, ranged:true, boltSpeed:70, rootHit:0.5 },
   garde:     { hp:34, dmg:9,  type:'phys', speed:40, atkCd:1.8, xp:15, spr:'garde',     r:6, armor:6, lancer:true },
@@ -2185,9 +2344,6 @@ function renderWorld(){
       ctx.fillStyle = '#ffd94a'; ctx.fillRect(px,py,16,16);
       ctx.globalAlpha = 1;
     }
-    if(t===T_STAIRS && !stairsOpen){
-      ctx.fillStyle='rgba(0,0,0,0.4)'; ctx.fillRect(px,py,16,16);
-    }
   }
 
   /* flèche vers l'escalier ouvert hors écran */
@@ -2270,12 +2426,6 @@ function renderWorld(){
       ctx.stroke();
       ctx.restore();
     }
-  }
-
-  /* escalier verrouillé : cadenas textuel */
-  if(!stairsOpen && (state==='play'||state==='levelup')){
-    ctx.fillStyle='#9a957f'; ctx.font='7px monospace'; ctx.textAlign='center';
-    ctx.fillText("tuez-les tous !", stairsPos.x-cam.x, stairsPos.y-cam.y-10);
   }
 
   /* esprits */
@@ -2458,6 +2608,7 @@ function loop(now){
   const dt=Math.min(0.05,(now-last)/1000); last=now;
   if(!statsOpen) update(dt);
   render();
+  updateCustomPanel();
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
