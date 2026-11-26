@@ -603,7 +603,9 @@ function genFloor(){
       setTile(cx,cy,T_DUNFLOOR);
     }
     const s=rooms[rooms.length-1];
-    stairsPos={x:(s.x+(s.w>>1))*TILE+8, y:(s.y+(s.h>>1))*TILE+8};
+    const stx=s.x+(s.w>>1), sty=s.y+(s.h>>1);
+    setTile(stx,sty,T_STAIRS);
+    stairsPos={x:stx*TILE+8, y:sty*TILE+8};
     const p0=rooms[0];
     player.x=(p0.x+(p0.w>>1))*TILE+8; player.y=(p0.y+(p0.h>>1))*TILE+8;
 
@@ -643,7 +645,7 @@ function genFloor(){
     let sx,sy,tries=0;
     do{ sx=rndi(mapW-10,mapW-4); sy=rndi(2,mapH-3); tries++; }
     while((isSolid(sx*TILE+8,sy*TILE+8)) && tries<200);
-    setTile(sx,sy,T_GRASS);
+    setTile(sx,sy,T_STAIRS);
     stairsPos={x:sx*TILE+8,y:sy*TILE+8};
 
     const count = 7 + floorNum;
@@ -1189,9 +1191,28 @@ function render(){
     if(theme==='dungeon' && t!==T_DUNWALL) img=TILES.dunFloor;
     if(theme==='village' && (t===T_DUNFLOOR||t===T_DUNWALL)) img=TILES.grass;
     ctx.drawImage(img,px,py);
-    if(t===T_STAIRS && stairsOpen) ctx.drawImage(TILES.stairs,px,py);
+    if(t===T_STAIRS && stairsOpen){
+      ctx.drawImage(TILES.stairs,px,py);
+      ctx.globalAlpha = 0.2+0.15*Math.sin(elapsed*4);
+      ctx.fillStyle = '#ffd94a'; ctx.fillRect(px,py,16,16);
+      ctx.globalAlpha = 1;
+    }
     if(t===T_STAIRS && !stairsOpen){
       ctx.fillStyle='rgba(0,0,0,0.4)'; ctx.fillRect(px,py,16,16);
+    }
+  }
+
+  /* flèche vers l'escalier ouvert hors écran */
+  if(stairsOpen && (state==='play'||state==='levelup')){
+    const sx=stairsPos.x-cam.x, sy=stairsPos.y-cam.y;
+    if(sx<0 || sx>VW || sy<0 || sy>VH){
+      const cx=clamp(sx,10,VW-10), cy=clamp(sy,10,VH-10);
+      ctx.save();
+      ctx.translate(cx,cy);
+      ctx.rotate(Math.atan2(sy-VH/2, sx-VW/2));
+      ctx.fillStyle='#ffd94a';
+      ctx.beginPath(); ctx.moveTo(7,0); ctx.lineTo(-4,-5); ctx.lineTo(-4,5); ctx.closePath(); ctx.fill();
+      ctx.restore();
     }
   }
 
