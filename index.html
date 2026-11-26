@@ -657,17 +657,18 @@ SPR.pretre = makeSprite([
   '..ww..ww...',
 ],{w:'#e8e4d8',s:'#d8a47f',k:'#1a1a1a',g:'#ffd94a'});
 SPR.chevalier = makeSprite([
-  '..mmmmmm...',
-  '.mmmmmmmm..',
-  '.mAssssAm..',
-  '.mAssssAm..',
-  '..mmmmmm...',
-  'l.mmmmmm...',
-  'l.mAmmAm...',
-  '..mmmmmm...',
-  '..mm..mm...',
-  '..MM..MM...',
-],{m:'#b8c0cc',A:'#565c66',s:'#3a3f4a',M:'#565c66',l:'#c8b07a'});
+  '.....mmmm.......',
+  '....mmAAmm......',
+  '....mAssAm......',
+  '....mmmmmm......',
+  '...mmmmmmmm.....',
+  '..hhhhhhhh.LLLL.',
+  '.hhhhhhhhhhL....',
+  '.hAhhhhhhAhh....',
+  '.hhhhhhhhhhh....',
+  '..hh..hh..hh....',
+  '..kk..kk..kk....',
+],{m:'#b8c0cc',A:'#565c66',s:'#2a2f3a',h:'#8a5a2b',k:'#3a2a16',L:'#d8dde2'});
 SPR.ghost = makeSprite([
   '..cccc..',
   '.cccccc.',
@@ -1160,6 +1161,10 @@ function genFloor(){
       const kind = roll<0.30?'aventurier': roll<0.45?'guerrier': roll<0.58?'mage': roll<0.72?'archer': roll<0.86?'paysan': roll<0.95?'bebe':'pretre';
       spawnEnemy(false, kind);
     }
+    if(Math.random()<0.10){
+      const g=spawnEnemy(true,'bebe');
+      if(g) g.golden=true;
+    }
   }
   for(let i=0;i<player.minionCount;i++) minions.push(makeMinion(i));
   placeChests();
@@ -1191,10 +1196,10 @@ function spawnEnemy(elite, kind, roomList){
     tries++;
   } while((isSolid(x,y) || dist(x,y,player.x,player.y)<(elite?260:110)) && tries<(elite?900:300));
 
-  const base = ENEMY_TYPES[kind];
+    const base = ENEMY_TYPES[kind];
   const fm = 1 + 0.22*(floorNum-1);
   const em = elite ? 3.2 + 0.6*(floorNum-1) : 1;
-  enemies.push({
+  const spawned = {
     kind, elite,
     x, y, r: base.r*(elite?1.35:1),
     maxHp: Math.round(base.hp*fm*em), hp: Math.round(base.hp*fm*em),
@@ -1205,7 +1210,28 @@ function spawnEnemy(elite, kind, roomList){
     chargeT:0, chargeCd:rnd(1,2.5), cdx:0, cdy:0, chargeHit:false,
     lvl: floorNum + (elite ? 2 + Math.floor(floorNum/2) : 0),
     aggro:false, wanderT:0, wdx:0, wdy:0, flip:false, hurtT:0, slowT:0, poisonT:0,
-  });
+  };
+  enemies.push(spawned);
+  return spawned;
+}
+
+/* teintes des ennemis élites */
+const TINTED = {};
+function tintSprite(spr, col, a){
+  const c=document.createElement('canvas'); c.width=spr.width; c.height=spr.height;
+  const g=c.getContext('2d');
+  g.drawImage(spr,0,0);
+  g.globalCompositeOperation='source-atop';
+  g.globalAlpha=a; g.fillStyle=col; g.fillRect(0,0,c.width,c.height);
+  return c;
+}
+function eliteSprite(name){
+  if(!TINTED['e_'+name]) TINTED['e_'+name]=tintSprite(SPR[name], '#ff5a5a', 0.35);
+  return TINTED['e_'+name];
+}
+function goldenSprite(name){
+  if(!TINTED['g_'+name]) TINTED['g_'+name]=tintSprite(SPR[name], '#ffd94a', 0.7);
+  return TINTED['g_'+name];
 }
 
 function makeMinion(i){
@@ -1214,9 +1240,11 @@ function makeMinion(i){
 
 /* ---------- entrées ---------- */
 const keys={};
+let attackQueued=false;
 addEventListener('keydown', e=>{
   ensureAudio();
   keys[e.code]=true;
+  if(!e.repeat && (e.code==='Space'||e.code==='KeyE'||e.code==='KeyJ')) attackQueued=true;
   if(['Tab','Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault();
   if(state==='title' && e.code==='Enter'){ resetGame(); state='play'; hideOverlays(); }
   else if(state==='dead' && e.code==='Enter'){ resetGame(); state='play'; hideOverlays(); }
@@ -1279,6 +1307,19 @@ function hurtEnemy(e, dmg, type, showText){
   }
   if(e.hp<=0) killEnemy(e);
 }
+function grantGoldenBlessing(){
+  if(player.goldenBlessing){
+    player.maxHp+=20; player.hp=Math.min(player.maxHp, player.hp+20);
+    addMsg('Bébé doré : +20 PV max (bénédiction déjà reçue)', '#ffd94a');
+    return;
+  }
+  player.goldenBlessing=true;
+  player.maxHp+=30; player.hp=Math.min(player.maxHp, player.hp+30);
+  player.str+=5; player.pow+=5; player.agi+=5; player.armor+=3; player.marmor+=3;
+  addMsg('Bébé doré vaincu ! Bénédiction unique : +30 PV max, +5 Force, +5 Pouvoir, +5 Agilité, +3 Armure, +3 Armure magique', '#ffd94a');
+  addFloater(player.x, player.y-16, 'BÉNÉDICTION DORÉE !', '#ffd94a');
+  sLevel();
+}
 function killEnemy(e){
   e.dead=true; killCount++; sKill();
   const xp = Math.round(e.xp * (1+player.xpMult));
@@ -1291,7 +1332,8 @@ function killEnemy(e){
     player.xpNext = 25 + (player.level-1)*18;
     openLevelUp();
   }
-  if(e.elite){
+  if(e.golden){ grantGoldenBlessing(); }
+  else if(e.elite){
     const rank = clamp(Math.floor(floorNum/3), 0, 3);
     proposeWeapon(makeWeapon(rank), 'prise sur une élite');
   }
@@ -1488,7 +1530,7 @@ function update(dt){
   /* attaque */
   if(player.atkCd>0) player.atkCd-=dt;
   if(player.atkAnim>0) player.atkAnim-=dt;
-  if(keys['Space']||keys['KeyE']||keys['KeyJ']) tryAttack();
+  if(attackQueued){ attackQueued=false; tryAttack(); }
   player.invulT=Math.max(0,player.invulT-dt);
 
   /* auras */
@@ -1864,7 +1906,7 @@ function renderWorld(){
   /* ennemis */
   for(const e of enemies){
     if(e.dead) continue;
-    const spr=SPR[e.spr];
+    const spr = e.golden ? goldenSprite(e.spr) : (e.elite ? eliteSprite(e.spr) : SPR[e.spr]);
     const bob = Math.sin((e.animT||0)*10)>0 ? 0 : -1;
     const sc = e.elite?1.4:1;
     if(e.elite) drawSpriteC(SPR.crown, e.x-cam.x, e.y-cam.y-e.r-13, false, 1);

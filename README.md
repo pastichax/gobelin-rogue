@@ -15,7 +15,7 @@ de 200 améliorations réparties en 55 familles et 4 rangs.
 | Touche | Action |
 |---|---|
 | ZQSD / WASD / Flèches | Se déplacer |
-| Espace / E | Attaquer au corps-à-corps (orienté selon le personnage) |
+| Espace / E | Attaquer au corps-à-corps (une pression = une attaque) |
 | Clic souris / visée | Arme à distance : tire vers la souris |
 | Maj | Dash (si débloqué) |
 | Tab | Panneau de caractéristiques et améliorations |
@@ -50,13 +50,18 @@ de 200 améliorations réparties en 55 familles et 4 rangs.
   (projectiles magiques à distance), archer (flèches à distance), bébé
   (inoffensif, uniquement dans les villages), paysan (faible, villages et
   tavernes), prêtre (rare, présent partout : soigne les autres ennemis mais
-  jamais lui-même) et chevalier (rapide, attaque par charge de lance en ligne
+  jamais lui-même) et chevalier (à cheval, rapide, attaque par charge de lance
+  en ligne
   droite, tourne difficilement), plus des **élites** (couronnées, bien plus
-  dures) qui lâchent une arme à comparer : il y en a 1 par étage, et 2 à
-  partir de l'étage 5. Leur puissance (PV, dégâts, niveau, XP) croît nettement
-  plus vite que celle des ennemis normaux dans les étages élevés, et elles
-  apparaissent toujours loin du joueur. Chaque ennemi affiche son niveau
-  au-dessus de lui, et les ennemis ne se chevauchent pas entre eux.
+  dures, reconnaissables à leur teinte rougeâtre) qui lâchent une arme à
+  comparer : il y en a 1 par étage, et 2 à partir de l'étage 5. Leur puissance
+  (PV, dégâts, niveau, XP) croît nettement plus vite que celle des ennemis
+  normaux dans les étages élevés, et elles apparaissent toujours loin du
+  joueur. Dans les villages peut apparaître (très rarement) un **bébé doré** :
+  inoffensif et couronné, il octroie une bénédiction unique (PV, Force,
+  Pouvoir, Agilité, armures) quand on arrive à l'attraper. Chaque ennemi
+  affiche son niveau au-dessus de lui, et les ennemis ne se chevauchent pas
+  entre eux.
 - **Armes** : 31 armes en 4 rangs — Basique, Amélioré, Puissant, Épique —
   reprenant les rangs des améliorations (mêlée et distance, physiques ou
   magiques). Les armes de mêlée magiques (Lame d'écaille, Glaive de braise,
