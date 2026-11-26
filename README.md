@@ -18,12 +18,13 @@ de 230 améliorations réparties en 55 familles et 5 rangs (jusqu'à Légendaire
 | Espace / E | Attaquer au corps-à-corps (une pression = une attaque) |
 | Clic souris / visée | Arme à distance : tire vers la souris |
 | Maj | Dash (si débloqué) |
-| Tab | Panneau de caractéristiques et améliorations |
-| 1 / 2 / 3 ou clic | Choisir une amélioration |
+| Tab | Panneau de caractéristiques et améliorations (met le jeu en pause) |
+| 1 / 2 / 3 ou clic | Sélectionner une amélioration, puis Entrée ou bouton « Valider » |
+| Survol d'une carte | Affiche le descriptif de l'amélioration |
 | M | Musique on/off |
 | Entrée | Démarrer / recommencer |
 | Marcher sur un coffre | Ouvrir le coffre (équipement ou arme à comparer) |
-| 1 / 2 / Échap (offre d'arme) | Garder l'actuelle / prendre la trouvée / garder |
+| 1 / 2 / Échap (offre d'arme) | Sélectionner garder l'actuelle / prendre la trouvée, puis Entrée ou bouton « Valider » |
 
 ## Systèmes
 
@@ -34,8 +35,9 @@ de 230 améliorations réparties en 55 familles et 5 rangs (jusqu'à Légendaire
 - **Coffres** : 1 à 2 coffres par étage ; marchez dessus pour ouvrir. Ils
   contiennent une arme dans ~75 % des cas, et un écran de comparaison s'affiche
   alors (dégâts de base et effectifs, cadence, DPS avec les caractéristiques de
-  scaling, rang, effets spéciaux) : gardez votre arme (1) ou prenez la nouvelle
-  (2). Sinon : bonus de statistique ou soin complet. Le rang des armes trouvées
+  scaling, rang, effets spéciaux) : sélectionnez votre choix (1 ou 2, ou clic
+  sur une carte) puis validez avec le bouton ou Entrée. Sinon : bonus de
+  statistique ou soin complet. Le rang des armes trouvées
   progresse lentement avec l'étage (Basique jusqu'à l'étage 3, puis un palier
   tous les 3 étages).
 - **8 types d'étages en cycle** : donjon (salles procédurales + couloirs,
@@ -47,12 +49,13 @@ de 230 améliorations réparties en 55 familles et 5 rangs (jusqu'à Légendaire
   cour de château-fort (muraille, chemins de pierre, donjon central) et
   intérieur de château-fort (dalles de pierre, piliers).
 - **Ennemis** : assassin (très rapide, frappe lourdement au corps-à-corps
-  mais tombe en quelques coups), guerrier (lent, blindé), mage (baguette
+  mais tombe en quelques coups), guerrier (lent, robuste), mage (baguette
   magique, projectiles à distance), archer (flèches à distance), bébé
   (inoffensif, uniquement dans les villages), paysan (faible, villages et
   tavernes, fourche en main), prêtre (rare, présent partout : soigne les
-  autres ennemis à courte portée mais jamais lui-même, lance de lents
-  projectiles et brandit son symbole magique), chevalier (à cheval, rapide,
+  autres ennemis à courte portée mais jamais lui-même, illumine ses
+  cobayes d'une lueur verte pendant toute la durée du soin ; seul le
+  prêtre élite attaque, avec de lents projectiles), chevalier (à cheval, rapide,
   attaque par charge de lance en ligne droite, tourne difficilement),
   **chien** (attaque en meutes, très rapide, morsure qui fait saigner sur la
   durée), **barde** (taverne et villages : projectile magique lent et large
@@ -67,7 +70,10 @@ de 230 améliorations réparties en 55 familles et 5 rangs (jusqu'à Légendaire
   joueur. Dans les villages peut apparaître (très rarement) un **bébé doré** :
   inoffensif et couronné, il octroie une bénédiction unique (PV, Force,
   Pouvoir, Agilité, armures) quand on arrive à l'attraper. Chaque ennemi
-  affiche son niveau au-dessus de lui, et les ennemis ne se chevauchent pas
+  affiche son niveau au-dessus de lui, et les ennemis ne se chevauchent pas ;
+  les armes à distance infligent nettement moins de recul que la mêlée, les
+  dégâts infligés s'affichent en blanc et passent en rouge sur un coup
+  critique
   entre eux.
 - **Armes** : 36 armes en 5 rangs — Basique, Amélioré, Puissant, Épique,
   Légendaire — reprenant les rangs des améliorations (mêlée et distance,

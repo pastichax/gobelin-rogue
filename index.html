@@ -31,6 +31,13 @@
   .card .nm { color:#8fd14f; font-size:13px; font-weight:bold; min-height:32px; }
   .card .ds { color:#b8b2a0; font-size:11px; margin-top:6px; line-height:1.35; }
   .card .key { color:#666; font-size:10px; margin-top:8px; }
+  .card.sel { background:#2a3148; transform:translateY(-6px); box-shadow:0 0 14px rgba(143,209,79,.35); }
+  #upDesc, #lootDesc { min-height:34px; margin-top:10px; color:#b8b2a0; font-size:12px;
+    max-width:500px; line-height:1.4; }
+  .selBtn { margin-top:6px; padding:8px 30px; font:bold 14px "Courier New", monospace; color:#0e1220;
+    background:#8fd14f; border:none; cursor:pointer; box-shadow:0 3px 0 #4a7a2a; }
+  .selBtn:disabled { background:#3a3f58; color:#8a8fa6; box-shadow:0 3px 0 #23273a; cursor:default; }
+  .selBtn:not(:disabled):hover { background:#a8e368; }
   #deadScreen { background:rgba(20,4,4,.85); }
   #deadScreen h1 { color:#e05555; font-size:36px; text-shadow:3px 3px 0 #000; }
   #deadScreen p { font-size:15px; color:#d8c8c0; margin:4px 0; }
@@ -54,8 +61,10 @@
 
   <div id="levelupScreen" class="overlay">
     <h2>NIVEAU SUPÉRIEUR !</h2>
-    <div class="sub">Choisissez une amélioration (1 / 2 / 3 ou cliquez)</div>
+    <div class="sub">Sélectionnez une amélioration puis validez (1 / 2 / 3, Entrée ou clic)</div>
     <div id="cards"></div>
+    <div id="upDesc"></div>
+    <button id="upConfirm" class="selBtn" disabled>Valider</button>
   </div>
 
   <div id="deadScreen" class="overlay">
@@ -66,8 +75,9 @@
 
   <div id="lootScreen" class="overlay">
     <h2>ARME TROUVÉE DANS LE COFFRE !</h2>
-    <div class="sub">Laquelle gardez-vous ? (1 : garder l'actuelle — 2 : prendre la nouvelle — Échap : garder)</div>
+    <div class="sub">Sélectionnez puis validez (1 : actuelle — 2 : nouvelle — Entrée : valider)</div>
     <div id="lootCards" style="display:flex;gap:14px;"></div>
+    <button id="lootConfirm" class="selBtn" disabled>Valider</button>
   </div>
 </div></div>
 
@@ -506,19 +516,34 @@ function showLootOffer(){
     return;
   }
   const entry = pendingWeaponQueue[0];
+  lootSel=null;
   const cards = document.getElementById('lootCards');
   cards.innerHTML =
     '<div class="card" id="keepCard">'+weaponCardHtml(player.weapon,'votre arme actuelle')+'<div class="key">[1] Garder</div></div>'+
     '<div class="card" id="takeCard">'+weaponCardHtml(entry.w,entry.src)+'<div class="key">[2] Prendre</div></div>';
   document.getElementById('keepCard').style.borderColor = RANK_META[player.weapon.rank||0].col;
   document.getElementById('takeCard').style.borderColor = RANK_META[entry.w.rank].col;
-  document.getElementById('keepCard').onclick = ()=>chooseLoot(false);
-  document.getElementById('takeCard').onclick = ()=>chooseLoot(true);
+  const btn=document.getElementById('lootConfirm');
+  btn.disabled=true; btn.textContent='Valider';
+  document.getElementById('keepCard').onclick = ()=>selectLoot(false);
+  document.getElementById('takeCard').onclick = ()=>selectLoot(true);
   document.getElementById('lootScreen').classList.add('show');
   state='loot';
 }
+function selectLoot(take){
+  if(state!=='loot' || !pendingWeaponQueue.length) return;
+  lootSel=take;
+  const k=document.getElementById('keepCard'), t=document.getElementById('takeCard');
+  k.classList.toggle('sel', !take); t.classList.toggle('sel', take);
+  k.style.borderColor = !take ? '#8fd14f' : RANK_META[player.weapon.rank||0].col;
+  t.style.borderColor = take ? '#8fd14f' : RANK_META[pendingWeaponQueue[0].w.rank].col;
+  const btn=document.getElementById('lootConfirm');
+  btn.disabled=false;
+  btn.textContent = take ? "Valider : prendre la nouvelle" : "Valider : garder l'actuelle";
+}
 function chooseLoot(take){
   if(state!=='loot' || !pendingWeaponQueue.length) return;
+  lootSel=null;
   const entry = pendingWeaponQueue.shift();
   if(take){
     player.weapon = entry.w;
@@ -1008,7 +1033,7 @@ function tileAt(px,py){ return getTile(Math.floor(px/TILE), Math.floor(py/TILE))
 
 const ENEMY_TYPES = {
   assassin:  { hp:10, dmg:16, type:'phys', speed:105, atkCd:1.8, xp:14, spr:'assassin',  r:5 },
-  guerrier:  { hp:40, dmg:9,  type:'phys', speed:42, atkCd:1.8, xp:15, spr:'warrior',    r:6, armor:5 },
+  guerrier:  { hp:47, dmg:9,  type:'phys', speed:42, atkCd:1.8, xp:15, spr:'warrior',    r:6, armor:3 },
   mage:      { hp:18, dmg:10, type:'mag',  speed:40, atkCd:1.9, xp:13, spr:'mage',       r:5, ranged:true },
   archer:    { hp:16, dmg:8,  type:'phys', speed:52, atkCd:1.6, xp:12, spr:'archer',     r:5, ranged:true },
   bebe:      { hp:6,  dmg:0,  type:'phys', speed:30, atkCd:9,   xp:3,  spr:'bebe',       r:4, passive:true },
@@ -1393,7 +1418,7 @@ function makeMinion(i){
 
 /* ---------- entrées ---------- */
 const keys={};
-let attackQueued=false;
+let attackQueued=false, levelupSel=null, lootSel=null;
 addEventListener('keydown', e=>{
   ensureAudio();
   keys[e.code]=true;
@@ -1403,11 +1428,13 @@ addEventListener('keydown', e=>{
   else if(state==='dead' && e.code==='Enter'){ resetGame(); state='play'; hideOverlays(); }
   else if(state==='levelup'){
     const i = ['Digit1','Digit2','Digit3'].indexOf(e.code);
-    if(i>=0) chooseUpgrade(i);
+    if(i>=0) selectUpgrade(i);
+    else if(e.code==='Enter' && levelupSel!==null) chooseUpgrade(levelupSel);
   }
   else if(state==='loot'){
-    if(e.code==='Digit1'||e.code==='Escape') chooseLoot(false);
-    else if(e.code==='Digit2') chooseLoot(true);
+    if(e.code==='Digit1'||e.code==='Escape') selectLoot(false);
+    else if(e.code==='Digit2') selectLoot(true);
+    else if(e.code==='Enter' && lootSel!==null) chooseLoot(lootSel);
   }
   if(e.code==='KeyM' && !e.repeat) toggleMusic();
   if(e.code==='Tab') statsOpen=!statsOpen;
@@ -1450,16 +1477,16 @@ function playerDamage(base, type, target){
   if(Math.random()*100 < player.crit){ d*=player.critMult; crit=true; }
   return {d, crit};
 }
-function hurtEnemy(e, dmg, type, showText, kb){
+function hurtEnemy(e, dmg, type, showText, kb, opts){
   const red = type==='mag' ? 0 : (e.armor||0);
   const total = Math.max(1, Math.round(dmg - red));
   e.hp -= total; e.hurtT=0.12; e.aggro=true;
   if(kb!==false && !(ENEMY_TYPES[e.kind]||{}).passive){
     const d=dist(player.x,player.y,e.x,e.y)||1;
-    const k=e.elite?90:140;
+    const k=(e.elite?90:140)*((opts&&opts.kbMult)||1);
     e.kbx=(e.x-player.x)/d*k; e.kby=(e.y-player.y)/d*k;
   }
-  if(showText) addFloater(e.x, e.y-10, ""+total, total>=player.critMult*10?'#ffd94a':'#fff');
+  if(showText) addFloater(e.x, e.y-10, ""+total, (opts&&opts.crit)?'#ff4d4d':'#fff');
   if(player.lifesteal>0){
     player.hp = Math.min(player.maxHp, player.hp + total*player.lifesteal);
   }
@@ -1560,7 +1587,7 @@ function tryAttack(){
         if(diff > half) continue;
       }
       const res = playerDamage(w.dmg, w.type, e);
-      hurtEnemy(e, res.d, w.type, true);
+      hurtEnemy(e, res.d, w.type, true, true, {crit:res.crit});
       if(w.slow) e.slowT=2;
       if(w.burn){ e.burnT=2.5; e.burnDps=res.d*w.burn; }
       if(res.crit) sfx(500,900,.08,.08);
@@ -1608,25 +1635,50 @@ function openLevelUp(){
     for(let j=0;j<copy.length;j++){ x -= copy[j].w; if(x<=0){ idx=j; break; } }
     levelupChoices.push(copy.splice(idx,1)[0]);
   }
+  levelupSel=null;
   const cards = document.getElementById('cards');
   cards.innerHTML='';
+  document.getElementById('upDesc').textContent='';
+  const btn=document.getElementById('upConfirm');
+  btn.disabled=true; btn.textContent='Valider';
   levelupChoices.forEach((u,i)=>{
     const rk = RANK_META[u.rank];
     const el=document.createElement('div');
     el.className='card';
     if(u.rank>0) el.style.borderColor = rk.col;
     el.innerHTML = '<div class="ico">'+u.i+'</div><div class="nm">'+u.n+'</div>'+
-      '<div class="ds"><span style="color:'+rk.col+'">['+rk.label+']</span> '+u.d+'</div><div class="key">['+(i+1)+']</div>';
-    el.onclick=()=>chooseUpgrade(i);
+      '<div class="ds"><span style="color:'+rk.col+'">['+rk.label+']</span></div><div class="key">['+(i+1)+']</div>';
+    el.onclick=()=>selectUpgrade(i);
+    el.onmouseenter=()=>showUpgradeDesc(i);
+    el.onmouseleave=()=>{ if(levelupSel===null) document.getElementById('upDesc').textContent=''; else showUpgradeDesc(levelupSel); };
     cards.appendChild(el);
   });
   state='levelup';
   document.getElementById('levelupScreen').classList.add('show');
 }
+function showUpgradeDesc(i){
+  const u=levelupChoices[i]; if(!u) return;
+  const rk=RANK_META[u.rank];
+  document.getElementById('upDesc').innerHTML = '<b style="color:'+rk.col+'">'+u.n+'</b> — '+u.d;
+}
+function selectUpgrade(i){
+  if(state!=='levelup' || !levelupChoices[i]) return;
+  levelupSel=i;
+  const kids=document.getElementById('cards').children;
+  for(let j=0;j<kids.length;j++){
+    const rj=RANK_META[levelupChoices[j].rank];
+    if(j===i){ kids[j].classList.add('sel'); kids[j].style.borderColor='#8fd14f'; }
+    else { kids[j].classList.remove('sel'); kids[j].style.borderColor = levelupChoices[j].rank>0 ? rj.col : ''; }
+  }
+  showUpgradeDesc(i);
+  const btn=document.getElementById('upConfirm');
+  btn.disabled=false; btn.textContent='Valider : '+levelupChoices[i].n;
+}
 function chooseUpgrade(i){
   if(state!=='levelup' || !levelupChoices[i]) return;
   const u=levelupChoices[i];
   upgradeCounts[u.n]=(upgradeCounts[u.n]||0)+1;
+  levelupSel=null;
   u.f(player);
   addMsg("Amélioration : "+u.n+" — "+u.d, "#8fd14f");
   document.getElementById('levelupScreen').classList.remove('show');
@@ -1689,7 +1741,7 @@ function update(dt){
         if(dist(player.x,player.y,e.x,e.y) < 14 && !e.dashHit){
           e.dashHit=true;
           const res=playerDamage(10+player.str*0.5, 'phys', e);
-          hurtEnemy(e, res.d*1.5*(player.dashPowerMult||1), 'phys', true);
+          hurtEnemy(e, res.d*1.5*(player.dashPowerMult||1), 'phys', true, true, {crit:res.crit});
           if(player.dashSlow) e.slowT=2;
         }
       }
@@ -1773,6 +1825,7 @@ function update(dt){
     }
     const slow = e.slowT>0 ? (e.slowPow||0.6) : 1;
     if(e.slowT>0) e.slowT-=dt;
+    if(e.healT>0) e.healT-=dt;
     const dp = dist(e.x,e.y,player.x,player.y);
     const type=ENEMY_TYPES[e.kind];
     if(type.passive){ e.aggro=false; }
@@ -1793,6 +1846,7 @@ function update(dt){
           const dd=Math.sqrt(bd)||1;
           if(dd>20){ mx=(tgt.x-e.x)/dd; my=(tgt.y-e.y)/dd; }
           tgt.hp=Math.min(tgt.maxHp, tgt.hp+4*dt);
+          tgt.healT=0.35;
           if(Math.random()<dt*4) addFloater(tgt.x, tgt.y-tgt.r-6, '+', '#8fd14f');
         }
       }
@@ -1824,7 +1878,7 @@ function update(dt){
         if(dp<90){ mx=(e.x-player.x)/dp; my=(e.y-player.y)/dp; }
         else if(dp>170){ mx=(player.x-e.x)/dp; my=(player.y-e.y)/dp; }
         e.cdT-=dt*slow;
-        if(e.cdT<=0 && dp<230){
+        if(e.cdT<=0 && dp<230 && !(type.healer && !e.elite)){
           e.cdT=e.atkCd;
           const d=dp||1;
           fireBolt(e.x,e.y,(player.x-e.x)/d,(player.y-e.y)/d, e.type, e.dmg, false, e.boltSpeed||150, type.rootHit?{root:type.rootHit*(e.elite?2:1), wide:true}:null);
@@ -1911,7 +1965,7 @@ function update(dt){
         if(e.dead) continue;
         if(b.hit.includes(e)) continue;
         if(dist(b.x,b.y,e.x,e.y) < e.r+2){
-          hurtEnemy(e, b.dmg, b.type, true);
+          hurtEnemy(e, b.dmg, b.type, true, true, {kbMult:0.35, crit:b.crit});
           if(b.slow) e.slowT=2;
           if(b.burn){ e.burnT=2.5; e.burnDps=b.dmg*b.burn; }
           if(b.fireball){
@@ -1921,7 +1975,7 @@ function update(dt){
               if(e2.dead||e2===e) continue;
               if(dist(b.x,b.y,e2.x,e2.y)<26){
                 const r2=playerDamage(b.dmg*0.6, 'mag', e2);
-                hurtEnemy(e2, r2.d, 'mag', true);
+                hurtEnemy(e2, r2.d, 'mag', true, true, {kbMult:0.35, crit:r2.crit});
               }
             }
           }
@@ -2178,6 +2232,16 @@ function renderWorld(){
   /* ennemis */
   for(const e of enemies){
     if(e.dead) continue;
+    if(e.healT>0){
+      const hx=e.x-cam.x, hy=e.y-cam.y;
+      const gr=ctx.createRadialGradient(hx,hy,1,hx,hy,e.r+8);
+      gr.addColorStop(0,'rgba(140,255,110,'+(0.7*Math.min(1,e.healT/0.35))+')');
+      gr.addColorStop(1,'rgba(140,255,110,0)');
+      ctx.save();
+      ctx.fillStyle=gr;
+      ctx.beginPath(); ctx.arc(hx,hy,e.r+8,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
     const spr = e.golden ? goldenSprite(e.spr) : (e.elite ? eliteSprite(e.spr) : SPR[e.spr]);
     const bob = Math.sin((e.animT||0)*10)>0 ? 0 : -1;
     const sc = e.elite?1.4:1;
@@ -2334,6 +2398,8 @@ function renderStats(c){
     c.fillStyle = i===0 ? '#8fd14f' : (i===lines.length ? '#ffd94a' : '#d8d4c4');
     c.fillText(t, x+8, y+15+i*9);
   });
+  c.textAlign='center'; c.fillStyle='#9a957f';
+  c.fillText('— partie en pause (TAB) —', VW/2, Math.min(y+h+9, VH-3));
 }
 function renderTitleArt(){
   drawSpriteC(SPR.goblinDown[0], VW/2, 96, false, 6);
@@ -2390,7 +2456,7 @@ function renderHUD(c){
 let last=performance.now();
 function loop(now){
   const dt=Math.min(0.05,(now-last)/1000); last=now;
-  update(dt);
+  if(!statsOpen) update(dt);
   render();
   requestAnimationFrame(loop);
 }
