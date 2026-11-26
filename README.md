@@ -17,7 +17,10 @@ visage (lunettes, monocle, moustache, cache-œil, lunettes-moustaches à faux
 nez) et tenue (cape, nœud papillon, collier de dents, écharpe, string vert
 fluo, gobelin nu avec entrejambe flouté). Apparence purement cosmétique :
 aucun effet sur les statistiques ni sur le gameplay ; vos choix sont
-mémorisés d'une partie à l'autre.
+mémorisés d'une partie à l'autre. Le gobelin a été redessiné en plus grand
+(16×14 au lieu de 12×11) avec un vrai grand nez, des oreilles pointées et deux
+jambes animées ; tous les accessoires sont calqués sur ce nouveau gabarit dans
+chacune des trois directions de marche.
 
 ## Contrôles
 
@@ -28,8 +31,9 @@ mémorisés d'une partie à l'autre.
 | Clic souris / visée | Arme à distance : tire vers la souris |
 | Maj | Dash (si débloqué) |
 | Tab | Panneau de caractéristiques et améliorations (met le jeu en pause) |
-| 1 / 2 / 3 ou clic | Sélectionner une amélioration, puis Entrée ou bouton « Valider » |
+| 1 / 2 / 3 ou clic | Sélectionner une amélioration, puis Entrée ou bouton « Valider » (cliquable) |
 | Survol d'une carte | Affiche le descriptif de l'amélioration |
+| Survol dans le menu TAB | Affiche l'effet de chaque amélioration déjà acquise |
 | M | Musique on/off |
 | Entrée | Démarrer / recommencer |
 | Marcher sur un coffre | Ouvrir le coffre (équipement ou arme à comparer) |
