@@ -42,6 +42,7 @@ chacune des trois directions de marche.
 Les statistiques affichées (HUD, menu TAB) sont les **valeurs effectives** :
 valeurs de base multipliées par les améliorations en pourcentage.
 | M | Musique on/off |
+| X | Effets sonores on/off (la musique n'est pas affectée) |
 
 Le HUD affiche en haut à droite un **chronomètre** (or) qui ne tourne que
 pendant le jeu : il se met en pause pendant les choix d'amélioration, les

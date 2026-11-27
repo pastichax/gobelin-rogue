@@ -167,7 +167,7 @@ function ensureAudio(){
   }
 }
 function sfx(f0, f1, dur, vol, type){
-  if(!AC) return;
+  if(!AC || !sfxOn) return;
   const o = AC.createOscillator(), g = AC.createGain();
   o.type = type||'square';
   o.frequency.setValueAtTime(f0, AC.currentTime);
@@ -185,7 +185,7 @@ const sShoot = ()=> sfx(700,300,.07,.05);
 const sLoot  = ()=> { sfx(520,780,.08,.08); setTimeout(()=>sfx(780,1040,.10,.08),80); };
 const sDash  = ()=> sfx(300,700,.10,.06,'triangle');
 function sTrumpet(){
-  if(!AC) return;
+  if(!AC || !sfxOn) return;
   const t=AC.currentTime;
   const g=AC.createGain();
   g.gain.setValueAtTime(0.0001,t);
@@ -203,7 +203,7 @@ function sTrumpet(){
   });
 }
 function sRattle(long){
-  if(!AC) return;
+  if(!AC || !sfxOn) return;
   const t=AC.currentTime, dur=long?0.6:0.25;
   const o=AC.createOscillator(), g=AC.createGain();
   o.type='sawtooth';
@@ -216,7 +216,7 @@ function sRattle(long){
   o.start(t); o.stop(t+dur);
 }
 function sCry(){
-  if(!AC) return;
+  if(!AC || !sfxOn) return;
   const t=AC.currentTime;
   for(let i=0;i<2;i++){
     const o=AC.createOscillator(), g=AC.createGain();
@@ -233,7 +233,7 @@ function sCry(){
   }
 }
 function sVomi(){
-  if(!AC) return;
+  if(!AC || !sfxOn) return;
   const t=AC.currentTime;
   for(let i=0;i<3;i++){
     const o=AC.createOscillator(), g=AC.createGain();
@@ -248,7 +248,7 @@ function sVomi(){
   }
 }
 function sProut(){
-  if(!AC) return;
+  if(!AC || !sfxOn) return;
   const t=AC.currentTime;
   const o=AC.createOscillator(), g=AC.createGain();
   o.type='sawtooth';
@@ -264,6 +264,7 @@ function sProut(){
 
 /* ---------- musique d'ambiance (chiptune fantasy déjantée) ---------- */
 let musicOn = true, musicStep = 0, musicNext = 0, noiseBuf = null;
+let sfxOn = true;
 const NOTE = m => 440*Math.pow(2,(m-69)/12);
 const MEL  = [69,72,76,72, 81,79,76,74, 72,76,79,76, 74,77,81,77,
               76,79,83,79, 84,83,79,76, 77,74,71,74, 69,0,64,0];
@@ -308,6 +309,10 @@ function scheduleMusic(){
   }
 }
 setInterval(scheduleMusic, 40);
+function toggleSfx(){
+  sfxOn = !sfxOn;
+  addMsg(sfxOn ? 'Sons : activés (X)' : 'Sons : coupés (X)', '#9fd7ff');
+}
 function toggleMusic(){
   musicOn = !musicOn;
   if(AC) musicNext = AC.currentTime + 0.05;
@@ -1921,6 +1926,7 @@ addEventListener('keydown', e=>{
     else if(e.code==='Enter' && lootSel!==null) chooseLoot(lootSel);
   }
   if(e.code==='KeyM' && !e.repeat) toggleMusic();
+  if(e.code==='KeyX' && !e.repeat) toggleSfx();
   if(e.code==='Tab'){ statsOpen=!statsOpen; syncStatsPanel(); }
 });
 addEventListener('keyup', e=>{ keys[e.code]=false; });
