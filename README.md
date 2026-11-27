@@ -35,7 +35,7 @@ chacune des trois directions de marche.
 | Clic souris / visée | Arme à distance : tire vers la souris |
 | Maj | Dash (si débloqué) — vitesse proportionnelle à votre vitesse de déplacement |
 | Tab | Panneau de caractéristiques et améliorations (met le jeu en pause, s'affiche par-dessus tous les autres menus, molette pour faire défiler) |
-| 1 / 2 / 3 ou clic | Sélectionner une amélioration, puis Entrée ou bouton « Valider » (cliquable) |
+| 1 / 2 / 3 ou clic | Sélectionner une amélioration, puis Entrée ou bouton « Valider » (cliquable) ; bouton « Ne rien choisir » pour passer sans améliorer |
 | Survol d'une carte | Affiche le descriptif de l'amélioration |
 | Survol dans le menu TAB | Affiche l'effet de chaque amélioration déjà acquise |
 
