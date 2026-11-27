@@ -711,7 +711,10 @@ LEG_FUSIONS.forEach(lg=>{
   }
   UPGRADES.push({
     n: lg.n, i: lg.i, rank: 4, d, f, w: lm.w,
-    req: p=>{ let ep=0; for(const u of UPGRADES){ if(u.rank===3 && upgradeCounts[u.n]) ep++; } return ep>=2; },
+    req: p=>{
+      const ea=A.n+RANK_META[3].tag, eb=B.n+RANK_META[3].tag;
+      return !!(upgradeCounts[ea]>0 && upgradeCounts[eb]>0);
+    },
   });
 });
 function openChest(ch){

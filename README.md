@@ -171,10 +171,10 @@ offres d'arme et le menu TAB.
   Épique, Légendaire — des versions de plus en plus fortes. Un rang
   n'apparaît qu'après avoir obtenu le rang immédiatement inférieur, et les
   rangs supérieurs ont un taux d'apparition plus faible (poids 100 % / 70 % /
-  50 % / 35 % / 25 %). Les 17 améliorations **Légendaires** (dorées)
+  50 % / 35 % / 25 %). Les 21 améliorations **Légendaires** (dorées)
   fusionnent deux améliorations Épiques en une seule version bien plus
-  puissante, et n'apparaissent qu'une fois au moins deux améliorations
-  Épiques obtenues. **Gobelin turbo-puant** : jet continu vert-marron vers la
+  puissante, et n'apparaissent qu'une fois que **les deux améliorations
+  Épiques qu'elles fusionnent** ont été obtenues. **Gobelin turbo-puant** : jet continu vert-marron vers la
   souris (dégâts de Vomi chaque seconde + ralentissement de Prout).
   **Super-toutou** : les 4 chiens fusionnent en un super-chien capé, stats
   additionnées et augmentées de 40 %. **Sauce du chef** : le gourdin crache
