@@ -156,7 +156,9 @@ offres d'arme et le menu TAB.
   les 8/6/4/3 s selon le rang, dégâts magiques), **Prout du gobelin crado**
   (nuage marron derrière vous qui ralentit fortement les ennemis), **Gros
   gourdin veineux** (gourdin géant à bout rose tournant autour du gobelin,
-  1/2/2,75/3,25 tours/s, dégâts physiques), **Sac à malice** (deux sacs verts
+  1/2/2,75/3,25 tours/s, dégâts physiques ; sa taille grossit à chaque rang :
+  +25 %, puis +20 %, puis +15 % — jusqu'à x1,725 — et encore +10 % avec
+  Sauce du chef, la zone de frappe et les gouttes suivant l'agrandissement), **Sac à malice** (deux sacs verts
   entre les jambes : vitesse -15/25/32/36 %, XP +30/50/64/72 %), **Bon
   toutou** (1 à 4 chiens fidèles qui errent librement dans le rayon de
   l'aura de ralentissement et fondent sur les ennemis à portée pour attaquer

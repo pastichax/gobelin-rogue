@@ -564,11 +564,10 @@ const UP_DEFS = [
     {d:"Chiens : +32,5% de dégâts", f:p=>{p.dogDmgMult+=0.325;}},
   ]},
   {n:"Gros gourdin veineux", i:"🥒", r:[
-    {d:"Un gourdin vert géant tourne autour de vous (1 tour/s) : dégâts physiques", f:p=>{p.clubRps=1;}},
-    {d:"Gourdin : 2 tours/s", f:p=>{p.clubRps=2;}},
-    {d:"Gourdin : 2,75 tours/s", f:p=>{p.clubRps=2.75;}},
-    {d:"Gourdin : 3,25 tours/s", f:p=>{p.clubRps=3.25;}},
-  ]},
+    {d:"Un gourdin vert géant tourne autour de vous (1 tour/s) : dégâts physiques", f:p=>{p.clubRps=1;p.clubScale=1;}},
+    {d:"Gourdin : 2 tours/s et +25% de taille", f:p=>{p.clubRps=2;p.clubScale=1.25;}},
+    {d:"Gourdin : 2,75 tours/s et +20% de taille (x1,5 au total)", f:p=>{p.clubRps=2.75;p.clubScale=1.5;}},
+    {d:"Gourdin : 3,25 tours/s et +15% de taille (x1,725 au total)", f:p=>{p.clubRps=3.25;p.clubScale=1.725;}},  ]},
   {n:"Sac à malice",         i:"🎒", r:[
     {d:"Deux sacs verts entre les jambes : vitesse -15%, XP gagnée +30%", f:p=>{p.sacSlow=0.15;p.sacXp=0.30;}},
     {d:"Sacs à malice : vitesse -25%, XP +50%", f:p=>{p.sacSlow=0.25;p.sacXp=0.50;}},
@@ -670,8 +669,8 @@ const LEG_FUSIONS = [
    d:"Vos 4 chiens fusionnent en un super-chien porteur de cape : statistiques additionnées des 4 chiens, augmentées de 40%",
    f:p=>{p.superDog=true;}},
   {n:"Sauce du chef",       i:"💧", fuse:["Gros gourdin veineux","Sac à malice"],
-   d:"Conserve le gourdin et les sacs à malice ; à chaque 1/8 de tour, l'extrémité du gourdin projette une goutte blanche (dégâts magiques + immobilisation 0,25 s)",
-   f:p=>{p.chefSauce=true;}},
+   d:"Conserve le gourdin et les sacs à malice ; à chaque 1/8 de tour, l'extrémité du gourdin projette une goutte blanche (dégâts magiques + immobilisation 0,25 s) ; gourdin encore +10% de taille (x1,9 au total)",
+   f:p=>{p.chefSauce=true;p.clubScale=(p.clubScale||1)*1.10;}},
   {n:"Force de la nature",   i:"💪", fuse:["Muscles gonflés","Ventre solide"],
    d:"Force +50% et Santé +50% — fusion légendaire",
    f:p=>{p.pctStr=(p.pctStr||1)+0.5;setPct(p,'pctHp',(p.pctHp||1)+0.5);}},
@@ -1425,7 +1424,7 @@ const player = {
   kbx:0, kby:0, bleedT:0, bleedAcc:0, bleedDps:0, rootT:0,
   vomiLvl:0, vomiCd:0, proutLvl:0, proutCd:0, turbo:false, turboCd:0,
   dogCount:0, dogDmgMult:1, superDog:false,
-  clubRps:0, clubAng:0, sauceAcc:0, chefSauce:false,
+  clubRps:0, clubAng:0, sauceAcc:0, chefSauce:false, clubScale:1,
   sacSlow:0, sacXp:0,
 };
 const upgradeCounts = {};
@@ -1451,7 +1450,7 @@ function resetGame(){
   player.bleedT=0; player.bleedAcc=0; player.bleedDps=0; player.rootT=0;
   player.vomiLvl=0; player.vomiCd=0; player.proutLvl=0; player.proutCd=0;
   player.turbo=false; player.turboCd=0; player.dogCount=0; player.dogDmgMult=1;
-  player.superDog=false; player.clubRps=0; player.clubAng=0; player.sauceAcc=0;
+  player.superDog=false; player.clubRps=0; player.clubAng=0; player.sauceAcc=0; player.clubScale=1;
   player.chefSauce=false; player.sacSlow=0; player.sacXp=0;
   dogs.length=0;
   statsOpen=false; syncStatsPanel(); mouse.active=false; pendingWeaponQueue=[];
@@ -2342,7 +2341,7 @@ function update(dt){
       while(player.sauceAcc>=Math.PI/4){
         player.sauceAcc-=Math.PI/4;
         const a=player.clubAng;
-        fireBolt(player.x+Math.cos(a)*24, player.y+Math.sin(a)*24, Math.cos(a), Math.sin(a),
+        fireBolt(player.x+Math.cos(a)*24*player.clubScale, player.y+Math.sin(a)*24*player.clubScale, Math.cos(a), Math.sin(a),
                  'mag', 10+pPow()*0.4, true, 170, {vis:'drop', root:0.25, life:1.0, quiet:true});
       }
     }
@@ -2353,7 +2352,7 @@ function update(dt){
       const rx=e.x-player.x, ry=e.y-player.y;
       const proj=rx*ca+ry*sa;
       const perp=Math.abs(-rx*sa+ry*ca);
-      if(proj>0 && proj<26+e.r && perp<e.r+3){
+      if(proj>0 && proj<26*player.clubScale+e.r && perp<e.r+3*player.clubScale){
         e.clubCd=0.5;
         const res=playerDamage(6+pStr()*0.4, 'phys', e);
         hurtEnemy(e, res.d, 'phys', true, true, {crit:res.crit});
@@ -2909,12 +2908,13 @@ function renderWorld(){
       const ca=Math.cos(player.clubAng), sa=Math.sin(player.clubAng);
       ctx.save();
       ctx.translate(player.x-cam.x, player.y-cam.y+2);
-      ctx.strokeStyle='#3f7a1e'; ctx.lineWidth=4; ctx.lineCap='round';
-      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(ca*22,sa*22); ctx.stroke();
-      ctx.strokeStyle='#6abe30'; ctx.lineWidth=2;
-      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(ca*20,sa*20); ctx.stroke();
+      const cs=player.clubScale||1;
+      ctx.strokeStyle='#3f7a1e'; ctx.lineWidth=4*cs; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(ca*22*cs,sa*22*cs); ctx.stroke();
+      ctx.strokeStyle='#6abe30'; ctx.lineWidth=2*cs;
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(ca*20*cs,sa*20*cs); ctx.stroke();
       ctx.fillStyle='#ff9ad5';
-      ctx.beginPath(); ctx.arc(ca*24,sa*24,3,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(ca*24*cs,sa*24*cs,3*cs,0,Math.PI*2); ctx.fill();
       ctx.restore();
     }
     if(player.sacSlow>0 && player.face!=='up'){
