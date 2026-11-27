@@ -38,6 +38,10 @@
     background:#8fd14f; border:none; cursor:pointer; box-shadow:0 3px 0 #4a7a2a; }
   .selBtn:disabled { background:#3a3f58; color:#8a8fa6; box-shadow:0 3px 0 #23273a; cursor:default; }
   .selBtn:not(:disabled):hover { background:#a8e368; }
+  .skipBtn { margin-top:6px; margin-left:10px; padding:8px 22px; font:bold 13px "Courier New", monospace;
+    color:#c9c4b4; background:#2a2f45; border:2px solid #4a5070; border-radius:6px; cursor:pointer;
+    box-shadow:0 3px 0 #1a1e30; }
+  .skipBtn:hover { background:#3a4060; color:#fff; }
   #statsOverlay { z-index:50; background:rgba(5,5,12,.88); }
   #statsBox { width:360px; max-width:94%; max-height:94%; display:flex; flex-direction:column;
     background:#20243a; border:3px solid #4a4f6e; padding:10px 12px; box-sizing:border-box; }
@@ -88,10 +92,11 @@
 
   <div id="levelupScreen" class="overlay">
     <h2>NIVEAU SUPÉRIEUR !</h2>
-    <div class="sub">Sélectionnez une amélioration puis validez (1 / 2 / 3, Entrée ou clic)</div>
+    <div class="sub">Sélectionnez une amélioration puis validez (1 / 2 / 3, Entrée ou clic), ou ne rien choisir</div>
     <div id="cards"></div>
     <div id="upDesc"></div>
     <button id="upConfirm" class="selBtn" disabled>Valider</button>
+    <button id="upSkip" class="skipBtn">Ne rien choisir</button>
   </div>
 
   <div id="deadScreen" class="overlay">
@@ -1930,6 +1935,7 @@ addEventListener('keydown', e=>{
 });
 addEventListener('keyup', e=>{ keys[e.code]=false; });
 document.getElementById('upConfirm').onclick = ()=>{ if(state==='levelup' && levelupSel!==null) chooseUpgrade(levelupSel); };
+document.getElementById('upSkip').onclick = ()=>{ skipUpgrade(); };
 document.getElementById('lootConfirm').onclick = ()=>{ if(state==='loot' && lootSel!==null) chooseLoot(lootSel); };
 cv.addEventListener('mousemove', e=>{
   const r=cv.getBoundingClientRect();
@@ -2205,6 +2211,21 @@ function selectUpgrade(i){
   showUpgradeDesc(i);
   const btn=document.getElementById('upConfirm');
   btn.disabled=false; btn.textContent='Valider : '+levelupChoices[i].n;
+}
+function skipUpgrade(){
+  if(state!=='levelup') return;
+  levelupSel=null;
+  addMsg('Aucune amélioration choisie', '#9a957f');
+  document.getElementById('levelupScreen').classList.remove('show');
+  levelupChoices=[];
+  if(player.xp >= player.xpNext){
+    player.xp -= player.xpNext; player.level++;
+    player.xpNext = 25 + (player.level-1)*18;
+    openLevelUp();
+  } else {
+    state='play';
+  }
+  if(state==='play' && pendingWeaponQueue.length) showLootOffer();
 }
 function chooseUpgrade(i){
   if(state!=='levelup' || !levelupChoices[i]) return;
