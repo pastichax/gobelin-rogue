@@ -176,6 +176,7 @@ offres d'arme et le menu TAB.
   50 % / 35 % / 25 %). **Limite de 10 emplacements** : le gobelin ne peut
   posséder que 10 améliorations (Chance exceptée) ; un rang supérieur
   remplace le rang inférieur de la même famille (les effets s'additionnent),
+  et le rang inférieur remplacé ne peut plus être obtenu à nouveau ;
   et une fois les 10 emplacements occupés, les niveaux ne proposent plus que
   des rangs supérieurs des améliorations possédées, des légendaires ou des
   Chance. L'écran de choix affiche les emplacements restants (X / 10) et met

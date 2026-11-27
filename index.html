@@ -2147,6 +2147,12 @@ function ownedSlots(){
   }
   return c;
 }
+function familyOwnedAtHigherRank(u){
+  return Object.keys(upgradeCounts).some(k=>{
+    const uk=UPGRADES.find(x=>x.n===k);
+    return uk && uk.fam===u.fam && uk.rank>u.rank;
+  });
+}
 function upgradeAvailableAtCap(u){
   if(u.fam==='Chance'){
     return Object.keys(upgradeCounts).some(k=>{
@@ -2176,7 +2182,7 @@ function fusionPartnerOwned(u){
 }
 function openLevelUp(){
   sLevel();
-  let pool = UPGRADES.filter(u => !(upgradeCounts[u.n]>0) && (!u.req || u.req(player)));
+  let pool = UPGRADES.filter(u => !(upgradeCounts[u.n]>0) && !familyOwnedAtHigherRank(u) && (!u.req || u.req(player)));
   if(ownedSlots()>=MAX_UP_SLOTS) pool = pool.filter(upgradeAvailableAtCap);
   if(!pool.length){
     addMsg('Améliorations : tous les emplacements sont au rang maximum', '#9a957f');
