@@ -38,6 +38,21 @@
     background:#8fd14f; border:none; cursor:pointer; box-shadow:0 3px 0 #4a7a2a; }
   .selBtn:disabled { background:#3a3f58; color:#8a8fa6; box-shadow:0 3px 0 #23273a; cursor:default; }
   .selBtn:not(:disabled):hover { background:#a8e368; }
+  #statsOverlay { z-index:50; background:rgba(5,5,12,.88); }
+  #statsBox { width:360px; max-width:94%; max-height:94%; display:flex; flex-direction:column;
+    background:#20243a; border:3px solid #4a4f6e; padding:10px 12px; box-sizing:border-box; }
+  #statsBox h2 { margin:0 0 6px 0; color:#8fd14f; font-size:18px; }
+  #statsInfo div { font-size:12px; color:#d8d4c4; line-height:1.55; text-align:left; }
+  .statsSec { margin-top:8px; color:#ffd94a; font-size:12px; text-align:left; }
+  #statsUps { flex:1 1 auto; overflow-y:auto; min-height:60px; max-height:240px;
+    text-align:left; margin-top:4px; }
+  .statUp { font-size:12px; color:#d8d4c4; padding:3px 6px; border-left:3px solid #666;
+    margin-bottom:2px; cursor:default; }
+  .statUp:hover { background:rgba(143,209,79,0.15); }
+  .statEmpty { font-size:11px; color:#8a8471; }
+  #statsDesc { min-height:30px; margin-top:6px; font-size:11px; color:#b8b2a0;
+    text-align:left; line-height:1.4; }
+  .statsHint { margin-top:6px; font-size:10px; color:#9a957f; }
   #customPanel { position:absolute; right:10px; top:50%; transform:translateY(-50%);
     display:none; flex-direction:column; align-items:center; gap:3px;
     background:rgba(8,8,16,0.92); border:3px solid #4a4f6e; padding:10px 12px; z-index:5; }
@@ -90,6 +105,17 @@
     <div class="sub">Sélectionnez puis validez (1 : actuelle — 2 : nouvelle — Entrée : valider)</div>
     <div id="lootCards" style="display:flex;gap:14px;"></div>
     <button id="lootConfirm" class="selBtn" disabled>Valider</button>
+  </div>
+
+  <div id="statsOverlay" class="overlay">
+    <div id="statsBox">
+      <h2 id="statsTitle">GOBELIN</h2>
+      <div id="statsInfo"></div>
+      <div class="statsSec">Améliorations (survolez : effet)</div>
+      <div id="statsUps"></div>
+      <div id="statsDesc"></div>
+      <div class="statsHint">TAB : fermer · molette : faire défiler — partie en pause</div>
+    </div>
   </div>
 
   <div id="customPanel">
@@ -158,6 +184,83 @@ const sLevel = ()=> { sfx(440,660,.12,.10); setTimeout(()=>sfx(660,990,.18,.10),
 const sShoot = ()=> sfx(700,300,.07,.05);
 const sLoot  = ()=> { sfx(520,780,.08,.08); setTimeout(()=>sfx(780,1040,.10,.08),80); };
 const sDash  = ()=> sfx(300,700,.10,.06,'triangle');
+function sTrumpet(){
+  if(!AC) return;
+  const t=AC.currentTime;
+  const g=AC.createGain();
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(0.11,t+0.03);
+  g.gain.setValueAtTime(0.11,t+0.16);
+  g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+  const f=AC.createBiquadFilter(); f.type='lowpass'; f.frequency.value=2400;
+  g.connect(f); f.connect(AC.destination);
+  [[233.1,0.5],[236.5,0.5],[349.2,0.85]].forEach(pair=>{
+    const o=AC.createOscillator();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(pair[0]*pair[1],t);
+    o.frequency.exponentialRampToValueAtTime(pair[0],t+0.09);
+    o.connect(g); o.start(t); o.stop(t+0.32);
+  });
+}
+function sRattle(long){
+  if(!AC) return;
+  const t=AC.currentTime, dur=long?0.6:0.25;
+  const o=AC.createOscillator(), g=AC.createGain();
+  o.type='sawtooth';
+  o.frequency.setValueAtTime(long?170:210,t);
+  o.frequency.exponentialRampToValueAtTime(40,t+dur);
+  g.gain.setValueAtTime(0.10,t);
+  g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  const f=AC.createBiquadFilter(); f.type='lowpass'; f.frequency.value=900;
+  o.connect(f); f.connect(g); g.connect(AC.destination);
+  o.start(t); o.stop(t+dur);
+}
+function sCry(){
+  if(!AC) return;
+  const t=AC.currentTime;
+  for(let i=0;i<2;i++){
+    const o=AC.createOscillator(), g=AC.createGain();
+    const t0=t+i*0.16;
+    o.type='triangle';
+    o.frequency.setValueAtTime(700,t0);
+    o.frequency.linearRampToValueAtTime(1300,t0+0.1);
+    o.frequency.linearRampToValueAtTime(500,t0+0.3);
+    g.gain.setValueAtTime(0.001,t0);
+    g.gain.exponentialRampToValueAtTime(0.09,t0+0.05);
+    g.gain.exponentialRampToValueAtTime(0.001,t0+0.34);
+    o.connect(g); g.connect(AC.destination);
+    o.start(t0); o.stop(t0+0.36);
+  }
+}
+function sVomi(){
+  if(!AC) return;
+  const t=AC.currentTime;
+  for(let i=0;i<3;i++){
+    const o=AC.createOscillator(), g=AC.createGain();
+    const t0=t+i*0.06;
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(260-i*45,t0);
+    o.frequency.exponentialRampToValueAtTime(90,t0+0.09);
+    g.gain.setValueAtTime(0.08,t0);
+    g.gain.exponentialRampToValueAtTime(0.001,t0+0.1);
+    o.connect(g); g.connect(AC.destination);
+    o.start(t0); o.stop(t0+0.11);
+  }
+}
+function sProut(){
+  if(!AC) return;
+  const t=AC.currentTime;
+  const o=AC.createOscillator(), g=AC.createGain();
+  o.type='sawtooth';
+  o.frequency.setValueAtTime(95,t);
+  for(let i=1;i<=6;i++) o.frequency.setValueAtTime(78+(i%2)*20, t+0.05*i);
+  o.frequency.linearRampToValueAtTime(60,t+0.35);
+  g.gain.setValueAtTime(0.11,t);
+  g.gain.exponentialRampToValueAtTime(0.001,t+0.4);
+  const f=AC.createBiquadFilter(); f.type='lowpass'; f.frequency.value=420;
+  o.connect(f); f.connect(g); g.connect(AC.destination);
+  o.start(t); o.stop(t+0.42);
+}
 
 /* ---------- musique d'ambiance (chiptune fantasy déjantée) ---------- */
 let musicOn = true, musicStep = 0, musicNext = 0, noiseBuf = null;
@@ -928,6 +1031,14 @@ SPR.chest = makeSprite([
   'cCccccccCc',
   '.cccccccc.',
 ],{c:'#8a5a2b',C:'#6e4420',y:'#ffd94a'});
+SPR.sacks = makeSprite([
+  '.gg..gg.',
+  'gGGggGGg',
+  'gGGggGGg',
+  'gGGggGGg',
+  '.gggggg.',
+  '...gg...',
+],{g:'#3f7a1e',G:'#6abe30'});
 SPR.chestOpen = makeSprite([
   '.cccccccc.',
   'cCddddddCc',
@@ -1205,7 +1316,7 @@ let dogs=[];
 let chests=[], statsOpen=false;
 const mouse={x:0,y:0,active:false};
 let cam={x:0,y:0};
-let floorNum=1, killCount=0, elapsed=0;
+let floorNum=1, killCount=0, elapsed=0, playTime=0;
 let msgs=[];
 let levelupChoices=[];
 let introScene=0;
@@ -1253,9 +1364,9 @@ function resetGame(){
   player.superDog=false; player.clubRps=0; player.clubAng=0; player.sauceAcc=0;
   player.chefSauce=false; player.sacSlow=0; player.sacXp=0;
   dogs.length=0;
-  statsOpen=false; mouse.active=false; pendingWeaponQueue=[];
+  statsOpen=false; syncStatsPanel(); mouse.active=false; pendingWeaponQueue=[];
   for(const k in upgradeCounts) delete upgradeCounts[k];
-  floorNum=1; killCount=0; elapsed=0; msgs=[];
+  floorNum=1; killCount=0; elapsed=0; playTime=0; msgs=[];
   addMsg("Arme de départ : " + player.weapon.name, "#8fd14f");
   genFloor();
 }
@@ -1721,7 +1832,7 @@ addEventListener('keydown', e=>{
     else if(e.code==='Enter' && lootSel!==null) chooseLoot(lootSel);
   }
   if(e.code==='KeyM' && !e.repeat) toggleMusic();
-  if(e.code==='Tab') statsOpen=!statsOpen;
+  if(e.code==='Tab'){ statsOpen=!statsOpen; syncStatsPanel(); }
 });
 addEventListener('keyup', e=>{ keys[e.code]=false; });
 document.getElementById('upConfirm').onclick = ()=>{ if(state==='levelup' && levelupSel!==null) chooseUpgrade(levelupSel); };
@@ -1797,7 +1908,8 @@ function grantGoldenBlessing(){
   sLevel();
 }
 function killEnemy(e){
-  e.dead=true; killCount++; sKill();
+  e.dead=true; killCount++;
+  if(e.kind==='bebe') sCry(); else sRattle(!!e.elite);
   const xp = Math.round(e.xp * (1+player.xpMult + (player.sacXp||0)));
   player.xp += xp;
   addFloater(e.x, e.y-14, "+"+xp+" XP", "#9fd7ff");
@@ -1898,7 +2010,7 @@ function tryAttack(){
       }
     }
   }
-  sHit();
+  if(w.cat==='trumpet') sTrumpet(); else sHit();
 }
 function fireBolt(x,y,dx,dy,type,baseDmg,fromPlayer,speed,fx){
   const res = fromPlayer ? playerDamage(baseDmg, type, null) : {d:baseDmg, crit:false};
@@ -1912,7 +2024,7 @@ function fireBolt(x,y,dx,dy,type,baseDmg,fromPlayer,speed,fx){
     vis: fx ? (fx.vis || (fx.cat==='bow'?'arrow' : fx.cat==='sling'?'stone' : fx.cat==='trumpet'?'trumpet' : 'orb'))
             : (type==='mag' ? 'orb' : 'arrow'),
   });
-  if(fromPlayer && !(fx&&fx.quiet)) sShoot();
+  if(fromPlayer && !(fx&&fx.quiet) && !(fx&&fx.cat==='trumpet')) sShoot();
 }
 
 /* ---------- montage des niveaux ---------- */
@@ -1991,6 +2103,7 @@ function update(dt){
   if(msgs.length && (msgs[0].life-=dt)<=0) msgs.shift();
 
   if(state!=='play'){ return; }
+  playTime+=dt;
 
   /* régénération & bouclier */
   if(player.regen>0) player.hp=Math.min(player.maxHp, player.hp+player.regen*dt);
@@ -2094,6 +2207,7 @@ function update(dt){
         const a=base+s*0.25;
         fireBolt(player.x, player.y, Math.cos(a), Math.sin(a), 'mag', dmg, true, 150, {vis:'vomi', quiet:true});
       }
+      sVomi();
     }
   }
   if(player.proutLvl>0 && !player.turbo){
@@ -2107,6 +2221,7 @@ function update(dt){
           if(!e.dead && dist(bx,by,e.x,e.y)<28+e.r){ e.slowT=2; e.slowPow=0.6; }
         }
       }
+      sProut();
     }
   }
   if(player.turbo){
@@ -2320,10 +2435,18 @@ function update(dt){
   /* chiens fidèles */
   syncDogs();
   const dogN = dogs.length || 1;
+  const dogRad = player.freezeRad || 44;
   dogs.forEach((dg,i)=>{
-    const orbR = dg.superD ? 30 : 26;
-    const ang = (dg.orb||0) + elapsed*1.8 + i*(Math.PI*2/dogN);
-    const tx=player.x+Math.cos(ang)*orbR, ty=player.y+Math.sin(ang)*orbR*0.7;
+    let tgt=null, tb=1e9;
+    for(const e of enemies){ if(e.dead) continue;
+      const dp=dist2(player.x,player.y,e.x,e.y);
+      if(dp<dogRad*dogRad){ const dd3=dist2(dg.x,dg.y,e.x,e.y); if(dd3<tb){ tb=dd3; tgt=e; } } }
+    let tx,ty;
+    if(tgt){ tx=tgt.x; ty=tgt.y; }
+    else{
+      const ang=(dg.orb||0) + elapsed*0.8 + i*(Math.PI*2/dogN);
+      tx=player.x+Math.cos(ang)*(dogRad*0.55); ty=player.y+Math.sin(ang)*(dogRad*0.55);
+    }
     const dd=dist(dg.x,dg.y,tx,ty);
     if(dd>2){ const s=Math.min(dd*5,170); moveEntity(dg,(tx-dg.x)/dd*s,(ty-dg.y)/dd*s,dt); dg.flip=(tx-dg.x)<0; }
     dg.animT=(dg.animT||0)+dt;
@@ -2333,6 +2456,7 @@ function update(dt){
       let best=null, bd=20*20;
       for(const e of enemies){ if(e.dead) continue;
         const dd2=dist2(dg.x,dg.y,e.x,e.y); if(dd2<bd){ bd=dd2; best=e; } }
+      if(tgt && dist2(dg.x,dg.y,tgt.x,tgt.y) < (20+tgt.r)*(20+tgt.r)) best=tgt;
       if(best){
         dg.cdT=0.9; dg.lungeT=0.15;
         dg.flip = best.x<dg.x;
@@ -2698,15 +2822,16 @@ function renderWorld(){
       ctx.beginPath(); ctx.arc(ca*24,sa*24,3,0,Math.PI*2); ctx.fill();
       ctx.restore();
     }
-    if(player.sacSlow>0){
-      ctx.fillStyle='#4e9423';
-      ctx.fillRect(Math.round(player.x-cam.x-5), Math.round(player.y-cam.y+1), 4, 5);
-      ctx.fillRect(Math.round(player.x-cam.x+1), Math.round(player.y-cam.y+2), 4, 5);
+    if(player.sacSlow>0 && player.face!=='up'){
+      const soff = player.face==='side' ? (player.faceLeft?2:-2) : 0;
+      drawSpriteC(SPR.sacks, player.x-cam.x+soff, player.y-cam.y+4, false, 1);
     }
     const gset = player.face==='up' ? SPR.goblinUp : player.face==='side' ? SPR.goblinSide : SPR.goblinDown;
     const gframe = player.moving ? (Math.floor(player.walkT*8)%2) : 0;
     drawSpriteC(gset[gframe], player.x-cam.x, player.y-cam.y+bob, player.face==='side' && player.faceLeft, 1);
     ctx.globalAlpha=1;
+    if(player.sacSlow>0 && player.face==='up')
+      drawSpriteC(SPR.sacks, player.x-cam.x, player.y-cam.y+4, false, 1);
     drawWeapon();
     if(player.shieldOn && player.shieldReady){
       ctx.strokeStyle='rgba(127,220,255,0.7)';
@@ -2822,77 +2947,51 @@ function render(){
     }
     c.globalAlpha=1;
     renderHUD(c);
-    if(statsOpen) renderStats(c);
   }
 }
-function renderStats(c){
+function syncStatsPanel(){
+  const ov=document.getElementById('statsOverlay');
+  if(!statsOpen){ ov.classList.remove('show'); return; }
+  updateStatsPanel();
+  ov.classList.add('show');
+}
+function updateStatsPanel(){
   const lines=[
-    'GOBELIN — niv '+player.level,
+    'Niveau : '+player.level,
     'PV '+Math.ceil(player.hp)+'/'+player.maxHp+' (+'+player.regen.toFixed(1)+'/s)',
     'Force '+player.str+'   Pouvoir '+player.pow,
     'Armure '+player.armor+'   Armure mag. '+player.marmor,
     'Agilité '+player.agi+'   Critique '+player.crit+'%',
     'Vol de vie '+(player.lifesteal*100).toFixed(0)+'%   Épines '+(player.thorns*100).toFixed(0)+'%',
+    'XP '+player.xp+'/'+player.xpNext,
     'Arme : '+player.weapon.name+' ['+RANK_META[player.weapon.rank||0].label+']',
   ];
+  document.getElementById('statsTitle').textContent='GOBELIN — niv '+player.level;
+  document.getElementById('statsInfo').innerHTML = lines.map(l=>'<div>'+l+'</div>').join('');
   const ups=Object.keys(upgradeCounts);
-  const maxUps=10;
-  const shown=ups.slice(0,maxUps);
-  const extra=ups.length-shown.length;
-  const w=250, descH=38;
-  const upStart=15+lines.length*9+12;
-  const h=upStart+(shown.length+(extra>0?1:0))*9+descH+6;
-  const x=(VW-w)/2, y=clamp((VH-h)/2,20,Math.max(20,VH-h-20));
-  c.fillStyle='rgba(8,8,16,0.93)'; c.fillRect(x,y,w,h);
-  c.strokeStyle='#4a4f6e'; c.lineWidth=1; c.strokeRect(x+0.5,y+0.5,w-1,h-1);
-  c.font='7px monospace'; c.textAlign='left';
-  lines.forEach((t,i)=>{
-    c.fillStyle = i===0 ? '#8fd14f' : '#d8d4c4';
-    c.fillText(t, x+8, y+15+i*9);
+  document.getElementById('statsUps').innerHTML = ups.length ? ups.map(n=>{
+    const def=UPGRADES.find(u=>u.n===n);
+    const rk=RANK_META[def?def.rank:0];
+    const label=n+(upgradeCounts[n]>1?' x'+upgradeCounts[n]:'');
+    return '<div class="statUp" data-n="'+n+'" style="border-left-color:'+rk.col+'"><span style="color:'+rk.col+'">'+label+'</span></div>';
+  }).join('') : '<div class="statEmpty">Aucune amélioration pour l\'instant.</div>';
+  document.getElementById('statsDesc').innerHTML='';
+}
+
+/* survol des améliorations dans le panneau TAB */
+(function(){
+  const upsEl=document.getElementById('statsUps');
+  if(!upsEl || upsEl.__bound) return;
+  upsEl.__bound=true;
+  upsEl.addEventListener('mouseover', e=>{
+    const row=e.target && e.target.closest ? e.target.closest('.statUp') : null;
+    if(!row) return;
+    const def=UPGRADES.find(u=>u.n===row.getAttribute('data-n'));
+    if(!def) return;
+    const rk=RANK_META[def.rank];
+    document.getElementById('statsDesc').innerHTML='<b style="color:'+rk.col+'">'+def.n+'</b> — '+def.d;
   });
-  let hovDef=null;
-  if(shown.length){
-    c.fillStyle='#ffd94a';
-    c.fillText('Améliorations (survolez : effet) :', x+8, y+upStart-4);
-    const mx=mouse.active ? mouse.x-cam.x : -1, my=mouse.active ? mouse.y-cam.y : -1;
-    shown.forEach((n,i)=>{
-      const ry=y+upStart+i*9;
-      const def=UPGRADES.find(u=>u.n===n);
-      const rk=RANK_META[def?def.rank:0];
-      const label=n+(upgradeCounts[n]>1?' x'+upgradeCounts[n]:'');
-      const hovered = mx>=x+3 && mx<=x+w-3 && my>=ry-8 && my<ry+1;
-      if(hovered){ c.fillStyle='rgba(143,209,79,0.18)'; c.fillRect(x+3,ry-8,w-6,9); hovDef=def; }
-      c.fillStyle = hovered ? '#8fd14f' : rk.col;
-      c.fillText(label, x+8, ry);
-    });
-    if(extra>0){ c.fillStyle='#9a957f'; c.fillText('… +'+extra+' autres', x+8, y+upStart+shown.length*9); }
-    const dy=y+h-descH+2;
-    c.fillStyle='#3a3f58'; c.fillRect(x+6, dy-8, w-12, 1);
-    if(hovDef){
-      const rk=RANK_META[hovDef.rank];
-      c.fillStyle=rk.col;
-      c.fillText(hovDef.n+' ['+rk.label+']', x+8, dy+2);
-      c.fillStyle='#d8d4c4';
-      wrapText(c, hovDef.d, w-16).slice(0,3).forEach((t,i)=> c.fillText(t, x+8, dy+11+i*9));
-    } else {
-      c.fillStyle='#8a8471';
-      c.fillText('Survolez une amélioration pour voir son effet.', x+8, dy+2);
-    }
-  }
-  c.textAlign='center'; c.fillStyle='#9a957f';
-  c.fillText('— partie en pause (TAB) —', VW/2, Math.min(y+h+9, VH-3));
-}
-function wrapText(c, txt, maxW){
-  const words=String(txt).split(' ');
-  const out=[]; let cur='';
-  for(const wd of words){
-    const t=cur?cur+' '+wd:wd;
-    if(cur && c.measureText(t).width>maxW){ out.push(cur); cur=wd; }
-    else cur=t;
-  }
-  if(cur) out.push(cur);
-  return out;
-}
+})();
 function introCartouche(txt){
   ctx.font='9px monospace'; ctx.textAlign='center';
   const w=Math.min(VW-16, ctx.measureText(txt).width+24);
@@ -2965,6 +3064,10 @@ function renderTitleArt(){
   drawSpriteC(SPR.adventurer, VW/2-60, 112, false, 2);
   drawSpriteC(SPR.adventurer, VW/2+60, 112, true, 2);
 }
+function fmtTime(t){
+  const s=Math.floor(t%60), m=Math.floor(t/60);
+  return m+':'+String(s).padStart(2,'0');
+}
 function renderHUD(c){
   /* barre de vie */
   bar(c,6,6,80,6, player.hp/player.maxHp, '#4caf50', '#1a1a24');
@@ -2974,20 +3077,22 @@ function renderHUD(c){
   /* XP */
   bar(c,6, VH-14, 120, 4, player.xp/player.xpNext, '#5c9ce0', '#1a1a24');
   c.fillStyle='#9fd7ff';
-  c.fillText("Niv "+player.level, 6, VH-18);
+  c.fillText("Niv "+player.level+" — XP "+player.xp+"/"+player.xpNext, 6, VH-18);
 
-  /* étage + kills */
+  /* chronomètre + étage + kills */
   c.textAlign='right';
+  c.fillStyle='#ffd94a';
+  c.fillText(fmtTime(playTime), VW-6, 12);
   c.fillStyle='#e8e4d8';
-  c.fillText(THEME_NAMES[theme]+" "+floorNum, VW-6, 12);
+  c.fillText(THEME_NAMES[theme]+" "+floorNum, VW-6, 22);
   c.fillStyle='#9a957f';
-  c.fillText("☠ "+killCount, VW-6, 22);
+  c.fillText("☠ "+killCount, VW-6, 32);
   if(!stairsOpen){
     c.fillStyle='#e05555';
-    c.fillText("Ennemis restants : "+enemies.filter(e=>!e.dead).length, VW-6, 32);
+    c.fillText("Ennemis restants : "+enemies.filter(e=>!e.dead).length, VW-6, 42);
   } else {
     c.fillStyle='#8fd14f';
-    c.fillText("Escalier ouvert !", VW-6, 32);
+    c.fillText("Escalier ouvert !", VW-6, 42);
   }
 
   /* arme */
@@ -3004,7 +3109,7 @@ function renderHUD(c){
   msgs.forEach((m,i)=>{
     c.globalAlpha=clamp(m.life,0,1);
     c.fillStyle=m.c;
-    c.fillText(m.t, VW-6, 44+i*9);
+    c.fillText(m.t, VW-6, 54+i*9);
   });
   c.globalAlpha=1;
 }

@@ -34,11 +34,15 @@ chacune des trois directions de marche.
 | Espace / E | Attaquer au corps-à-corps (une pression = une attaque) |
 | Clic souris / visée | Arme à distance : tire vers la souris |
 | Maj | Dash (si débloqué) |
-| Tab | Panneau de caractéristiques et améliorations (met le jeu en pause) |
+| Tab | Panneau de caractéristiques et améliorations (met le jeu en pause, s'affiche par-dessus tous les autres menus, molette pour faire défiler) |
 | 1 / 2 / 3 ou clic | Sélectionner une amélioration, puis Entrée ou bouton « Valider » (cliquable) |
 | Survol d'une carte | Affiche le descriptif de l'amélioration |
 | Survol dans le menu TAB | Affiche l'effet de chaque amélioration déjà acquise |
 | M | Musique on/off |
+
+Le HUD affiche en haut à droite un **chronomètre** (or) qui ne tourne que
+pendant le jeu : il se met en pause pendant les choix d'amélioration, les
+offres d'arme et le menu TAB.
 | Entrée | Démarrer / recommencer |
 | Marcher sur un coffre | Ouvrir le coffre (équipement ou arme à comparer) |
 | 1 / 2 / Échap (offre d'arme) | Sélectionner garder l'actuelle / prendre la trouvée, puis Entrée ou bouton « Valider » |
@@ -138,9 +142,10 @@ chacune des trois directions de marche.
   gourdin veineux** (gourdin géant à bout rose tournant autour du gobelin,
   1/2/2,75/3,25 tours/s, dégâts physiques), **Sac à malice** (deux sacs verts
   entre les jambes : vitesse -15/25/32/36 %, XP +30/50/64/72 %), **Bon
-  toutou** (1 à 4 chiens fidèles en orbite qui attaquent au corps-à-corps)
-  et **Toutou costaud** (+15/25/32,5 % de dégâts des chiens, à partir du rang
-  Amélioré).
+  toutou** (1 à 4 chiens fidèles qui errent librement dans le rayon de
+  l'aura de ralentissement et fondent sur les ennemis à portée pour attaquer
+  au corps-à-corps) et **Toutou costaud** (+15/25/32,5 % de dégâts des chiens,
+  à partir du rang Amélioré).
 - **Améliorations à rangs** : familles (statistiques, compétences et
   équipement), chacune déclinée en 5 rangs — Basique, Amélioré, Puissant,
   Épique, Légendaire — des versions de plus en plus fortes. Un rang
@@ -155,10 +160,16 @@ chacune des trois directions de marche.
   additionnées et augmentées de 40 %. **Sauce du chef** : le gourdin crache
   une goutte blanche à chaque 1/8 de tour (dégâts magiques + immobilisation
   0,25 s). Chaque rang ne peut être pris qu'une fois.
+- **Sons** : trompette réaliste (accord cuivré à 3 pistes) à chaque attaque
+  de trompette ; à la mort, chaque ennemi pousse un râle court (plus long
+  pour les élites) et les bébés pleurent ; le Vomi du gobelin ivre glougloute
+  et le Prout du gobelin crado pète.
 - **Auras visuelles** : l'aura de gel (anneau bleu avec flocons orbitants)
   et l'aura de poison (anneau vert à rayon croissant avec la puissance)
   s'affichent en continu autour du gobelin, avec un rayon correspondant
   exactement à la portée réelle de l'effet.
+- **Indicateurs HUD** : XP courant/requis affiché au-dessus de la barre d'XP,
+  chronomètre en haut à droite.
 - **Objectif** : tuer tous les ennemis d'un étage pour ouvrir l'escalier, et
   descendre le plus loin possible.
 
@@ -169,5 +180,9 @@ chacune des trois directions de marche.
   texte parfaitement net.
 - Sprites et tuiles dessinés en pixel art procédural (aucun asset externe).
   Le gobelin a un sprite propre à chaque direction (haut, bas, gauche,
-  droite) avec jambes animées en marchant, peau verte et grand nez.
-- Effets sonores générés via WebAudio.
+  droite) avec jambes animées en marchant, peau verte et grand nez ; les
+  améliorations Sac à malice / Sauce du chef ajoutent un double sac vert
+  accroché à l'arrière, à hauteur de l'entrejambe (visible dans toutes les
+  directions sauf de dos).
+- Effets sonores générés via WebAudio (synthèse oscillateurs : cuivre,
+  râles, pleurs, glouglouts, pets).
