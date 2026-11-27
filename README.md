@@ -38,7 +38,11 @@ chacune des trois directions de marche.
 | 1 / 2 / 3 ou clic | Sélectionner une amélioration, puis Entrée ou bouton « Valider » (cliquable) |
 | Survol d'une carte | Affiche le descriptif de l'amélioration |
 | Survol dans le menu TAB | Affiche l'effet de chaque amélioration déjà acquise |
+
+Les statistiques affichées (HUD, menu TAB) sont les **valeurs effectives** :
+valeurs de base multipliées par les améliorations en pourcentage.
 | M | Musique on/off |
+| X | Effets sonores on/off (la musique n'est pas affectée) |
 
 Le HUD affiche en haut à droite un **chronomètre** (or) qui ne tourne que
 pendant le jeu : il se met en pause pendant les choix d'amélioration, les
@@ -136,11 +140,26 @@ offres d'arme et le menu TAB.
   jamais retomber. Les rangs d'armes utilisent le même code couleur que les
   améliorations (gris, bleu, violet, or), visible sur les cartes de comparaison
   et dans le HUD.
+- **Améliorations en pourcentage** : six familles multiplient une statistique
+  plutôt que d'ajouter des points fixes — **Ventre solide** (Santé),
+  **Carapace** (Armure), **Barrière mentale** (Armure magique), **Démarche
+  vive** (Agilité), **Flamme intérieure** (Pouvoir) et **Muscles gonflés**
+  (Force) : +10 / 18 / 25 / 30 % par rang (multiplicatif, futurs gains
+  inclus). Quatre **légendaires** à deux statistiques +50 % :
+  **Force de la nature** (Force + Santé), **Carapace de tortue** (Armure +
+  Armure magique), **Sang arcanique** (Pouvoir + Vol de vie) et **Vélocité
+  suprême** (Agilité + Vitesse d'attaque).
+- **Chance** (dé, 3 rangs : Basique, Amélioré, Puissant) : fait évoluer au
+  rang supérieur une amélioration aléatoire possédée du même rang que la
+  Chance jouée — celle-ci gagne les effets du rang supérieur (ex. « Cœur de
+  troll » devient « Cœur de troll amélioré »).
 - **Améliorations déjantées** : **Vomi du gobelin ivre** (cône de vomi tous
   les 8/6/4/3 s selon le rang, dégâts magiques), **Prout du gobelin crado**
   (nuage marron derrière vous qui ralentit fortement les ennemis), **Gros
   gourdin veineux** (gourdin géant à bout rose tournant autour du gobelin,
-  1/2/2,75/3,25 tours/s, dégâts physiques), **Sac à malice** (deux sacs verts
+  1/2/2,75/3,25 tours/s, dégâts physiques ; sa taille grossit à chaque rang :
+  +25 %, puis +20 %, puis +15 % — jusqu'à x1,725 — et encore +10 % avec
+  Sauce du chef, la zone de frappe et les gouttes suivant l'agrandissement), **Sac à malice** (deux sacs verts
   entre les jambes : vitesse -15/25/32/36 %, XP +30/50/64/72 %), **Bon
   toutou** (1 à 4 chiens fidèles qui errent librement dans le rayon de
   l'aura de ralentissement et fondent sur les ennemis à portée pour attaquer
@@ -170,6 +189,9 @@ offres d'arme et le menu TAB.
   exactement à la portée réelle de l'effet.
 - **Indicateurs HUD** : XP courant/requis affiché au-dessus de la barre d'XP,
   chronomètre en haut à droite.
+- **Écran de fin** : récapitulatif de la partie — étage atteint, niveau,
+  éliminations, arme finale et **dégâts infligés** (physiques, magiques,
+  dont ceux des auras et des familiers).
 - **Objectif** : tuer tous les ennemis d'un étage pour ouvrir l'escalier, et
   descendre le plus loin possible.
 
