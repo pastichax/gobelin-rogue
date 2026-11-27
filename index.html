@@ -648,7 +648,7 @@ UP_DEFS.forEach(def=>{
     const prevName = r>r0 ? def.n + RANK_META[r-1].tag : null;
     const baseReq = def.req;
     UPGRADES.push({
-      n: def.n + meta.tag, i: def.i, rank: r, d, f, w: meta.w,
+      n: def.n + meta.tag, fam: def.n, i: def.i, rank: r, d, f, w: meta.w,
       req: (r===r0 || def.noChain) ? baseReq : (p => upgradeCounts[prevName]>0 && (!baseReq || baseReq(p))),
     });
   }
@@ -710,7 +710,7 @@ LEG_FUSIONS.forEach(lg=>{
     f = p=>{ fa(p); fb(p); };
   }
   UPGRADES.push({
-    n: lg.n, i: lg.i, rank: 4, d, f, w: lm.w,
+    n: lg.n, fam: lg.n, i: lg.i, rank: 4, d, f, w: lm.w,
     req: p=>{
       const ea=A.n+RANK_META[3].tag, eb=B.n+RANK_META[3].tag;
       return !!(upgradeCounts[ea]>0 && upgradeCounts[eb]>0);
@@ -2126,10 +2126,39 @@ function fireBolt(x,y,dx,dy,type,baseDmg,fromPlayer,speed,fx){
   if(fromPlayer && !(fx&&fx.quiet) && !(fx&&fx.cat==='trumpet')) sShoot();
 }
 
+/* ---------- limite d'emplacements d'améliorations ---------- */
+const MAX_UP_SLOTS = 10;
+function ownedSlots(){
+  let c=0;
+  for(const n in upgradeCounts){
+    const u=UPGRADES.find(x=>x.n===n);
+    if(u && u.fam!=='Chance') c++;
+  }
+  return c;
+}
+function upgradeAvailableAtCap(u){
+  if(u.fam==='Chance'){
+    return Object.keys(upgradeCounts).some(k=>{
+      const uk=UPGRADES.find(x=>x.n===k);
+      return uk && uk.fam!=='Chance' && uk.rank===u.rank;
+    });
+  }
+  if(u.rank===4) return true;
+  return Object.keys(upgradeCounts).some(k=>{
+    const uk=UPGRADES.find(x=>x.n===k);
+    return uk && uk.fam===u.fam && uk.rank<u.rank;
+  });
+}
 /* ---------- montage des niveaux ---------- */
 function openLevelUp(){
   sLevel();
-  const pool = UPGRADES.filter(u => !(upgradeCounts[u.n]>0) && (!u.req || u.req(player)));
+  let pool = UPGRADES.filter(u => !(upgradeCounts[u.n]>0) && (!u.req || u.req(player)));
+  if(ownedSlots()>=MAX_UP_SLOTS) pool = pool.filter(upgradeAvailableAtCap);
+  if(!pool.length){
+    addMsg('Améliorations : tous les emplacements sont au rang maximum', '#9a957f');
+    state='play';
+    return;
+  }
   levelupChoices=[];
   const copy = pool.slice();
   for(let i=0;i<3 && copy.length;i++){
@@ -2180,6 +2209,16 @@ function selectUpgrade(i){
 function chooseUpgrade(i){
   if(state!=='levelup' || !levelupChoices[i]) return;
   const u=levelupChoices[i];
+  if(u.fam!=='Chance'){
+    for(const k of Object.keys(upgradeCounts)){
+      const uk=UPGRADES.find(x=>x.n===k);
+      if(uk && uk.fam===u.fam && uk.rank<u.rank) delete upgradeCounts[k];
+    }
+  }
+  if(u.rank===4){
+    const lg=LEG_FUSIONS.find(l=>l.n===u.n);
+    if(lg) for(const fn of lg.fuse) delete upgradeCounts[fn+RANK_META[3].tag];
+  }
   upgradeCounts[u.n]=(upgradeCounts[u.n]||0)+1;
   levelupSel=null;
   u.f(player);
