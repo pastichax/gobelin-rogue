@@ -2333,8 +2333,8 @@ function update(dt){
         const d=dist(player.x,player.y,mouse.x,mouse.y)||1;
         tx=(mouse.x-player.x)/d; ty=(mouse.y-player.y)/d;
       }
-      fireBolt(player.x, player.y, tx, ty, 'mag', (8+pPow()*0.5)*0.08, true, 160,
-               {vis:'vomi', slow:true, life:0.75, quiet:true});
+      fireBolt(player.x, player.y, tx, ty, 'mag', (8+pPow()*0.5)*0.08, true, 200,
+               {vis:'vomi', slow:true, life:1.0, quiet:true});
     }
   }
 

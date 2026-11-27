@@ -175,7 +175,8 @@ offres d'arme et le menu TAB.
   fusionnent deux améliorations Épiques en une seule version bien plus
   puissante, et n'apparaissent qu'une fois que **les deux améliorations
   Épiques qu'elles fusionnent** ont été obtenues. **Gobelin turbo-puant** : jet continu vert-marron vers la
-  souris (dégâts de Vomi chaque seconde + ralentissement de Prout).
+  souris, longue portée (200 px), (dégâts de Vomi chaque seconde +
+  ralentissement de Prout).
   **Super-toutou** : les 4 chiens fusionnent en un super-chien capé, stats
   additionnées et augmentées de 40 %. **Sauce du chef** : le gourdin crache
   une goutte blanche à chaque 1/8 de tour (dégâts magiques + immobilisation
