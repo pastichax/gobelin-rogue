@@ -33,7 +33,7 @@ chacune des trois directions de marche.
 | ZQSD / WASD / Flèches | Se déplacer |
 | Espace / E | Attaquer au corps-à-corps (une pression = une attaque) |
 | Clic souris / visée | Arme à distance : tire vers la souris |
-| Maj | Dash (si débloqué) |
+| Maj | Dash (si débloqué) — vitesse proportionnelle à votre vitesse de déplacement |
 | Tab | Panneau de caractéristiques et améliorations (met le jeu en pause, s'affiche par-dessus tous les autres menus, molette pour faire défiler) |
 | 1 / 2 / 3 ou clic | Sélectionner une amélioration, puis Entrée ou bouton « Valider » (cliquable) |
 | Survol d'une carte | Affiche le descriptif de l'amélioration |
@@ -149,18 +149,19 @@ offres d'arme et le menu TAB.
   **Force de la nature** (Force + Santé), **Carapace de tortue** (Armure +
   Armure magique), **Sang arcanique** (Pouvoir + Vol de vie) et **Vélocité
   suprême** (Agilité + Vitesse d'attaque).
-- **Chance** (dé, 3 rangs : Basique, Amélioré, Puissant) : fait évoluer au
-  rang supérieur une amélioration aléatoire possédée du même rang que la
-  Chance jouée — celle-ci gagne les effets du rang supérieur (ex. « Cœur de
-  troll » devient « Cœur de troll amélioré »).
+- **Chance** (dé, 3 rangs : Basique, Amélioré, Puissant, proposables sans
+  ordre) : fait évoluer au rang supérieur une amélioration aléatoire possédée
+  du même rang que la Chance jouée — celle-ci gagne les effets du rang
+  supérieur ; le menu TAB indique, au survol de chaque Chance, l'amélioration
+  ainsi évoluée.
 - **Améliorations déjantées** : **Vomi du gobelin ivre** (cône de vomi tous
   les 8/6/4/3 s selon le rang, dégâts magiques), **Prout du gobelin crado**
   (nuage marron derrière vous qui ralentit fortement les ennemis), **Gros
   gourdin veineux** (gourdin géant à bout rose tournant autour du gobelin,
   1/2/2,75/3,25 tours/s, dégâts physiques ; sa taille grossit à chaque rang :
   +25 %, puis +20 %, puis +15 % — jusqu'à x1,725 — et encore +10 % avec
-  Sauce du chef, la zone de frappe et les gouttes suivant l'agrandissement), **Sac à malice** (deux sacs verts
-  entre les jambes : vitesse -15/25/32/36 %, XP +30/50/64/72 %), **Bon
+  Sauce du chef, la zone de frappe et les gouttes suivant l'agrandissement), **Sac à malice** (sacs verts
+  agrandis à l'écran : vitesse -15/25/32/36 %, XP +30/50/64/72 %), **Bon
   toutou** (1 à 4 chiens fidèles qui errent librement dans le rayon de
   l'aura de ralentissement et fondent sur les ennemis à portée pour attaquer
   au corps-à-corps) et **Toutou costaud** (+15/25/32,5 % de dégâts des chiens,
@@ -170,11 +171,19 @@ offres d'arme et le menu TAB.
   Épique, Légendaire — des versions de plus en plus fortes. Un rang
   n'apparaît qu'après avoir obtenu le rang immédiatement inférieur, et les
   rangs supérieurs ont un taux d'apparition plus faible (poids 100 % / 70 % /
-  50 % / 35 % / 25 %). Les 17 améliorations **Légendaires** (dorées)
+  50 % / 35 % / 25 %). **Limite de 10 emplacements** : le gobelin ne peut
+  posséder que 10 améliorations (Chance exceptée) ; un rang supérieur
+  remplace le rang inférieur de la même famille (les effets s'additionnent),
+  et une fois les 10 emplacements occupés, les niveaux ne proposent plus que
+  des rangs supérieurs des améliorations possédées, des légendaires ou des
+  Chance. Les 21 améliorations **Légendaires** (dorées)
   fusionnent deux améliorations Épiques en une seule version bien plus
-  puissante, et n'apparaissent qu'une fois au moins deux améliorations
-  Épiques obtenues. **Gobelin turbo-puant** : jet continu vert-marron vers la
-  souris (dégâts de Vomi chaque seconde + ralentissement de Prout).
+  puissante — leurs effets s'ajoutent à ceux déjà acquis, plus l'effet
+  propre de la légendaire — et n'occupent qu'**un seul emplacement** au lieu
+  des 2 épiques consommées ; elles n'apparaissent qu'une fois que **les deux
+  améliorations Épiques qu'elles fusionnent** ont été obtenues. **Gobelin turbo-puant** : jet continu vert-marron vers la
+  souris, longue portée (200 px), (dégâts de Vomi chaque seconde +
+  ralentissement de Prout).
   **Super-toutou** : les 4 chiens fusionnent en un super-chien capé, stats
   additionnées et augmentées de 40 %. **Sauce du chef** : le gourdin crache
   une goutte blanche à chaque 1/8 de tour (dégâts magiques + immobilisation

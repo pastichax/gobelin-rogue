@@ -423,6 +423,8 @@ function evolveOwned(rank){
   upgradeCounts[old]--; if(upgradeCounts[old]<=0) delete upgradeCounts[old];
   uNext.f(player);
   upgradeCounts[uNext.n]=(upgradeCounts[uNext.n]||0)+1;
+  player.chanceLog=player.chanceLog||[];
+  player.chanceLog[rank]={from:old, to:uNext.n};
   addMsg('Chance : «'+old+'» évolue en «'+uNext.n+'»', '#ffd94a');
   addFloater(player.x, player.y-20, 'ÉVOLUTION !', '#ffd94a');
   return uNext.n;
@@ -574,10 +576,10 @@ const UP_DEFS = [
     {d:"Gourdin : 2,75 tours/s et +20% de taille (x1,5 au total)", f:p=>{p.clubRps=2.75;p.clubScale=1.5;}},
     {d:"Gourdin : 3,25 tours/s et +15% de taille (x1,725 au total)", f:p=>{p.clubRps=3.25;p.clubScale=1.725;}},  ]},
   {n:"Sac à malice",         i:"🎒", r:[
-    {d:"Deux sacs verts entre les jambes : vitesse -15%, XP gagnée +30%", f:p=>{p.sacSlow=0.15;p.sacXp=0.30;}},
-    {d:"Sacs à malice : vitesse -25%, XP +50%", f:p=>{p.sacSlow=0.25;p.sacXp=0.50;}},
-    {d:"Sacs à malice : vitesse -32%, XP +64%", f:p=>{p.sacSlow=0.32;p.sacXp=0.64;}},
-    {d:"Sacs à malice : vitesse -36%, XP +72%", f:p=>{p.sacSlow=0.36;p.sacXp=0.72;}},
+    {d:"Vitesse -15%, XP gagnée +30%", f:p=>{p.sacSlow=0.15;p.sacXp=0.30;}},
+    {d:"Vitesse -25%, XP +50%", f:p=>{p.sacSlow=0.25;p.sacXp=0.50;}},
+    {d:"Vitesse -32%, XP +64%", f:p=>{p.sacSlow=0.32;p.sacXp=0.64;}},
+    {d:"Vitesse -36%, XP +72%", f:p=>{p.sacSlow=0.36;p.sacXp=0.72;}},
   ]},
   {n:"Coffre d'armurier",    i:"🎁", r:[
     {d:"Recevoir une arme du rang supérieur à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
@@ -621,7 +623,7 @@ const UP_DEFS = [
     {d:"Force +25% (multiplicatif)", f:p=>setPct(p,'pctStr',1.25)},
     {d:"Force +30% (multiplicatif)", f:p=>setPct(p,'pctStr',1.30)},
   ]},
-  {n:"Chance",               i:"🎲", maxRank:2, r:[
+  {n:"Chance",               i:"🎲", maxRank:2, noChain:true, r:[
     {d:"Fait évoluer au rang suivant une amélioration Basique aléatoire que vous possédez (elle gagne les effets du rang supérieur)", f:p=>evolveOwned(0)},
     {d:"Fait évoluer au rang suivant une amélioration Améliorée aléatoire que vous possédez (elle gagne les effets du rang supérieur)", f:p=>evolveOwned(1)},
     {d:"Fait évoluer au rang suivant une amélioration Puissante aléatoire que vous possédez (elle gagne les effets du rang supérieur)", f:p=>evolveOwned(2)},
@@ -646,8 +648,8 @@ UP_DEFS.forEach(def=>{
     const prevName = r>r0 ? def.n + RANK_META[r-1].tag : null;
     const baseReq = def.req;
     UPGRADES.push({
-      n: def.n + meta.tag, i: def.i, rank: r, d, f, w: meta.w,
-      req: r===r0 ? baseReq : (p => upgradeCounts[prevName]>0 && (!baseReq || baseReq(p))),
+      n: def.n + meta.tag, fam: def.n, i: def.i, rank: r, d, f, w: meta.w,
+      req: (r===r0 || def.noChain) ? baseReq : (p => upgradeCounts[prevName]>0 && (!baseReq || baseReq(p))),
     });
   }
 });
@@ -674,7 +676,7 @@ const LEG_FUSIONS = [
    d:"Vos 4 chiens fusionnent en un super-chien porteur de cape : statistiques additionnées des 4 chiens, augmentées de 40%",
    f:p=>{p.superDog=true;}},
   {n:"Sauce du chef",       i:"💧", fuse:["Gros gourdin veineux","Sac à malice"],
-   d:"Conserve le gourdin et les sacs à malice ; à chaque 1/8 de tour, l'extrémité du gourdin projette une goutte blanche (dégâts magiques + immobilisation 0,25 s) ; gourdin encore +10% de taille (x1,9 au total)",
+   d:"Conserve le gourdin ; à chaque 1/8 de tour, l'extrémité du gourdin projette une goutte blanche (dégâts magiques + immobilisation 0,25 s) ; gourdin encore +10% de taille (x1,9 au total)",
    f:p=>{p.chefSauce=true;p.clubScale=(p.clubScale||1)*1.10;}},
   {n:"Force de la nature",   i:"💪", fuse:["Muscles gonflés","Ventre solide"],
    d:"Force +50% et Santé +50% — fusion légendaire",
@@ -708,8 +710,11 @@ LEG_FUSIONS.forEach(lg=>{
     f = p=>{ fa(p); fb(p); };
   }
   UPGRADES.push({
-    n: lg.n, i: lg.i, rank: 4, d, f, w: lm.w,
-    req: p=>{ let ep=0; for(const u of UPGRADES){ if(u.rank===3 && upgradeCounts[u.n]) ep++; } return ep>=2; },
+    n: lg.n, fam: lg.n, i: lg.i, rank: 4, d, f, w: lm.w,
+    req: p=>{
+      const ea=A.n+RANK_META[3].tag, eb=B.n+RANK_META[3].tag;
+      return !!(upgradeCounts[ea]>0 && upgradeCounts[eb]>0);
+    },
   });
 });
 function openChest(ch){
@@ -1045,11 +1050,6 @@ SPR.chien = makeSprite([
   '.hhhhhh..',
   '..k..k.k.',
 ],{h:'#8a5a2b',A:'#5e3818',k:'#3a2a16',t:'#b03a2e'});
-SPR.bone = makeSprite([
-  'w.....w',
-  'wwwwwww',
-  'w.....w',
-],{w:'#e8e4d8'});
 SPR.barde = makeSprite([
   '...ff.....',
   '..mmmmm...',
@@ -1160,7 +1160,6 @@ SPRW.trumpet = makeSprite(['..gggg..','.gggggg.','.gg..gg.','..g..g..','..g..g..
 const HELD = {
   mage: SPRW.wand, pretre: SPR.holy, barde: SPR.lute, garde: SPR.halberd,
   paysan: SPR.pitchfork, guerrier: SPRW.sword, archer: SPRW.bow, assassin: SPRW.dagger,
-  chien: SPR.bone,
 };
 
 /* ---------- personnalisation du gobelin (purement cosmétique) ---------- */
@@ -1456,7 +1455,7 @@ function resetGame(){
   player.vomiLvl=0; player.vomiCd=0; player.proutLvl=0; player.proutCd=0;
   player.turbo=false; player.turboCd=0; player.dogCount=0; player.dogDmgMult=1;
   player.superDog=false; player.clubRps=0; player.clubAng=0; player.sauceAcc=0; player.clubScale=1;
-  player.chefSauce=false; player.sacSlow=0; player.sacXp=0;
+  player.chefSauce=false; player.sacSlow=0; player.sacXp=0; player.chanceLog=null;
   dogs.length=0;
   statsOpen=false; syncStatsPanel(); mouse.active=false; pendingWeaponQueue=[];
   for(const k in upgradeCounts) delete upgradeCounts[k];
@@ -2127,10 +2126,39 @@ function fireBolt(x,y,dx,dy,type,baseDmg,fromPlayer,speed,fx){
   if(fromPlayer && !(fx&&fx.quiet) && !(fx&&fx.cat==='trumpet')) sShoot();
 }
 
+/* ---------- limite d'emplacements d'améliorations ---------- */
+const MAX_UP_SLOTS = 10;
+function ownedSlots(){
+  let c=0;
+  for(const n in upgradeCounts){
+    const u=UPGRADES.find(x=>x.n===n);
+    if(u && u.fam!=='Chance') c++;
+  }
+  return c;
+}
+function upgradeAvailableAtCap(u){
+  if(u.fam==='Chance'){
+    return Object.keys(upgradeCounts).some(k=>{
+      const uk=UPGRADES.find(x=>x.n===k);
+      return uk && uk.fam!=='Chance' && uk.rank===u.rank;
+    });
+  }
+  if(u.rank===4) return true;
+  return Object.keys(upgradeCounts).some(k=>{
+    const uk=UPGRADES.find(x=>x.n===k);
+    return uk && uk.fam===u.fam && uk.rank<u.rank;
+  });
+}
 /* ---------- montage des niveaux ---------- */
 function openLevelUp(){
   sLevel();
-  const pool = UPGRADES.filter(u => !(upgradeCounts[u.n]>0) && (!u.req || u.req(player)));
+  let pool = UPGRADES.filter(u => !(upgradeCounts[u.n]>0) && (!u.req || u.req(player)));
+  if(ownedSlots()>=MAX_UP_SLOTS) pool = pool.filter(upgradeAvailableAtCap);
+  if(!pool.length){
+    addMsg('Améliorations : tous les emplacements sont au rang maximum', '#9a957f');
+    state='play';
+    return;
+  }
   levelupChoices=[];
   const copy = pool.slice();
   for(let i=0;i<3 && copy.length;i++){
@@ -2181,6 +2209,16 @@ function selectUpgrade(i){
 function chooseUpgrade(i){
   if(state!=='levelup' || !levelupChoices[i]) return;
   const u=levelupChoices[i];
+  if(u.fam!=='Chance'){
+    for(const k of Object.keys(upgradeCounts)){
+      const uk=UPGRADES.find(x=>x.n===k);
+      if(uk && uk.fam===u.fam && uk.rank<u.rank) delete upgradeCounts[k];
+    }
+  }
+  if(u.rank===4){
+    const lg=LEG_FUSIONS.find(l=>l.n===u.n);
+    if(lg) for(const fn of lg.fuse) delete upgradeCounts[fn+RANK_META[3].tag];
+  }
   upgradeCounts[u.n]=(upgradeCounts[u.n]||0)+1;
   levelupSel=null;
   u.f(player);
@@ -2259,7 +2297,8 @@ function update(dt){
   }
   if(player.dashUnlocked && (keys['ShiftLeft']||keys['ShiftRight']) && player.dashCd<=0 && player.dashT<=0 && player.rootT<=0){
     player.dashT=0.15; player.dashCd=2*player.dashCdMult;
-    player.dashVx=player.dirx*520; player.dashVy=player.diry*520;
+    const dspd = 92 * (1+pAgi()/120) * player.moveMult * (1-(player.sacSlow||0));
+    player.dashVx=player.dirx*dspd*5; player.dashVy=player.diry*dspd*5;
     sDash();
   }
 
@@ -2333,8 +2372,8 @@ function update(dt){
         const d=dist(player.x,player.y,mouse.x,mouse.y)||1;
         tx=(mouse.x-player.x)/d; ty=(mouse.y-player.y)/d;
       }
-      fireBolt(player.x, player.y, tx, ty, 'mag', (8+pPow()*0.5)*0.08, true, 160,
-               {vis:'vomi', slow:true, life:0.75, quiet:true});
+      fireBolt(player.x, player.y, tx, ty, 'mag', (8+pPow()*0.5)*0.08, true, 200,
+               {vis:'vomi', slow:true, life:1.0, quiet:true});
     }
   }
 
@@ -2925,14 +2964,14 @@ function renderWorld(){
     }
     if(player.sacSlow>0 && player.face!=='up'){
       const soff = player.face==='side' ? (player.faceLeft?2:-2) : 0;
-      drawSpriteC(SPR.sacks, player.x-cam.x+soff, player.y-cam.y+4, false, 1);
+      drawSpriteC(SPR.sacks, player.x-cam.x+soff, player.y-cam.y+4, false, 1.5);
     }
     const gset = player.face==='up' ? SPR.goblinUp : player.face==='side' ? SPR.goblinSide : SPR.goblinDown;
     const gframe = player.moving ? (Math.floor(player.walkT*8)%2) : 0;
     drawSpriteC(gset[gframe], player.x-cam.x, player.y-cam.y+bob, player.face==='side' && player.faceLeft, 1);
     ctx.globalAlpha=1;
     if(player.sacSlow>0 && player.face==='up')
-      drawSpriteC(SPR.sacks, player.x-cam.x, player.y-cam.y+4, false, 1);
+      drawSpriteC(SPR.sacks, player.x-cam.x, player.y-cam.y+4, false, 1.5);
     drawWeapon();
     if(player.shieldOn && player.shieldReady){
       ctx.strokeStyle='rgba(127,220,255,0.7)';
@@ -3090,7 +3129,12 @@ function updateStatsPanel(){
     const def=UPGRADES.find(u=>u.n===row.getAttribute('data-n'));
     if(!def) return;
     const rk=RANK_META[def.rank];
-    document.getElementById('statsDesc').innerHTML='<b style="color:'+rk.col+'">'+def.n+'</b> — '+def.d;
+    let extra='';
+    if(def.n.indexOf('Chance')===0 && player.chanceLog && player.chanceLog[def.rank]){
+      const cl=player.chanceLog[def.rank];
+      extra='<br>Dernière évolution : «'+cl.from+'» → «'+cl.to+'»';
+    }
+    document.getElementById('statsDesc').innerHTML='<b style="color:'+rk.col+'">'+def.n+'</b> — '+def.d+extra;
   });
 })();
 function introCartouche(txt){
