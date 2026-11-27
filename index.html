@@ -220,6 +220,7 @@ const WEAPONS = [
     {name:"Lame d'écaille",      type:'mag',  dmg:10, cd:380, range:25, arc:2.0, cat:'sword'},
     {name:"Vieille fronde",      type:'phys', dmg:5,  cd:300, range:0,  cat:'sling'},
     {name:"Griffe usée",         type:'phys', dmg:7,  cd:220, range:22, arc:1.2, cat:'dagger'},
+    {name:"Trompette en toile",  type:'mag',  dmg:5,  cd:420, range:0,  cat:'trumpet', pierce:true},
   ],
   [ /* rang Amélioré */
     {name:"Dague d'aventurier",  type:'phys', dmg:14, cd:280, range:26, arc:1.4, cat:'dagger'},
@@ -229,6 +230,7 @@ const WEAPONS = [
     {name:"Glaive de braise",    type:'mag',  dmg:16, cd:480, range:28, arc:2.2, cat:'sword', burn:0.3},
     {name:"Lance de milicien",   type:'phys', dmg:17, cd:520, range:38, arc:0.8, cat:'spear'},
     {name:"Arc court",           type:'phys', dmg:7,  cd:300, range:0,  cat:'bow'},
+    {name:"Trompette de cuivre", type:'mag',  dmg:9,  cd:400, range:0,  cat:'trumpet', pierce:true},
   ],
   [ /* rang Puissant */
     {name:"Épée de mercenaire",  type:'phys', dmg:25, cd:470, range:30, arc:2.2, cat:'sword'},
@@ -241,6 +243,7 @@ const WEAPONS = [
     {name:"Arc elfique",         type:'phys', dmg:12, cd:360, range:0,  cat:'bow', pierce:true},
     {name:"Arc de givre",        type:'phys', dmg:11, cd:380, range:0,  cat:'bow', slow:true},
     {name:"Arc de feu",          type:'phys', dmg:13, cd:400, range:0,  cat:'bow', burn:0.3},
+    {name:"Trompette argentée",  type:'mag',  dmg:14, cd:380, range:0,  cat:'trumpet', pierce:true},
   ],
   [ /* rang Épique */
     {name:"Lame runique du gobelin", type:'phys', dmg:38, cd:420, range:31, arc:2.2, cat:'sword'},
@@ -251,6 +254,7 @@ const WEAPONS = [
     {name:"Faux démoniaque",         type:'phys', dmg:41, cd:520, range:34, arc:3.6, cat:'scythe'},
     {name:"Arc composé",             type:'phys', dmg:24, cd:420, range:0,  cat:'bow', pierce:true},
     {name:"Arc de la tempête",       type:'phys', dmg:17, cd:340, range:0,  cat:'bow', multishot:3},
+    {name:"Trompette de guerre",     type:'mag',  dmg:22, cd:360, range:0,  cat:'trumpet', pierce:true},
   ],
   [ /* rang Légendaire */
     {name:"Croc du Roi gobelin", type:'phys', dmg:57, cd:380, range:32, arc:2.2, cat:'sword'},
@@ -258,6 +262,7 @@ const WEAPONS = [
     {name:"Arc du Vide",         type:'phys', dmg:38, cd:360, range:0,  cat:'bow', pierce:true, multishot:2},
     {name:"Sceptre du Réveille-Morts", type:'mag', dmg:42, cd:420, range:0, cat:'wand'},
     {name:"Masse du Séisme",     type:'phys', dmg:46, cd:620, range:20, aoe:64, cat:'hammer'},
+    {name:"Trompette du destin", type:'mag',  dmg:34, cd:330, range:0,  cat:'trumpet', pierce:true},
   ],
 ];
 let gameReady=false;
@@ -315,37 +320,23 @@ function statDesc(e){
 }
 const UP_DEFS = [
   {n:"Cœur de troll",        i:"❤", e:[['maxHp',15],['hp',15]]},
-  {n:"Cœur de troll ancien", i:"❤", e:[['maxHp',30],['hp',30]]},
-  {n:"Ventre de gobelin",    i:"🍖", e:[['maxHp',25],['hp',25]]},
   {n:"Peau bouillie",        i:"🛡", e:[['armor',3]]},
-  {n:"Cotte de fer",         i:"🛡", e:[['armor',6]]},
   {n:"Rune protectrice",     i:"🛡", e:[['marmor',3]]},
-  {n:"Amulette arcanique",   i:"🛡", e:[['marmor',6]]},
-  {n:"Manteau du sage",      i:"🛡", e:[['marmor',8]]},
   {n:"Bottes rapides",       i:"⚡", e:[['agi',8]]},
-  {n:"Sang de lézard",       i:"⚡", e:[['agi',15]]},
-  {n:"Bottes elfiques",      i:"⚡", e:[['agi',12]]},
   {n:"Œil du sorcier",       i:"✨", e:[['pow',5]]},
-  {n:"Sphère de mana",       i:"✨", e:[['pow',10]]},
-  {n:"Grimoire interdit",    i:"✨", e:[['pow',12]]},
   {n:"Poings de pierre",     i:"👊", e:[['str',3]]},
-  {n:"Biceps de gargouille", i:"👊", e:[['str',6]]},
   {n:"Pierre à aiguiser",    i:"👊", e:[['str',5],['armor',3]]},
   {n:"Régénération",         i:"🌿", e:[['regen',0.6]]},
-  {n:"Sève de vie",          i:"🌿", e:[['regen',1]]},
   {n:"Écorce vivante",       i:"🌿", e:[['regen',1.5],['armor',2]]},
   {n:"Totem de vie",         i:"🌿", e:[['maxHp',20],['hp',20],['regen',2]]},
   {n:"Faim insatiable",      i:"🥺", e:[['lifesteal',0.06]]},
-  {n:"Crocs vampiriques",    i:"🥺", e:[['lifesteal',0.10]]},
   {n:"Épines",               i:"🌵", e:[['thorns',0.25]]},
   {n:"Second souffle",       i:"💨", e:[['healKill',0.15]]},
   {n:"Œil critique",         i:"🎯", e:[['crit',8]]},
   {n:"Frappe puissante",     i:"🎯", e:[['critMult',0.5]]},
   {n:"Œil de lynx",          i:"🎯", e:[['crit',5],['agi',5]]},
   {n:"Curiosité",            i:"📖", e:[['xpMult',0.2]]},
-  {n:"Chance du gredin",     i:"🧙", e:[['xpMult',0.15]]},
   {n:"Esprit frère",         i:"👻", e:[['minionCount',1]]},
-  {n:"Esprit jumeau",        i:"👻", e:[['minionCount',1]], req:p=>p.minionCount>0},
   {n:"Éveil spirituel",      i:"👻", e:[['minionDmgMult',0.6]], req:p=>p.minionCount>0},
   {n:"Éclat jumelé",         i:"🔮", e:[['boltLevel',1]], req:p=>p.boltOnHit},
   {n:"Boule de feu",         i:"🔥", e:[['fireball',0.25]]},
@@ -358,7 +349,6 @@ const UP_DEFS = [
   {n:"Mana débordant",       i:"✨", e:[['pow',8],['marmor',3]]},
   {n:"Cœur farouche",        i:"❤", e:[['maxHp',10],['hp',10],['str',2]]},
   {n:"Résistance ancestrale",i:"🛡", e:[['armor',4],['marmor',4]]},
-  {n:"Cotte de plates",      i:"🛡", e:[['armor',10]]},
   {n:"Bond du gobelin",      i:"💨", r:[
     {d:"Débloque le dash (MAJ)",              f:p=>{p.dashUnlocked=true;}},
     {d:"Dash : récupération -35%",            f:p=>{p.dashCdMult*=0.65;}},
@@ -413,6 +403,41 @@ const UP_DEFS = [
     {d:"Soigne tout, +35 PV max", f:p=>{p.maxHp+=35;p.hp=p.maxHp;}},
     {d:"Soigne tout, +60 PV max", f:p=>{p.maxHp+=60;p.hp=p.maxHp;}},
   ]},
+  {n:"Vomi du gobelin ivre", i:"🍺", r:[
+    {d:"Toutes les 8 s : cône de vomi dans la direction de déplacement (dégâts magiques)", f:p=>{p.vomiLvl=1;}},
+    {d:"Toutes les 6 s : cône de vomi renforcé (dégâts magiques)", f:p=>{p.vomiLvl=2;}},
+    {d:"Toutes les 4 s : cône de vomi puissant (dégâts magiques)", f:p=>{p.vomiLvl=3;}},
+    {d:"Toutes les 3 s : cône de vomi dévastateur (dégâts magiques)", f:p=>{p.vomiLvl=4;}},
+  ]},
+  {n:"Prout du gobelin crado", i:"💨", r:[
+    {d:"Toutes les 8 s : nuage marron derrière vous, ralentit fortement les ennemis (2 s)", f:p=>{p.proutLvl=1;}},
+    {d:"Toutes les 6 s : nuage marron ralentissant", f:p=>{p.proutLvl=2;}},
+    {d:"Toutes les 4 s : nuage marron ralentissant", f:p=>{p.proutLvl=3;}},
+    {d:"Toutes les 3 s : nuage marron ralentissant", f:p=>{p.proutLvl=4;}},
+  ]},
+  {n:"Bon toutou",           i:"🐕", r:[
+    {d:"Un chien fidèle vous suit en orbite et attaque au corps-à-corps", f:p=>{p.dogCount=Math.max(p.dogCount,1);}},
+    {d:"2 chiens fidèles vous suivent", f:p=>{p.dogCount=Math.max(p.dogCount,2);}},
+    {d:"3 chiens fidèles vous suivent", f:p=>{p.dogCount=Math.max(p.dogCount,3);}},
+    {d:"4 chiens fidèles vous suivent", f:p=>{p.dogCount=Math.max(p.dogCount,4);}},
+  ]},
+  {n:"Toutou costaud",       i:"🐕", minRank:1, req:p=>p.dogCount>0, r:[
+    {d:"Chiens : +15% de dégâts", f:p=>{p.dogDmgMult+=0.15;}},
+    {d:"Chiens : +25% de dégâts", f:p=>{p.dogDmgMult+=0.25;}},
+    {d:"Chiens : +32,5% de dégâts", f:p=>{p.dogDmgMult+=0.325;}},
+  ]},
+  {n:"Gros gourdin veineux", i:"🥒", r:[
+    {d:"Un gourdin vert géant tourne autour de vous (1 tour/s) : dégâts physiques", f:p=>{p.clubRps=1;}},
+    {d:"Gourdin : 2 tours/s", f:p=>{p.clubRps=2;}},
+    {d:"Gourdin : 2,75 tours/s", f:p=>{p.clubRps=2.75;}},
+    {d:"Gourdin : 3,25 tours/s", f:p=>{p.clubRps=3.25;}},
+  ]},
+  {n:"Sac à malice",         i:"🎒", r:[
+    {d:"Deux sacs verts entre les jambes : vitesse -15%, XP gagnée +30%", f:p=>{p.sacSlow=0.15;p.sacXp=0.30;}},
+    {d:"Sacs à malice : vitesse -25%, XP +50%", f:p=>{p.sacSlow=0.25;p.sacXp=0.50;}},
+    {d:"Sacs à malice : vitesse -32%, XP +64%", f:p=>{p.sacSlow=0.32;p.sacXp=0.64;}},
+    {d:"Sacs à malice : vitesse -36%, XP +72%", f:p=>{p.sacSlow=0.36;p.sacXp=0.72;}},
+  ]},
   {n:"Coffre d'armurier",    i:"🎁", r:[
     {d:"Recevoir une arme du rang supérieur à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
     {d:"Recevoir une arme deux rangs au-dessus à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+2); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
@@ -422,10 +447,11 @@ const UP_DEFS = [
 ];
 const UPGRADES = [];
 UP_DEFS.forEach(def=>{
-  for(let r=0;r<4;r++){
+  const r0 = def.minRank||0;
+  for(let r=r0;r<4;r++){
     const meta = RANK_META[r];
     let d, f;
-    if(def.r){ d=def.r[r].d; f=def.r[r].f; }
+    if(def.r){ d=def.r[r-r0].d; f=def.r[r-r0].f; }
     else {
       const e = def.e.map(([k,v])=>{
         const val = v<10 ? Math.round(v*RANK_SCALE[r]*10)/10 : Math.round(v*RANK_SCALE[r]);
@@ -434,36 +460,47 @@ UP_DEFS.forEach(def=>{
       d = statDesc(e);
       f = p=>{ for(const [k,v] of e) p[k]+=v; };
     }
-    const prevName = r>0 ? def.n + RANK_META[r-1].tag : null;
+    const prevName = r>r0 ? def.n + RANK_META[r-1].tag : null;
     const baseReq = def.req;
     UPGRADES.push({
       n: def.n + meta.tag, i: def.i, rank: r, d, f, w: meta.w,
-      req: r===0 ? baseReq : (p => upgradeCounts[prevName]>0 && (!baseReq || baseReq(p))),
+      req: r===r0 ? baseReq : (p => upgradeCounts[prevName]>0 && (!baseReq || baseReq(p))),
     });
   }
 });
 /* rang Légendaire : fusionne deux améliorations Épiques en une seule plus puissante */
 const LEG_FUSIONS = [
   {n:"Sang de titan",       i:"❤", fuse:["Cœur de troll","Poings de pierre"]},
-  {n:"Colosse de gobelin",  i:"🍖", fuse:["Cœur de troll","Ventre de gobelin"]},
-  {n:"Forteresse ambulante", i:"🛡", fuse:["Cotte de fer","Manteau du sage"]},
-  {n:"Éclair vivant",       i:"⚡", fuse:["Sang de lézard","Réflexes félines"]},
-  {n:"Arcane suprême",      i:"✨", fuse:["Grimoire interdit","Sphère de mana"]},
+  {n:"Colosse de gobelin",  i:"🍖", fuse:["Cœur de troll","Cœur farouche"]},
+  {n:"Forteresse ambulante", i:"🛡", fuse:["Peau bouillie","Rune protectrice"]},
+  {n:"Éclair vivant",       i:"⚡", fuse:["Bottes rapides","Réflexes félines"]},
+  {n:"Arcane suprême",      i:"✨", fuse:["Œil du sorcier","Mana débordant"]},
   {n:"Boucher d'élites",    i:"🗡", fuse:["Crocs acérés","Chasseur d'élites"]},
   {n:"Fléau double",        i:"🐉", fuse:["Sang de dragon","Crocs acérés"]},
-  {n:"Vampire ancien",      i:"🧛", fuse:["Crocs vampiriques","Second souffle"]},
+  {n:"Vampire ancien",      i:"🧛", fuse:["Faim insatiable","Second souffle"]},
   {n:"Œil du destin",       i:"🎯", fuse:["Œil critique","Frappe puissante"]},
   {n:"Érudit maudit",       i:"💀", fuse:["Trésor maudit","Curiosité"]},
   {n:"Tempête de givre",    i:"❄", fuse:["Aura de gel","Projectile magique"]},
   {n:"Chef de guerre",      i:"😡", fuse:["Fureur du gobelin","Cœur farouche"]},
   {n:"Bouclier vivant",     i:"🔮", fuse:["Bouclier runique","Écorce vivante"]},
   {n:"Cavalier fantôme",    i:"💨", fuse:["Bond du gobelin","Jambes de ressort"]},
+  {n:"Gobelin turbo-puant", i:"🤮", fuse:["Vomi du gobelin ivre","Prout du gobelin crado"],
+   d:"Jet continu vert-marron à moyenne distance vers la souris : inflige chaque seconde les dégâts de Vomi et applique le ralentissement de Prout",
+   f:p=>{p.turbo=true;}},
+  {n:"Super-toutou",        i:"🐕", fuse:["Bon toutou","Toutou costaud"],
+   d:"Vos 4 chiens fusionnent en un super-chien porteur de cape : statistiques additionnées des 4 chiens, augmentées de 40%",
+   f:p=>{p.superDog=true;}},
+  {n:"Sauce du chef",       i:"💧", fuse:["Gros gourdin veineux","Sac à malice"],
+   d:"Conserve le gourdin et les sacs à malice ; à chaque 1/8 de tour, l'extrémité du gourdin projette une goutte blanche (dégâts magiques + immobilisation 0,25 s)",
+   f:p=>{p.chefSauce=true;}},
 ];
 LEG_FUSIONS.forEach(lg=>{
   const A=UP_DEFS.find(d=>d.n===lg.fuse[0]), B=UP_DEFS.find(d=>d.n===lg.fuse[1]);
+  if(!A||!B) throw new Error('fusion inconnue : '+lg.n);
   const lm = RANK_META[4];
   let d, f;
-  if(A.e && B.e){
+  if(lg.f){ d=lg.d; f=lg.f; }
+  else if(A.e && B.e){
     const merged={};
     for(const [k,v] of A.e.concat(B.e)) merged[k]=(merged[k]||0)+v*RANK_SCALE[3]*1.2;
     const e=Object.entries(merged).map(([k,v])=>[k, v<10 ? Math.round(v*10)/10 : Math.round(v)]);
@@ -500,7 +537,7 @@ function openChest(ch){
 }
 
 /* ---------- offre d'arme trouvée (comparaison / accepter-refuser) ---------- */
-const WPN_ICONS = {dagger:'🗡',sword:'⚔',axe:'🪓',club:'🏏',spear:'🔱',staff:'🪄',wand:'✨',bow:'🏹',sling:'🌀',scythe:'☠',trident:'🔱',hammer:'🔨'};
+const WPN_ICONS = {dagger:'🗡',sword:'⚔',axe:'🪓',club:'🏏',spear:'🔱',staff:'🪄',wand:'✨',bow:'🏹',sling:'🌀',scythe:'☠',trident:'🔱',hammer:'🔨',trumpet:'🎺'};
 let pendingWeaponQueue = [];   /* entrées : {w, src} */
 function weaponCardHtml(w, tag){
   const eff = Math.round(w.dmg * (w.type==='mag' ? (1+player.pow/50)*(1+player.magMult) : (1+player.str/50)*(1+player.physMult)));
@@ -518,13 +555,14 @@ function weaponCardHtml(w, tag){
   if(w.slow) fx.push('Givre : ralentit les cibles (2 s)');
   if(w.burn) fx.push('Feu : brûlure sur la durée');
   if(w.multishot) fx.push('Tir de '+w.multishot+' flèches en éventail');
+  if(w.cat==='trumpet') fx.push('Onde sonore : projectile large perforant, portée réduite de moitié');
   return '<div class="ico">'+(WPN_ICONS[w.cat]||'🗡')+'</div>'
     +'<div class="nm">'+w.name+'<br><span style="color:#666;font-weight:normal">('+tag+')</span></div>'
     +'<div class="ds"><span style="color:'+rk.col+'">Rang : '+rk.label+'</span> • '+(w.type==='mag'?'dégâts magiques':'dégâts physiques')+'<br>'
     +'Dégâts : '+w.dmg+' (effectif ~'+eff+', scaling : '+scale+')<br>'
     +'Cadence : '+(1000/w.cd).toFixed(1)+'/s (accélérée par Agilité)<br>'
     +'DPS : '+dps+' (effectif ~'+effDps+')<br>'
-    +(w.aoe?'Portée : zone très large (360°)':(w.range>0?'Portée : mêlée':'Portée : distance (visée souris)'))
+    +(w.aoe?'Portée : zone très large (360°)':(w.range>0?'Portée : mêlée':'Portée : distance'+(w.cat==='trumpet'?' réduite (moitié)':'')+' (visée souris)'))
     +(fx.length?'<br>'+fx.join('<br>'):'')+'</div>';
 }
 function proposeWeapon(w, src){
@@ -914,6 +952,7 @@ SPRW.sling   = makeSprite(['s...s','.s.s.','..s..','..p..','.....'],{s:'#8a5a2b'
 SPRW.scythe  = makeSprite(['.gg.....','gggggg..','....s...','....s...','....s...','....s...','....s...','....s...'],{g:'#d8dde2',s:'#5e3a4e'});
 SPRW.trident = makeSprite(['t.t.t','t.t.t','ttttt','.t...','.t...','.t...','.t...','.t...','.t...'],{t:'#d8dde2'});
 SPRW.hammer  = makeSprite(['.gggggg.','gwwwwwwg','gwwwwwwg','.gggggg.','...s....','...s....','...s....','...s....'],{g:'#9aa0a6',w:'#d8dde2',s:'#8a5a2b'});
+SPRW.trumpet = makeSprite(['..gggg..','.gggggg.','.gg..gg.','..g..g..','..g..g..','..g..g..','..g..g..','...yy...'],{g:'#ffd94a',y:'#d8dde2'});
 /* objets portés par les ennemis */
 const HELD = {
   mage: SPRW.wand, pretre: SPR.holy, barde: SPR.lute, garde: SPR.halberd,
@@ -1162,12 +1201,14 @@ let state='title';
 let mapW=44, mapH=32, tiles=new Uint8Array(mapW*mapH), theme='dungeon';
 let stairsPos={x:0,y:0}, stairsOpen=false;
 let enemies=[], bolts=[], floaters=[], minions=[], poisonTicks=[], blasts=[];
+let dogs=[];
 let chests=[], statsOpen=false;
 const mouse={x:0,y:0,active:false};
 let cam={x:0,y:0};
 let floorNum=1, killCount=0, elapsed=0;
 let msgs=[];
 let levelupChoices=[];
+let introScene=0;
 
 const player = {
   x:0,y:0, r:5, dirx:1, diry:0, animT:0, moving:false, face:'down', faceLeft:false, walkT:0,
@@ -1182,6 +1223,10 @@ const player = {
   weapon: makeWeapon(0),
   atkCd:0, atkAnim:0, dashCd:0, dashT:0, dashVx:0, dashVy:0, invulT:0,
   kbx:0, kby:0, bleedT:0, bleedAcc:0, bleedDps:0, rootT:0,
+  vomiLvl:0, vomiCd:0, proutLvl:0, proutCd:0, turbo:false, turboCd:0,
+  dogCount:0, dogDmgMult:1, superDog:false,
+  clubRps:0, clubAng:0, sauceAcc:0, chefSauce:false,
+  sacSlow:0, sacXp:0,
 };
 const upgradeCounts = {};
 
@@ -1203,6 +1248,11 @@ function resetGame(){
   gameReady=true;
   player.atkCd=0; player.atkAnim=0; player.dashCd=0; player.dashT=0; player.invulT=0; player.kbx=0; player.kby=0;
   player.bleedT=0; player.bleedAcc=0; player.bleedDps=0; player.rootT=0;
+  player.vomiLvl=0; player.vomiCd=0; player.proutLvl=0; player.proutCd=0;
+  player.turbo=false; player.turboCd=0; player.dogCount=0; player.dogDmgMult=1;
+  player.superDog=false; player.clubRps=0; player.clubAng=0; player.sauceAcc=0;
+  player.chefSauce=false; player.sacSlow=0; player.sacXp=0;
+  dogs.length=0;
   statsOpen=false; mouse.active=false; pendingWeaponQueue=[];
   for(const k in upgradeCounts) delete upgradeCounts[k];
   floorNum=1; killCount=0; elapsed=0; msgs=[];
@@ -1232,13 +1282,14 @@ const ENEMY_TYPES = {
   garde:     { hp:34, dmg:9,  type:'phys', speed:40, atkCd:1.8, xp:15, spr:'garde',     r:6, armor:6, lancer:true },
 };
 
-const THEME_CYCLE=['dungeon','forest','ferme','village','library','tavern','chateau','chateauInt'];
-const THEME_NAMES={dungeon:'Donjon', forest:'Forêt', village:'Village', library:'Bibliothèque', tavern:'Taverne',
+const THEME_CYCLE=['dungeon','forest','ferme','village','library','temple','tavern','chateau','chateauInt'];
+const THEME_NAMES={dungeon:'Donjon', forest:'Forêt', village:'Village', library:'Bibliothèque', temple:'Temple', tavern:'Taverne',
   chateau:'Château (cour)', chateauInt:'Château (intérieur)', ferme:'Ferme'};
 function genFloor(){
   enemies=[]; bolts=[]; floaters=[]; minions=[]; poisonTicks=[]; blasts=[];
   theme = THEME_CYCLE[(floorNum-1)%THEME_CYCLE.length];
   tiles.fill(theme==='dungeon'||theme==='chateauInt' ? T_DUNWALL :
+             theme==='temple' ? T_DUNFLOOR :
              theme==='village'||theme==='ferme'||theme==='chateau'||theme==='forest' ? T_GRASS : T_WOOD);
   stairsOpen=false;
 
@@ -1266,7 +1317,7 @@ function genFloor(){
     const p0=rooms[0];
     player.x=(p0.x+(p0.w>>1))*TILE+8; player.y=(p0.y+(p0.h>>1))*TILE+8;
 
-    const count = 5 + floorNum;
+    const count = Math.round((5 + floorNum)*1.5);
     for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.4?'guerrier': roll<0.62?'mage': roll<0.82?'archer':'assassin';
@@ -1298,7 +1349,7 @@ function genFloor(){
     setTile(sx,sy,T_STAIRS);
     stairsPos={x:sx*TILE+8,y:sy*TILE+8};
 
-    const count = 6 + floorNum;
+    const count = Math.round((6 + floorNum)*1.5);
     for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.5?'mage': roll<0.75?'guerrier':'archer';
@@ -1307,6 +1358,36 @@ function genFloor(){
     for(let i=0;i<count;i++){
       const roll=Math.random();
       const kind = roll<0.5?'mage': roll<0.68?'assassin': roll<0.82?'archer': roll<0.92?'guerrier':'pretre';
+      spawnEnemy(false, kind);
+    }
+  } else if(theme==='temple'){
+    /* temple : nef pillée, piliers et autels */
+    for(let x=0;x<mapW;x++){ setTile(x,0,T_DUNWALL); setTile(x,mapH-1,T_DUNWALL); }
+    for(let y=0;y<mapH;y++){ setTile(0,y,T_DUNWALL); setTile(mapW-1,y,T_DUNWALL); }
+    for(let y=4;y<mapH-3;y+=5) for(let x=5;x<mapW-5;x+=7){ setTile(x,y,T_PILLAR); setTile(x+1,y,T_PILLAR); }
+    for(let i=0;i<4;i++){
+      const x=rndi(6,mapW-8), y=rndi(4,mapH-6);
+      if(getTile(x,y)===T_DUNFLOOR && getTile(x+1,y)===T_DUNFLOOR){ setTile(x,y,T_TABLE); setTile(x+1,y,T_TABLE); }
+    }
+    player.x=3*TILE+8; player.y=(mapH>>1)*TILE+8;
+    for(let yy=(mapH>>1)-1; yy<=(mapH>>1)+1; yy++)
+      for(let xx=2; xx<=4; xx++)
+        if(getTile(xx,yy)!==T_DUNWALL) setTile(xx,yy,T_DUNFLOOR);
+    let sx,sy,tries=0;
+    do{ sx=rndi(mapW-10,mapW-4); sy=rndi(2,mapH-3); tries++; }
+    while((isSolid(sx*TILE+8,sy*TILE+8)) && tries<200);
+    setTile(sx,sy,T_STAIRS);
+    stairsPos={x:sx*TILE+8,y:sy*TILE+8};
+
+    const count = Math.round((6 + floorNum)*1.5);
+    for(let i=0;i<eliteCount();i++){
+      const roll=Math.random();
+      const kind = roll<0.45?'pretre': roll<0.8?'guerrier':'paysan';
+      spawnEnemy(true, kind);
+    }
+    for(let i=0;i<count;i++){
+      const roll=Math.random();
+      const kind = roll<0.34?'pretre': roll<0.58?'guerrier': roll<0.9?'paysan':'barde';
       spawnEnemy(false, kind);
     }
   } else if(theme==='tavern'){
@@ -1332,7 +1413,7 @@ function genFloor(){
     setTile(sx,sy,T_STAIRS);
     stairsPos={x:sx*TILE+8,y:sy*TILE+8};
 
-    const count = 7 + floorNum;
+    const count = Math.round((7 + floorNum)*1.5);
     for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.35?'guerrier': roll<0.55?'assassin': roll<0.7?'barde': roll<0.9?'paysan':'archer';
@@ -1362,7 +1443,7 @@ function genFloor(){
       if(getTile(x,y)===T_GRASS) setTile(x,y,T_TREE);
     }
     player.x=3*TILE+8; player.y=py*TILE+8;
-    const count = 6 + floorNum;
+    const count = Math.round((6 + floorNum)*1.5);
     for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.4?'chevalier': roll<0.6?'garde': roll<0.8?'guerrier': roll<0.93?'archer':'assassin';
@@ -1386,7 +1467,7 @@ function genFloor(){
     while((isSolid(sx*TILE+8,sy*TILE+8)) && tries<200);
     setTile(sx,sy,T_STAIRS);
     stairsPos={x:sx*TILE+8,y:sy*TILE+8};
-    const count = 6 + floorNum;
+    const count = Math.round((6 + floorNum)*1.5);
     for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.4?'chevalier': roll<0.65?'garde': roll<0.85?'guerrier':'mage';
@@ -1423,7 +1504,7 @@ function genFloor(){
     for(let y=Math.min(midy,sy); y<=Math.max(midy,sy); y++) setTile(sx,y,T_GRASS);
     setTile(sx,sy,T_STAIRS);
     stairsPos={x:sx*TILE+8, y:sy*TILE+8};
-    const count = 6 + floorNum;
+    const count = Math.round((6 + floorNum)*1.5);
     for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.45?'assassin': roll<0.75?'archer':'guerrier';
@@ -1460,7 +1541,7 @@ function genFloor(){
     while((isSolid(sx*TILE+8,sy*TILE+8)) && tries<200);
     setTile(sx,sy,T_STAIRS);
     stairsPos={x:sx*TILE+8,y:sy*TILE+8};
-    const count = 7 + floorNum;
+    const count = Math.round((7 + floorNum)*1.5);
     for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.4?'assassin': roll<0.7?'archer':'guerrier';
@@ -1503,7 +1584,7 @@ function genFloor(){
     setTile(sx,sy,T_STAIRS);
     stairsPos={x:sx*TILE+8,y:sy*TILE+8};
 
-    const count = 7 + floorNum;
+    const count = Math.round((7 + floorNum)*1.5);
     for(let i=0;i<eliteCount();i++){
       const roll=Math.random();
       const kind = roll<0.32?'guerrier': roll<0.5?'assassin': roll<0.68?'garde': roll<0.86?'archer':'paysan';
@@ -1520,9 +1601,11 @@ function genFloor(){
     }
   }
   if(theme==='dungeon'||theme==='forest'||theme==='ferme'||theme==='chateau'||theme==='chateauInt'){
-    spawnPack('chien', rndi(2,4));
+    spawnPack('chien', rndi(3,6));
   }
   for(let i=0;i<player.minionCount;i++) minions.push(makeMinion(i));
+  dogs.length=0;
+  for(let i=0;i<player.dogCount;i++) dogs.push(makeDog(i));
   placeChests();
   addMsg("Étage "+floorNum+" — "+THEME_NAMES[theme], "#9fd7ff");
 }
@@ -1564,11 +1647,12 @@ function spawnEnemy(elite, kind, roomList){
     const base = ENEMY_TYPES[kind];
   const fm = 1 + 0.22*(floorNum-1);
   const em = elite ? 3.2 + 0.6*(floorNum-1) : 1;
+  const nf = elite ? 1 : 0.7;
   const spawned = {
     kind, elite,
     x, y, r: base.r*(elite?1.35:1),
-    maxHp: Math.round(base.hp*fm*em), hp: Math.round(base.hp*fm*em),
-    dmg: base.dmg*(1+0.18*(floorNum-1))*(elite ? 1.6 + 0.12*(floorNum-1) : 1),
+    maxHp: Math.round(base.hp*fm*em*nf), hp: Math.round(base.hp*fm*em*nf),
+    dmg: base.dmg*(1+0.18*(floorNum-1))*(elite ? 1.6 + 0.12*(floorNum-1) : 1)*nf,
     type: base.type, speed: base.speed*(elite?0.9:1),
     atkCd: base.atkCd, cdT: rnd(0,0.8), xp: Math.round(base.xp*(elite ? 4 + Math.floor(floorNum/2) : 1)),
     spr: base.spr, armor: base.armor||0,
@@ -1602,6 +1686,18 @@ function goldenSprite(name){
 function makeMinion(i){
   return { x:player.x-10, y:player.y-10, cdT:rnd(0,1), idx:i, animT:0 };
 }
+function makeDog(i, sup){
+  return { x:player.x, y:player.y, cdT:rnd(0,0.5), idx:i, superD:!!sup, orb:rnd(0,Math.PI*2), animT:0, flip:false, lungeT:0 };
+}
+function syncDogs(){
+  if(player.dogCount<=0){ dogs.length=0; return; }
+  if(player.superDog){
+    if(!(dogs.length===1 && dogs[0].superD)){ dogs.length=0; dogs.push(makeDog(0,true)); }
+  } else {
+    if(dogs.length && dogs[0].superD) dogs.length=0;
+    while(dogs.length<player.dogCount) dogs.push(makeDog(dogs.length));
+  }
+}
 
 /* ---------- entrées ---------- */
 const keys={};
@@ -1611,7 +1707,8 @@ addEventListener('keydown', e=>{
   keys[e.code]=true;
   if(!e.repeat && (e.code==='Space'||e.code==='KeyE'||e.code==='KeyJ')) attackQueued=true;
   if(['Tab','Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault();
-  if(state==='title' && e.code==='Enter'){ resetGame(); state='play'; hideOverlays(); }
+  if(state==='title' && e.code==='Enter'){ resetGame(); state='intro'; introScene=0; hideOverlays(); }
+  else if(state==='intro' && (e.code==='Enter'||e.code==='Space'||e.code==='KeyE')){ advanceIntro(); }
   else if(state==='dead' && e.code==='Enter'){ resetGame(); state='play'; hideOverlays(); }
   else if(state==='levelup'){
     const i = ['Digit1','Digit2','Digit3'].indexOf(e.code);
@@ -1637,6 +1734,7 @@ cv.addEventListener('mousemove', e=>{
 });
 cv.addEventListener('mousedown', e=>{
   ensureAudio();
+  if(state==='intro'){ advanceIntro(); return; }
   if(state!=='play') return;
   const rect=cv.getBoundingClientRect();
   const mx=(e.clientX-rect.left)/rect.width*VW + cam.x;
@@ -1645,6 +1743,10 @@ cv.addEventListener('mousedown', e=>{
   player.dirx=(mx-player.x)/d; player.diry=(my-player.y)/d;
   tryAttack();
 });
+function advanceIntro(){
+  introScene++;
+  if(introScene>2){ state='play'; attackQueued=false; }
+}
 function hideOverlays(){
   document.getElementById('titleScreen').classList.remove('show');
   document.getElementById('levelupScreen').classList.remove('show');
@@ -1696,7 +1798,7 @@ function grantGoldenBlessing(){
 }
 function killEnemy(e){
   e.dead=true; killCount++; sKill();
-  const xp = Math.round(e.xp * (1+player.xpMult));
+  const xp = Math.round(e.xp * (1+player.xpMult + (player.sacXp||0)));
   player.xp += xp;
   addFloater(e.x, e.y-14, "+"+xp+" XP", "#9fd7ff");
   if(player.healKill>0) player.hp=Math.min(player.maxHp, player.hp+player.maxHp*player.healKill);
@@ -1802,14 +1904,15 @@ function fireBolt(x,y,dx,dy,type,baseDmg,fromPlayer,speed,fx){
   const res = fromPlayer ? playerDamage(baseDmg, type, null) : {d:baseDmg, crit:false};
   bolts.push({
     x,y, vx:dx*speed, vy:dy*speed, type, dmg:res.d,
-    fromPlayer, life:1.6, crit:res.crit,
+    fromPlayer, life:(fx&&fx.life) || (fx&&fx.cat==='trumpet' ? 0.8 : 1.6), crit:res.crit,
     fireball: fromPlayer && Math.random()<player.fireball,
     root: (fx&&fx.root)||0, wide: !!(fx&&fx.wide),
     pierce: !!(fx&&fx.pierce), slow: !!(fx&&fx.slow), burn: fx?fx.burn:0, hit: [],
-    vis: fx ? (fx.cat==='bow'?'arrow' : fx.cat==='sling'?'stone' : 'orb')
+    rad: (fx&&fx.rad) || (fx&&fx.cat==='trumpet' ? 8 : 2),
+    vis: fx ? (fx.vis || (fx.cat==='bow'?'arrow' : fx.cat==='sling'?'stone' : fx.cat==='trumpet'?'trumpet' : 'orb'))
             : (type==='mag' ? 'orb' : 'arrow'),
   });
-  if(fromPlayer) sShoot();
+  if(fromPlayer && !(fx&&fx.quiet)) sShoot();
 }
 
 /* ---------- montage des niveaux ---------- */
@@ -1937,7 +2040,7 @@ function update(dt){
     }
     if(player.dashT<=0) for(const e of enemies) e.dashHit=false;
   } else {
-    const spd = 92 * (1+player.agi/120) * player.moveMult;
+    const spd = 92 * (1+player.agi/120) * player.moveMult * (1-(player.sacSlow||0));
     const rooted = player.rootT>0;
     moveEntity(player, rooted?0:dx*spd, rooted?0:dy*spd, dt);
   }
@@ -1980,6 +2083,74 @@ function update(dt){
     }
   }
 
+  /* vomi, prout, turbo-puant */
+  if(player.vomiLvl>0 && !player.turbo){
+    player.vomiCd-=dt;
+    if(player.vomiCd<=0){
+      player.vomiCd=[8,6,4,3][player.vomiLvl-1];
+      const base=Math.atan2(player.diry,player.dirx);
+      const dmg=8+player.pow*0.5+player.vomiLvl*2;
+      for(let s=-2;s<=2;s++){
+        const a=base+s*0.25;
+        fireBolt(player.x, player.y, Math.cos(a), Math.sin(a), 'mag', dmg, true, 150, {vis:'vomi', quiet:true});
+      }
+    }
+  }
+  if(player.proutLvl>0 && !player.turbo){
+    player.proutCd-=dt;
+    if(player.proutCd<=0){
+      player.proutCd=[8,6,4,3][player.proutLvl-1];
+      for(const off of [10,20]){
+        const bx=player.x-player.dirx*off, by=player.y-player.diry*off;
+        blasts.push({x:bx, y:by, t:0, dur:0.6, r:28, poo:true});
+        for(const e of enemies){
+          if(!e.dead && dist(bx,by,e.x,e.y)<28+e.r){ e.slowT=2; e.slowPow=0.6; }
+        }
+      }
+    }
+  }
+  if(player.turbo){
+    player.turboCd-=dt;
+    if(player.turboCd<=0){
+      player.turboCd=0.08;
+      let tx=player.dirx, ty=player.diry;
+      if(mouse.active){
+        const d=dist(player.x,player.y,mouse.x,mouse.y)||1;
+        tx=(mouse.x-player.x)/d; ty=(mouse.y-player.y)/d;
+      }
+      fireBolt(player.x, player.y, tx, ty, 'mag', (8+player.pow*0.5)*0.08, true, 160,
+               {vis:'vomi', slow:true, life:0.75, quiet:true});
+    }
+  }
+
+  /* gros gourdin veineux (+ sauce du chef) */
+  if(player.clubRps>0){
+    const prev=player.clubAng;
+    player.clubAng+=player.clubRps*Math.PI*2*dt;
+    if(player.chefSauce){
+      player.sauceAcc+=player.clubAng-prev;
+      while(player.sauceAcc>=Math.PI/4){
+        player.sauceAcc-=Math.PI/4;
+        const a=player.clubAng;
+        fireBolt(player.x+Math.cos(a)*24, player.y+Math.sin(a)*24, Math.cos(a), Math.sin(a),
+                 'mag', 10+player.pow*0.4, true, 170, {vis:'drop', root:0.25, life:1.0, quiet:true});
+      }
+    }
+    const ca=Math.cos(player.clubAng), sa=Math.sin(player.clubAng);
+    for(const e of enemies){
+      if(e.dead) continue;
+      if((e.clubCd||0)>0){ e.clubCd-=dt; continue; }
+      const rx=e.x-player.x, ry=e.y-player.y;
+      const proj=rx*ca+ry*sa;
+      const perp=Math.abs(-rx*sa+ry*ca);
+      if(proj>0 && proj<26+e.r && perp<e.r+3){
+        e.clubCd=0.5;
+        const res=playerDamage(6+player.str*0.4, 'phys', e);
+        hurtEnemy(e, res.d, 'phys', true, true, {crit:res.crit});
+      }
+    }
+  }
+
   /* coffres */
   for(const ch of chests){
     if(!ch.open && dist(player.x,player.y,ch.x,ch.y)<12) openChest(ch);
@@ -2014,6 +2185,7 @@ function update(dt){
     }
     const slow = e.slowT>0 ? (e.slowPow||0.6) : 1;
     if(e.slowT>0) e.slowT-=dt;
+    if(e.rootT>0) e.rootT-=dt;
     if(e.healT>0) e.healT-=dt;
     const dp = dist(e.x,e.y,player.x,player.y);
     const type=ENEMY_TYPES[e.kind];
@@ -2030,7 +2202,7 @@ function update(dt){
           const dd=dist2(e.x,e.y,o.x,o.y);
           if(dd<bd){ bd=dd; tgt=o; }
         }
-        if(tgt && bd<50*50){
+        if(tgt && bd<150*150){
           healed=true;
           const dd=Math.sqrt(bd)||1;
           if(dd>20){ mx=(tgt.x-e.x)/dd; my=(tgt.y-e.y)/dd; }
@@ -2099,7 +2271,7 @@ function update(dt){
       if(e.wanderT<=0){ e.wanderT=rnd(0.8,2); const a=rnd(0,Math.PI*2); e.wdx=Math.cos(a); e.wdy=Math.sin(a); if(Math.random()<0.3){e.wdx=0;e.wdy=0;} }
       mx=e.wdx*0.4; my=e.wdy*0.4;
     }
-    if(mx||my){
+    if((mx||my) && !(e.rootT>0)){
       const sp=e.speed*slow;
       moveEntity(e, mx*sp, my*sp, dt);
       e.flip = mx<0;
@@ -2145,6 +2317,32 @@ function update(dt){
     }
   });
 
+  /* chiens fidèles */
+  syncDogs();
+  const dogN = dogs.length || 1;
+  dogs.forEach((dg,i)=>{
+    const orbR = dg.superD ? 30 : 26;
+    const ang = (dg.orb||0) + elapsed*1.8 + i*(Math.PI*2/dogN);
+    const tx=player.x+Math.cos(ang)*orbR, ty=player.y+Math.sin(ang)*orbR*0.7;
+    const dd=dist(dg.x,dg.y,tx,ty);
+    if(dd>2){ const s=Math.min(dd*5,170); moveEntity(dg,(tx-dg.x)/dd*s,(ty-dg.y)/dd*s,dt); dg.flip=(tx-dg.x)<0; }
+    dg.animT=(dg.animT||0)+dt;
+    if(dg.lungeT>0) dg.lungeT-=dt;
+    dg.cdT-=dt;
+    if(dg.cdT<=0){
+      let best=null, bd=20*20;
+      for(const e of enemies){ if(e.dead) continue;
+        const dd2=dist2(dg.x,dg.y,e.x,e.y); if(dd2<bd){ bd=dd2; best=e; } }
+      if(best){
+        dg.cdT=0.9; dg.lungeT=0.15;
+        dg.flip = best.x<dg.x;
+        const base=(6+player.str*0.2)*player.dogDmgMult*(dg.superD?5.6:1);
+        const res=playerDamage(base, 'phys', best);
+        hurtEnemy(best, res.d, 'phys', true, true, {crit:res.crit});
+      } else dg.cdT=0.2;
+    }
+  });
+
   /* projectiles */
   for(const b of bolts){
     b.x+=b.vx*dt; b.y+=b.vy*dt; b.life-=dt;
@@ -2153,9 +2351,10 @@ function update(dt){
       for(const e of enemies){
         if(e.dead) continue;
         if(b.hit.includes(e)) continue;
-        if(dist(b.x,b.y,e.x,e.y) < e.r+2){
+        if(dist(b.x,b.y,e.x,e.y) < e.r+(b.rad||2)){
           hurtEnemy(e, b.dmg, b.type, true, true, {kbMult:0.35, crit:b.crit});
-          if(b.slow) e.slowT=2;
+          if(b.slow){ e.slowT=2; e.slowPow=0.6; }
+          if(b.root) e.rootT=Math.max(e.rootT||0, b.root);
           if(b.burn){ e.burnT=2.5; e.burnDps=b.dmg*b.burn; }
           if(b.fireball){
             sfx(200,60,.2,.12,'sawtooth');
@@ -2313,7 +2512,7 @@ function drawWeapon(){
       ctx.fillStyle = '#e2e6ea'; ctx.fillRect(2,-1,3,2);
       ctx.globalAlpha = 1;
     }
-  } else if(w.cat==='wand' || w.cat==='staff'){
+  } else if(w.cat==='wand' || w.cat==='staff' || w.cat==='trumpet'){
     ctx.rotate(-0.25 + t*0.5);
     ctx.drawImage(spr, -spr.width/2, -spr.height/2);
     if(t>0){
@@ -2348,6 +2547,7 @@ let hudTexts=[];
 function renderWorld(){
   ctx.fillStyle='#000'; ctx.fillRect(0,0,VW,VH);
   if(state==='title'){ renderTitleArt(); return; }
+  if(state==='intro'){ renderIntro(); return; }
 
   const x0=Math.floor(cam.x/TILE), y0=Math.floor(cam.y/TILE);
   const x1=Math.min(mapW-1, x0+Math.ceil(VW/TILE)), y1=Math.min(mapH-1, y0+Math.ceil(VH/TILE));
@@ -2369,7 +2569,7 @@ function renderWorld(){
     if(theme==='dungeon' && t!==T_DUNWALL) img=TILES.dunFloor;
     if(theme==='village' && (t===T_DUNFLOOR||t===T_DUNWALL)) img=TILES.grass;
     if((theme==='library'||theme==='tavern') && t!==T_DUNWALL && t!==T_SHELF && t!==T_TABLE && t!==T_BARREL) img=TILES.wood;
-    if(theme==='chateauInt' && (t===T_STAIRS)) img=TILES.dunFloor;
+    if((theme==='chateauInt'||theme==='temple') && t===T_STAIRS) img=TILES.dunFloor;
     ctx.drawImage(img,px,py);
     if(t===T_STAIRS && stairsOpen){
       ctx.drawImage(TILES.stairs,px,py);
@@ -2469,12 +2669,40 @@ function renderWorld(){
     ctx.globalAlpha=1;
   }
 
+  /* chiens fidèles */
+  for(const dg of dogs){
+    const bob=Math.sin((dg.animT||0)*12)>0?-1:0;
+    const sc=dg.superD?1.8:1;
+    if(dg.superD){
+      ctx.fillStyle='#b03a2e';
+      ctx.fillRect(Math.round(dg.x-cam.x-7), Math.round(dg.y-cam.y-3), 14, 9);
+    }
+    drawSpriteC(SPR.chien, dg.x-cam.x, dg.y-cam.y+bob-(dg.lungeT>0?2:0), dg.flip, sc);
+  }
+
   /* joueur */
   {
     const bob = player.moving ? (Math.sin(player.animT*12)>0?-1:0) : 0;
     if(player.invulT>0 && Math.floor(elapsed*20)%2===0) ctx.globalAlpha=0.5;
     drawAuras();
     drawMeleeArc();
+    if(player.clubRps>0){
+      const ca=Math.cos(player.clubAng), sa=Math.sin(player.clubAng);
+      ctx.save();
+      ctx.translate(player.x-cam.x, player.y-cam.y+2);
+      ctx.strokeStyle='#3f7a1e'; ctx.lineWidth=4; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(ca*22,sa*22); ctx.stroke();
+      ctx.strokeStyle='#6abe30'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(ca*20,sa*20); ctx.stroke();
+      ctx.fillStyle='#ff9ad5';
+      ctx.beginPath(); ctx.arc(ca*24,sa*24,3,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+    if(player.sacSlow>0){
+      ctx.fillStyle='#4e9423';
+      ctx.fillRect(Math.round(player.x-cam.x-5), Math.round(player.y-cam.y+1), 4, 5);
+      ctx.fillRect(Math.round(player.x-cam.x+1), Math.round(player.y-cam.y+2), 4, 5);
+    }
     const gset = player.face==='up' ? SPR.goblinUp : player.face==='side' ? SPR.goblinSide : SPR.goblinDown;
     const gframe = player.moving ? (Math.floor(player.walkT*8)%2) : 0;
     drawSpriteC(gset[gframe], player.x-cam.x, player.y-cam.y+bob, player.face==='side' && player.faceLeft, 1);
@@ -2500,6 +2728,25 @@ function renderWorld(){
       ctx.fillRect(-6,-1,2,2);
       if(b.slow){ ctx.fillStyle='rgba(127,220,255,0.85)'; ctx.fillRect(4,-2,3,4); }
       if(b.burn){ ctx.fillStyle='rgba(255,156,64,0.85)'; ctx.fillRect(3,-2,3,4); }
+    } else if(b.vis==='vomi'){
+      ctx.fillStyle='#8fd14f'; ctx.fillRect(-2,-2,5,4);
+      ctx.fillStyle='#7a5a32'; ctx.fillRect(1,-1,3,3);
+      ctx.globalAlpha=0.5;
+      ctx.fillStyle='#a4e05f'; ctx.fillRect(-3,-3,7,6);
+      ctx.globalAlpha=1;
+    } else if(b.vis==='trumpet'){
+      ctx.fillStyle='rgba(255,255,255,0.25)';
+      ctx.beginPath(); ctx.arc(0,0,10,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#e8e4d8';
+      ctx.beginPath(); ctx.arc(0,0,8,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#ffd94a';
+      ctx.beginPath(); ctx.arc(0,0,4,0,Math.PI*2); ctx.fill();
+    } else if(b.vis==='drop'){
+      ctx.fillStyle='#ffffff';
+      ctx.beginPath(); ctx.arc(0,0,3,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=0.4;
+      ctx.beginPath(); ctx.arc(0,0,5,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=1;
     } else if(b.vis==='stone'){
       ctx.fillStyle='#9aa0a6'; ctx.fillRect(-2,-2,4,4);
       ctx.fillStyle='#c8ccd2'; ctx.fillRect(-1,-1,2,2);
@@ -2524,14 +2771,16 @@ function renderWorld(){
     const rr = 5 + (bl.r-5)*(1-Math.pow(1-p,2));
     ctx.globalAlpha = 1-p;
     const gr = ctx.createRadialGradient(px,py,1,px,py,rr);
-    gr.addColorStop(0,'rgba(255,232,130,0.95)');
-    gr.addColorStop(0.55,'rgba(255,156,64,0.6)');
-    gr.addColorStop(1,'rgba(255,80,20,0)');
+    gr.addColorStop(0, bl.poo ? 'rgba(140,100,55,0.95)' : 'rgba(255,232,130,0.95)');
+    gr.addColorStop(0.55, bl.poo ? 'rgba(110,80,40,0.6)' : 'rgba(255,156,64,0.6)');
+    gr.addColorStop(1, bl.poo ? 'rgba(70,50,25,0)' : 'rgba(255,80,20,0)');
     ctx.fillStyle=gr;
     ctx.beginPath(); ctx.arc(px,py,rr,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle='rgba(255,210,90,'+(0.9*(1-p)).toFixed(3)+')';
-    ctx.lineWidth=2;
-    ctx.beginPath(); ctx.arc(px,py,rr,0,Math.PI*2); ctx.stroke();
+    if(!bl.poo){
+      ctx.strokeStyle='rgba(255,210,90,'+(0.9*(1-p)).toFixed(3)+')';
+      ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(px,py,rr,0,Math.PI*2); ctx.stroke();
+    }
     ctx.globalAlpha=1;
   }
 
@@ -2541,10 +2790,10 @@ function renderWorld(){
   }
 
   /* ambiance : vignette */
-  if(theme==='dungeon'||theme==='library'){
+  if(theme==='dungeon'||theme==='library'||theme==='temple'){
     const g=ctx.createRadialGradient(player.x-cam.x,player.y-cam.y,40, player.x-cam.x,player.y-cam.y,180);
     g.addColorStop(0,'rgba(0,0,0,0)');
-    g.addColorStop(1, theme==='library' ? 'rgba(10,0,30,0.45)' : 'rgba(0,0,0,0.55)');
+    g.addColorStop(1, theme==='dungeon' ? 'rgba(0,0,0,0.55)' : 'rgba(10,0,30,0.45)');
     ctx.fillStyle=g; ctx.fillRect(0,0,VW,VH);
   } else if(theme==='tavern'){
     const g=ctx.createRadialGradient(player.x-cam.x,player.y-cam.y,50, player.x-cam.x,player.y-cam.y,200);
@@ -2562,7 +2811,7 @@ function render(){
   c.imageSmoothingEnabled=false;
   c.fillStyle='#000'; c.fillRect(0,0,cv.width,cv.height);
   c.drawImage(worldCv,0,0,cv.width,cv.height);
-  if(state!=='title'){
+  if(state!=='title' && state!=='intro'){
     const S=cv.width/VW;
     c.setTransform(S,0,0,S,0,0);
     c.font='6px monospace'; c.textAlign='center';
@@ -2643,6 +2892,71 @@ function wrapText(c, txt, maxW){
   }
   if(cur) out.push(cur);
   return out;
+}
+function introCartouche(txt){
+  ctx.font='9px monospace'; ctx.textAlign='center';
+  const w=Math.min(VW-16, ctx.measureText(txt).width+24);
+  const x=(VW-w)/2, y=8, h=24;
+  ctx.fillStyle='#e8dcb0'; ctx.fillRect(x,y,w,h);
+  ctx.strokeStyle='#8a5a2b'; ctx.lineWidth=2; ctx.strokeRect(x+1,y+1,w-2,h-2);
+  ctx.fillStyle='#3a2a10';
+  ctx.fillText(txt, VW/2, y+15);
+  ctx.textAlign='left';
+}
+function renderIntro(){
+  ctx.fillStyle = introScene===1 ? '#2a1010' : introScene===0 ? '#1a2410' : '#160c10';
+  ctx.fillRect(0,0,VW,VH);
+  ctx.fillStyle = introScene===2 ? '#241812' : '#2e4a1c';
+  ctx.fillRect(0,200,VW,70);
+  if(introScene===0){
+    const fx=VW/2, fy=196;
+    ctx.fillStyle='#5e3a1c'; ctx.fillRect(fx-14,fy+4,28,4);
+    const fl = 1+Math.sin(elapsed*9)*0.3;
+    ctx.fillStyle='#ff9c40';
+    ctx.beginPath(); ctx.moveTo(fx-7,fy+4); ctx.quadraticCurveTo(fx,fy-16*fl,fx+7,fy+4); ctx.fill();
+    ctx.fillStyle='#ffd94a';
+    ctx.beginPath(); ctx.moveTo(fx-4,fy+4); ctx.quadraticCurveTo(fx,fy-9*fl,fx+4,fy+4); ctx.fill();
+    ctx.fillStyle='#b03a2e'; ctx.fillRect(fx-3,fy-14,7,4);
+    drawSpriteC(SPR.goblinDown[0], fx-44, fy-8, false, 3);
+    drawSpriteC(SPR.goblinDown[0], fx+44, fy-6, true, 2.8);
+    drawSpriteC(SPR.goblinDown[0], fx-24, fy+2, false, 2);
+    drawSpriteC(SPR.goblinDown[0], fx+24, fy+2, true, 2);
+    introCartouche("Je vivais heureux avec mes parents.");
+  } else if(introScene===1){
+    drawSpriteC(SPR.goblinDown[0], VW/2-50, 192, false, 2.4);
+    drawSpriteC(SPR.goblinDown[0], VW/2+40, 198, true, 2.2);
+    drawSpriteC(SPR.goblinDown[0], VW/2-5, 202, false, 1.8);
+    drawSpriteC(SPR.warrior, VW/2-120, 150, false, 3);
+    drawSpriteC(SPR.mage, VW/2+120, 150, true, 3);
+    drawSpriteC(SPR.archer, VW/2-160, 190, false, 2.4);
+    drawSpriteC(SPR.chevalier, VW/2+150, 186, true, 2.2);
+    ctx.strokeStyle='#d8dde2'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(VW/2-120,120); ctx.lineTo(VW/2-108,98); ctx.stroke();
+    introCartouche("Cette vie paisible fut troublée par d'horribles humains.");
+  } else {
+    for(const b of [[VW/2-70,206,50,10],[VW/2+30,212,60,12],[VW/2-10,220,44,9]]){
+      ctx.fillStyle='#5e1010';
+      ctx.beginPath(); ctx.ellipse(b[0],b[1],b[2],b[3],0,0,Math.PI*2); ctx.fill();
+    }
+    ctx.save();
+    ctx.translate(VW/2-70,200); ctx.rotate(Math.PI/2); ctx.globalAlpha=0.9;
+    ctx.drawImage(SPR.goblinDown[0], -24, -14, 48, 28);
+    ctx.restore();
+    ctx.save();
+    ctx.translate(VW/2+55,206); ctx.rotate(-Math.PI/2); ctx.globalAlpha=0.9;
+    ctx.drawImage(SPR.goblinDown[0], -24, -14, 48, 28);
+    ctx.restore();
+    drawSpriteC(SPR.goblinDown[0], VW/2, 198, false, 2);
+    ctx.fillStyle='#7fdcff';
+    const ty2 = 4+Math.sin(elapsed*6)*2;
+    ctx.fillRect(VW/2-4, 190+ty2, 2, 3);
+    ctx.fillRect(VW/2+2, 190+ty2, 2, 3);
+    introCartouche("ce jour-là, j'ai décidé de venger les miens, et d'être sans pitié.");
+  }
+  ctx.textAlign='center';
+  ctx.fillStyle='#9a957f'; ctx.font='8px monospace';
+  ctx.fillText('— cliquez pour continuer ('+(introScene+1)+'/3) —', VW/2, VH-12);
+  ctx.textAlign='left';
 }
 function renderTitleArt(){
   drawSpriteC(SPR.goblinDown[0], VW/2, 96, false, 6);

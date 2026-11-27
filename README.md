@@ -10,6 +10,10 @@ donjons et vos villages : éliminez-les tous, gagnez des niveaux, et choisissez
 à chaque niveau une amélioration parmi 3 tirées au hasard d'un pool de plus
 de 230 améliorations réparties en 55 familles et 5 rangs (jusqu'à Légendaire).
 
+Une **intro en 3 scènes de peinture pixel art** (famille de gobelins autour
+d'un feu de camp, irruption des humains, serment de vengeance) raconte le
+passé du gobelin : cliquez (ou Entrée) pour passer d'une scène à la suivante.
+
 Sur l'écran d'accueil (et après chaque partie), un panneau **VOTRE GOBELIN**
 permet de le personnaliser : couleur de cheveux (7 teintes), accessoire de
 tête (casque, bandana, chapeau de mage, chapeau de fête, couronne, casquette),
@@ -56,14 +60,15 @@ chacune des trois directions de marche.
   statistique ou soin complet. Le rang des armes trouvées
   progresse lentement avec l'étage (Basique jusqu'à l'étage 3, puis un palier
   tous les 3 étages).
-- **8 types d'étages en cycle** : donjon (salles procédurales + couloirs,
+- **9 types d'étages en cycle** : donjon (salles procédurales + couloirs,
   ambiance sombre), forêt (bouquets d'arbres et clairières reliées par un
   sentier), ferme (champs cultivés clôturés, grange, arbres), village
   (maisons, arbres, palissades), bibliothèque de mage (rayonnages de livres,
-  tables de lecture, ambiance violette, mages en nombre), intérieur de
-  taverne (comptoir, tonneaux, tables, ambiance chaleureuse, belliqueux),
-  cour de château-fort (muraille, chemins de pierre, donjon central) et
-  intérieur de château-fort (dalles de pierre, piliers).
+  tables de lecture, ambiance violette, mages en nombre), **temple** (nef
+  pillée, piliers et autels, fréquenté par des prêtres, guerriers et paysans),
+  intérieur de taverne (comptoir, tonneaux, tables, ambiance chaleureuse,
+  belliqueux), cour de château-fort (muraille, chemins de pierre, donjon
+  central) et intérieur de château-fort (dalles de pierre, piliers).
 - **Ennemis** : assassin (très rapide, frappe lourdement au corps-à-corps
   mais tombe en quelques coups), guerrier (lent, robuste), mage (baguette
   magique, projectiles à distance), archer (flèches à distance), bébé
@@ -84,7 +89,8 @@ chacune des trois directions de marche.
   comparer : il y en a 1 par étage, et 2 à partir de l'étage 5. Leur puissance
   (PV, dégâts, niveau, XP) croît nettement plus vite que celle des ennemis
   normaux dans les étages élevés, et elles apparaissent toujours loin du
-  joueur. Dans les villages peut apparaître (très rarement) un **bébé doré** :
+  joueur. Les ennemis normaux sont 30 % moins robustes et percutants mais
+  50 % plus nombreux à chaque étage (élites inchangées). Dans les villages peut apparaître (très rarement) un **bébé doré** :
   inoffensif et couronné, il octroie une bénédiction unique (PV, Force,
   Pouvoir, Agilité, armures) quand on arrive à l'attraper. Chaque ennemi
   affiche son niveau au-dessus de lui, et les ennemis ne se chevauchent pas ;
@@ -92,7 +98,11 @@ chacune des trois directions de marche.
   dégâts infligés s'affichent en blanc et passent en rouge sur un coup
   critique
   entre eux.
-- **Armes** : 36 armes en 5 rangs — Basique, Amélioré, Puissant, Épique,
+- **Trompettes** : une arme magique à distance par rang (de la Trompette en
+  toile à la Trompette du destin). Le projectile est une **onde sonore**
+  circulaire du diamètre du gobelin qui **perfore** les ennemis, avec une
+  portée divisée par deux par rapport aux autres armes à distance.
+- **Armes** : 41 armes en 5 rangs — Basique, Amélioré, Puissant, Épique,
   Légendaire — reprenant les rangs des améliorations (mêlée et distance,
   physiques ou magiques). Les légendaires : Croc du Roi gobelin (mêlée
   physique), Lame du Jugement (mêlée magique enflammée), Arc du Vide
@@ -122,15 +132,29 @@ chacune des trois directions de marche.
   jamais retomber. Les rangs d'armes utilisent le même code couleur que les
   améliorations (gris, bleu, violet, or), visible sur les cartes de comparaison
   et dans le HUD.
-- **Améliorations à rangs** : 55 familles (statistiques, compétences et
+- **Améliorations déjantées** : **Vomi du gobelin ivre** (cône de vomi tous
+  les 8/6/4/3 s selon le rang, dégâts magiques), **Prout du gobelin crado**
+  (nuage marron derrière vous qui ralentit fortement les ennemis), **Gros
+  gourdin veineux** (gourdin géant à bout rose tournant autour du gobelin,
+  1/2/2,75/3,25 tours/s, dégâts physiques), **Sac à malice** (deux sacs verts
+  entre les jambes : vitesse -15/25/32/36 %, XP +30/50/64/72 %), **Bon
+  toutou** (1 à 4 chiens fidèles en orbite qui attaquent au corps-à-corps)
+  et **Toutou costaud** (+15/25/32,5 % de dégâts des chiens, à partir du rang
+  Amélioré).
+- **Améliorations à rangs** : familles (statistiques, compétences et
   équipement), chacune déclinée en 5 rangs — Basique, Amélioré, Puissant,
   Épique, Légendaire — des versions de plus en plus fortes. Un rang
   n'apparaît qu'après avoir obtenu le rang immédiatement inférieur, et les
   rangs supérieurs ont un taux d'apparition plus faible (poids 100 % / 70 % /
-  50 % / 35 % / 25 %). Les 14 améliorations **Légendaires** (dorées)
+  50 % / 35 % / 25 %). Les 17 améliorations **Légendaires** (dorées)
   fusionnent deux améliorations Épiques en une seule version bien plus
   puissante, et n'apparaissent qu'une fois au moins deux améliorations
-  Épiques obtenues. Chaque rang ne peut être pris qu'une fois.
+  Épiques obtenues. **Gobelin turbo-puant** : jet continu vert-marron vers la
+  souris (dégâts de Vomi chaque seconde + ralentissement de Prout).
+  **Super-toutou** : les 4 chiens fusionnent en un super-chien capé, stats
+  additionnées et augmentées de 40 %. **Sauce du chef** : le gourdin crache
+  une goutte blanche à chaque 1/8 de tour (dégâts magiques + immobilisation
+  0,25 s). Chaque rang ne peut être pris qu'une fois.
 - **Auras visuelles** : l'aura de gel (anneau bleu avec flocons orbitants)
   et l'aura de poison (anneau vert à rayon croissant avec la puissance)
   s'affichent en continu autour du gobelin, avec un rayon correspondant
