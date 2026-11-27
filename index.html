@@ -388,6 +388,40 @@ const RANK_META = [
   {tag:' légendaire', label:'Légendaire', w:0.25, col:'#ffae00'},
 ];
 const RANK_SCALE = [1, 1.6, 2.4, 3.5, 5.0];
+/* statistiques effectives : valeurs de base x multiplicateurs en pourcentage */
+function pStr(){ return player.str*(player.pctStr||1); }
+function pPow(){ return player.pow*(player.pctPow||1); }
+function pArmor(){ return player.armor*(player.pctArmor||1); }
+function pMarmor(){ return player.marmor*(player.pctMarmor||1); }
+function pAgi(){ return player.agi*(player.pctAgi||1); }
+function pLifesteal(){ return player.lifesteal*(player.pctLs||1); }
+function hpMax(){ return Math.round(player.maxHp*(player.pctHp||1)); }
+function setPct(p,k,v){
+  const old=p[k]||1;
+  if(k==='pctHp'){
+    const nm=Math.round(p.maxHp*v);
+    p.hp=Math.min(nm, Math.ceil(p.hp*(v/old)));
+  }
+  p[k]=v;
+}
+function evolveOwned(rank){
+  const owned=Object.keys(upgradeCounts).filter(n=>{
+    if(n.indexOf('Chance')===0) return false;
+    const u=UPGRADES.find(x=>x.n===n);
+    return u && u.rank===rank;
+  });
+  if(!owned.length){ addMsg('Chance : aucune amélioration à faire évoluer', '#9a957f'); return null; }
+  const old=owned[Math.floor(Math.random()*owned.length)];
+  const uOld=UPGRADES.find(x=>x.n===old);
+  const uNext=UPGRADES.find(x=>x.n===uOld.n+RANK_META[rank+1].tag);
+  if(!uNext) return null;
+  upgradeCounts[old]--; if(upgradeCounts[old]<=0) delete upgradeCounts[old];
+  uNext.f(player);
+  upgradeCounts[uNext.n]=(upgradeCounts[uNext.n]||0)+1;
+  addMsg('Chance : «'+old+'» évolue en «'+uNext.n+'»', '#ffd94a');
+  addFloater(player.x, player.y-20, 'ÉVOLUTION !', '#ffd94a');
+  return uNext.n;
+}
 const FMT = {
   maxHp: v=>'+'+v+' PV max',
   armor: v=>'+'+v+' armure',
@@ -547,11 +581,53 @@ const UP_DEFS = [
     {d:"Recevoir une arme de rang maximal à comparer", f:p=>{proposeWeapon(makeWeapon(4), 'offerte par l\'armurier');}},
     {d:"Recevoir deux armes de rang maximal à comparer", f:p=>{proposeWeapon(makeWeapon(4), 'offerte par l\'armurier');proposeWeapon(makeWeapon(4), 'offerte par l\'armurier');}},
   ]},
+  {n:"Ventre solide",        i:"❤", r:[
+    {d:"Santé +10% (multiplicatif, PV max futurs inclus)", f:p=>setPct(p,'pctHp',1.10)},
+    {d:"Santé +18% (multiplicatif)", f:p=>setPct(p,'pctHp',1.18)},
+    {d:"Santé +25% (multiplicatif)", f:p=>setPct(p,'pctHp',1.25)},
+    {d:"Santé +30% (multiplicatif)", f:p=>setPct(p,'pctHp',1.30)},
+  ]},
+  {n:"Carapace",             i:"🛡", r:[
+    {d:"Armure +10% (multiplicatif)", f:p=>setPct(p,'pctArmor',1.10)},
+    {d:"Armure +18% (multiplicatif)", f:p=>setPct(p,'pctArmor',1.18)},
+    {d:"Armure +25% (multiplicatif)", f:p=>setPct(p,'pctArmor',1.25)},
+    {d:"Armure +30% (multiplicatif)", f:p=>setPct(p,'pctArmor',1.30)},
+  ]},
+  {n:"Barrière mentale",     i:"🔮", r:[
+    {d:"Armure magique +10% (multiplicatif)", f:p=>setPct(p,'pctMarmor',1.10)},
+    {d:"Armure magique +18% (multiplicatif)", f:p=>setPct(p,'pctMarmor',1.18)},
+    {d:"Armure magique +25% (multiplicatif)", f:p=>setPct(p,'pctMarmor',1.25)},
+    {d:"Armure magique +30% (multiplicatif)", f:p=>setPct(p,'pctMarmor',1.30)},
+  ]},
+  {n:"Démarche vive",        i:"⚡", r:[
+    {d:"Agilité +10% (multiplicatif)", f:p=>setPct(p,'pctAgi',1.10)},
+    {d:"Agilité +18% (multiplicatif)", f:p=>setPct(p,'pctAgi',1.18)},
+    {d:"Agilité +25% (multiplicatif)", f:p=>setPct(p,'pctAgi',1.25)},
+    {d:"Agilité +30% (multiplicatif)", f:p=>setPct(p,'pctAgi',1.30)},
+  ]},
+  {n:"Flamme intérieure",    i:"✨", r:[
+    {d:"Pouvoir +10% (multiplicatif)", f:p=>setPct(p,'pctPow',1.10)},
+    {d:"Pouvoir +18% (multiplicatif)", f:p=>setPct(p,'pctPow',1.18)},
+    {d:"Pouvoir +25% (multiplicatif)", f:p=>setPct(p,'pctPow',1.25)},
+    {d:"Pouvoir +30% (multiplicatif)", f:p=>setPct(p,'pctPow',1.30)},
+  ]},
+  {n:"Muscles gonflés",      i:"💪", r:[
+    {d:"Force +10% (multiplicatif)", f:p=>setPct(p,'pctStr',1.10)},
+    {d:"Force +18% (multiplicatif)", f:p=>setPct(p,'pctStr',1.18)},
+    {d:"Force +25% (multiplicatif)", f:p=>setPct(p,'pctStr',1.25)},
+    {d:"Force +30% (multiplicatif)", f:p=>setPct(p,'pctStr',1.30)},
+  ]},
+  {n:"Chance",               i:"🎲", maxRank:2, r:[
+    {d:"Fait évoluer au rang suivant une amélioration Basique aléatoire que vous possédez (elle gagne les effets du rang supérieur)", f:p=>evolveOwned(0)},
+    {d:"Fait évoluer au rang suivant une amélioration Améliorée aléatoire que vous possédez (elle gagne les effets du rang supérieur)", f:p=>evolveOwned(1)},
+    {d:"Fait évoluer au rang suivant une amélioration Puissante aléatoire que vous possédez (elle gagne les effets du rang supérieur)", f:p=>evolveOwned(2)},
+  ]},
 ];
 const UPGRADES = [];
 UP_DEFS.forEach(def=>{
   const r0 = def.minRank||0;
-  for(let r=r0;r<4;r++){
+  const rMax = def.maxRank===undefined ? 3 : def.maxRank;
+  for(let r=r0;r<=rMax;r++){
     const meta = RANK_META[r];
     let d, f;
     if(def.r){ d=def.r[r-r0].d; f=def.r[r-r0].f; }
@@ -596,6 +672,18 @@ const LEG_FUSIONS = [
   {n:"Sauce du chef",       i:"💧", fuse:["Gros gourdin veineux","Sac à malice"],
    d:"Conserve le gourdin et les sacs à malice ; à chaque 1/8 de tour, l'extrémité du gourdin projette une goutte blanche (dégâts magiques + immobilisation 0,25 s)",
    f:p=>{p.chefSauce=true;}},
+  {n:"Force de la nature",   i:"💪", fuse:["Muscles gonflés","Ventre solide"],
+   d:"Force +50% et Santé +50% — fusion légendaire",
+   f:p=>{p.pctStr=(p.pctStr||1)+0.5;setPct(p,'pctHp',(p.pctHp||1)+0.5);}},
+  {n:"Carapace de tortue",   i:"🐢", fuse:["Carapace","Barrière mentale"],
+   d:"Armure +50% et Armure magique +50% — fusion légendaire",
+   f:p=>{p.pctArmor=(p.pctArmor||1)+0.5;p.pctMarmor=(p.pctMarmor||1)+0.5;}},
+  {n:"Sang arcanique",       i:"✨", fuse:["Flamme intérieure","Faim insatiable"],
+   d:"Pouvoir +50% et Vol de vie +50% — fusion légendaire",
+   f:p=>{p.pctPow=(p.pctPow||1)+0.5;p.pctLs=(p.pctLs||1)+0.5;}},
+  {n:"Vélocité suprême",     i:"⚡", fuse:["Démarche vive","Réflexes félines"],
+   d:"Agilité +50% et Vitesse d'attaque +50% — fusion légendaire",
+   f:p=>{p.pctAgi=(p.pctAgi||1)+0.5;p.atkSpeedMult+=0.5;}},
 ];
 LEG_FUSIONS.forEach(lg=>{
   const A=UP_DEFS.find(d=>d.n===lg.fuse[0]), B=UP_DEFS.find(d=>d.n===lg.fuse[1]);
@@ -633,7 +721,7 @@ function openChest(ch){
     {t:'+2 force',         f:()=>{player.str+=2;}},
     {t:'+2 pouvoir',       f:()=>{player.pow+=2;}},
     {t:'+2 agilité',       f:()=>{player.agi+=2;}},
-    {t:'soin complet',     f:()=>{player.hp=player.maxHp;}},
+    {t:'soin complet',     f:()=>{player.hp=hpMax();}},
   ];
   const o=pick(opts); o.f();
   addMsg('Coffre : '+o.t, '#ffd94a');
@@ -643,7 +731,7 @@ function openChest(ch){
 const WPN_ICONS = {dagger:'🗡',sword:'⚔',axe:'🪓',club:'🏏',spear:'🔱',staff:'🪄',wand:'✨',bow:'🏹',sling:'🌀',scythe:'☠',trident:'🔱',hammer:'🔨',trumpet:'🎺'};
 let pendingWeaponQueue = [];   /* entrées : {w, src} */
 function weaponCardHtml(w, tag){
-  const eff = Math.round(w.dmg * (w.type==='mag' ? (1+player.pow/50)*(1+player.magMult) : (1+player.str/50)*(1+player.physMult)));
+  const eff = Math.round(w.dmg * (w.type==='mag' ? (1+pPow()/50)*(1+player.magMult) : (1+pStr()/50)*(1+player.physMult)));
   const dps = (w.dmg*1000/w.cd).toFixed(1);
   const effDps = (eff*1000/w.cd).toFixed(1);
   const rk = RANK_META[w.rank]||RANK_META[0];
@@ -1312,6 +1400,7 @@ let state='title';
 let mapW=44, mapH=32, tiles=new Uint8Array(mapW*mapH), theme='dungeon';
 let stairsPos={x:0,y:0}, stairsOpen=false;
 let enemies=[], bolts=[], floaters=[], minions=[], poisonTicks=[], blasts=[];
+const dmgDealt={phys:0, mag:0, aura:0, fam:0};
 let dogs=[];
 let chests=[], statsOpen=false;
 const mouse={x:0,y:0,active:false};
@@ -1355,6 +1444,7 @@ function resetGame(){
   player.dashPowerMult=1; player.dashSlow=false; player.boltDmgMult=1;
   player.shieldOn=false; player.shieldCd=12; player.shieldTimer=0; player.shieldReady=false;
   player.physMult=0; player.magMult=0; player.atkSpeedMult=1; player.moveMult=1; player.eliteDmgMult=0;
+  player.pctStr=1; player.pctPow=1; player.pctArmor=1; player.pctMarmor=1; player.pctAgi=1; player.pctHp=1; player.pctLs=1;
   player.weapon = makeWeapon(0);
   gameReady=true;
   player.atkCd=0; player.atkAnim=0; player.dashCd=0; player.dashT=0; player.invulT=0; player.kbx=0; player.kby=0;
@@ -1366,7 +1456,7 @@ function resetGame(){
   dogs.length=0;
   statsOpen=false; syncStatsPanel(); mouse.active=false; pendingWeaponQueue=[];
   for(const k in upgradeCounts) delete upgradeCounts[k];
-  floorNum=1; killCount=0; elapsed=0; playTime=0; msgs=[];
+  floorNum=1; killCount=0; elapsed=0; playTime=0; msgs=[]; dmgDealt.phys=0; dmgDealt.mag=0; dmgDealt.aura=0; dmgDealt.fam=0;
   addMsg("Arme de départ : " + player.weapon.name, "#8fd14f");
   genFloor();
 }
@@ -1872,8 +1962,8 @@ function addFloater(x,y,txt,color){ floaters.push({x,y,txt,color,life:0.8,vy:-26
 /* ---------- combat ---------- */
 function playerDamage(base, type, target){
   let d = base;
-  d *= type==='mag' ? (1+player.pow/50)*(1+player.magMult) : (1+player.str/50)*(1+player.physMult);
-  if(player.rage && player.hp < player.maxHp*player.rageTh) d *= player.rageMult;
+  d *= type==='mag' ? (1+pPow()/50)*(1+player.magMult) : (1+pStr()/50)*(1+player.physMult);
+  if(player.rage && player.hp < hpMax()*player.rageTh) d *= player.rageMult;
   if(target && target.elite) d *= 1+player.eliteDmgMult;
   let crit=false;
   if(Math.random()*100 < player.crit){ d*=player.critMult; crit=true; }
@@ -1882,6 +1972,8 @@ function playerDamage(base, type, target){
 function hurtEnemy(e, dmg, type, showText, kb, opts){
   const red = type==='mag' ? 0 : (e.armor||0);
   const total = Math.max(1, Math.round(dmg - red));
+  if(type==='mag') dmgDealt.mag+=total; else dmgDealt.phys+=total;
+  const dsrc=opts&&opts.src; if(dsrc) dmgDealt[dsrc]+=total;
   e.hp -= total; e.hurtT=0.12; e.aggro=true;
   if(kb!==false && !(ENEMY_TYPES[e.kind]||{}).passive){
     const d=dist(player.x,player.y,e.x,e.y)||1;
@@ -1889,19 +1981,19 @@ function hurtEnemy(e, dmg, type, showText, kb, opts){
     e.kbx=(e.x-player.x)/d*k; e.kby=(e.y-player.y)/d*k;
   }
   if(showText) addFloater(e.x, e.y-10, ""+total, (opts&&opts.crit)?'#ff4d4d':'#fff');
-  if(player.lifesteal>0){
-    player.hp = Math.min(player.maxHp, player.hp + total*player.lifesteal);
+  if(pLifesteal()>0){
+    player.hp = Math.min(hpMax(), player.hp + total*pLifesteal());
   }
   if(e.hp<=0) killEnemy(e);
 }
 function grantGoldenBlessing(){
   if(player.goldenBlessing){
-    player.maxHp+=20; player.hp=Math.min(player.maxHp, player.hp+20);
+    player.maxHp+=20; player.hp=Math.min(hpMax(), player.hp+20);
     addMsg('Bébé doré : +20 PV max (bénédiction déjà reçue)', '#ffd94a');
     return;
   }
   player.goldenBlessing=true;
-  player.maxHp+=30; player.hp=Math.min(player.maxHp, player.hp+30);
+  player.maxHp+=30; player.hp=Math.min(hpMax(), player.hp+30);
   player.str+=5; player.pow+=5; player.agi+=5; player.armor+=3; player.marmor+=3;
   addMsg('Bébé doré vaincu ! Bénédiction unique : +30 PV max, +5 Force, +5 Pouvoir, +5 Agilité, +3 Armure, +3 Armure magique', '#ffd94a');
   addFloater(player.x, player.y-16, 'BÉNÉDICTION DORÉE !', '#ffd94a');
@@ -1913,7 +2005,7 @@ function killEnemy(e){
   const xp = Math.round(e.xp * (1+player.xpMult + (player.sacXp||0)));
   player.xp += xp;
   addFloater(e.x, e.y-14, "+"+xp+" XP", "#9fd7ff");
-  if(player.healKill>0) player.hp=Math.min(player.maxHp, player.hp+player.maxHp*player.healKill);
+  if(player.healKill>0) player.hp=Math.min(hpMax(), player.hp+hpMax()*player.healKill);
   while(player.xp >= player.xpNext){
     player.xp -= player.xpNext;
     player.level++;
@@ -1933,7 +2025,7 @@ function hurtPlayer(dmg, type, src){
     addFloater(player.x, player.y-12, "bloqué !", "#7fdcff");
     return;
   }
-  const red = type==='mag' ? player.marmor : player.armor;
+  const red = type==='mag' ? pMarmor() : pArmor();
   const total = Math.max(1, Math.round(dmg * 100/(100+red)));
   player.hp -= total; player.invulT=0.35;
   if(src){
@@ -1951,14 +2043,16 @@ function die(){
   state='dead';
   document.getElementById('deadStats').innerHTML =
     "Étage atteint : <b>"+floorNum+"</b> — Niveau : <b>"+player.level+"</b> — Éliminations : <b>"+killCount+"</b><br>"+
-    "Arme finale : "+player.weapon.name;
+    "Arme finale : "+player.weapon.name+"<br>"+
+    "Dégâts infligés — physiques : <b>"+Math.round(dmgDealt.phys)+"</b> · magiques : <b>"+Math.round(dmgDealt.mag)+"</b> "+
+    "(dont auras : "+Math.round(dmgDealt.aura)+" · familiers : "+Math.round(dmgDealt.fam)+")";
   document.getElementById('deadScreen').classList.add('show');
 }
 
 function tryAttack(){
   if(player.atkCd>0 || state!=='play') return;
   const w = player.weapon;
-  player.atkCd = w.cd/1000 / (1+player.agi/100) / player.atkSpeedMult;
+  player.atkCd = w.cd/1000 / (1+pAgi()/100) / player.atkSpeedMult;
   player.atkAnim = 0.22;
   const ranged = w.range===0;
   if(ranged){
@@ -2002,7 +2096,7 @@ function tryAttack(){
         bdx=(mouse.x-player.x)/d; bdy=(mouse.y-player.y)/d;
       }
       const nb = 1+player.boltLevel;
-      const bd = (4+player.pow*0.5)*(player.boltDmgMult||1);
+      const bd = (4+pPow()*0.5)*(player.boltDmgMult||1);
       for(let s=0;s<nb;s++){
         const off = nb>1 ? (s-(nb-1)/2)*0.18 : 0;
         const ca=Math.cos(off), sa=Math.sin(off);
@@ -2017,6 +2111,7 @@ function fireBolt(x,y,dx,dy,type,baseDmg,fromPlayer,speed,fx){
   bolts.push({
     x,y, vx:dx*speed, vy:dy*speed, type, dmg:res.d,
     fromPlayer, life:(fx&&fx.life) || (fx&&fx.cat==='trumpet' ? 0.8 : 1.6), crit:res.crit,
+    src: fx&&fx.src,
     fireball: fromPlayer && Math.random()<player.fireball,
     root: (fx&&fx.root)||0, wide: !!(fx&&fx.wide),
     pierce: !!(fx&&fx.pierce), slow: !!(fx&&fx.slow), burn: fx?fx.burn:0, hit: [],
@@ -2106,7 +2201,7 @@ function update(dt){
   playTime+=dt;
 
   /* régénération & bouclier */
-  if(player.regen>0) player.hp=Math.min(player.maxHp, player.hp+player.regen*dt);
+  if(player.regen>0) player.hp=Math.min(hpMax(), player.hp+player.regen*dt);
   if(player.shieldOn && !player.shieldReady){
     player.shieldTimer-=dt;
     if(player.shieldTimer<=0) player.shieldReady=true;
@@ -2145,7 +2240,7 @@ function update(dt){
       for(const e of enemies){
         if(dist(player.x,player.y,e.x,e.y) < 14 && !e.dashHit){
           e.dashHit=true;
-          const res=playerDamage(10+player.str*0.5, 'phys', e);
+          const res=playerDamage(10+pStr()*0.5, 'phys', e);
           hurtEnemy(e, res.d*1.5*(player.dashPowerMult||1), 'phys', true, true, {crit:res.crit});
           if(player.dashSlow) e.slowT=2;
         }
@@ -2153,7 +2248,7 @@ function update(dt){
     }
     if(player.dashT<=0) for(const e of enemies) e.dashHit=false;
   } else {
-    const spd = 92 * (1+player.agi/120) * player.moveMult * (1-(player.sacSlow||0));
+    const spd = 92 * (1+pAgi()/120) * player.moveMult * (1-(player.sacSlow||0));
     const rooted = player.rootT>0;
     moveEntity(player, rooted?0:dx*spd, rooted?0:dy*spd, dt);
   }
@@ -2190,7 +2285,7 @@ function update(dt){
         e.poisonAcc=(e.poisonAcc||0)+player.poisonAura*3*dt;
         if(e.poisonAcc>=1){
           const dmg=Math.floor(e.poisonAcc); e.poisonAcc-=dmg;
-          hurtEnemy(e, dmg, 'mag', false, false);
+          hurtEnemy(e, dmg, 'mag', false, false, {src:'aura'});
         }
       }
     }
@@ -2202,7 +2297,7 @@ function update(dt){
     if(player.vomiCd<=0){
       player.vomiCd=[8,6,4,3][player.vomiLvl-1];
       const base=Math.atan2(player.diry,player.dirx);
-      const dmg=8+player.pow*0.5+player.vomiLvl*2;
+      const dmg=8+pPow()*0.5+player.vomiLvl*2;
       for(let s=-2;s<=2;s++){
         const a=base+s*0.25;
         fireBolt(player.x, player.y, Math.cos(a), Math.sin(a), 'mag', dmg, true, 150, {vis:'vomi', quiet:true});
@@ -2233,7 +2328,7 @@ function update(dt){
         const d=dist(player.x,player.y,mouse.x,mouse.y)||1;
         tx=(mouse.x-player.x)/d; ty=(mouse.y-player.y)/d;
       }
-      fireBolt(player.x, player.y, tx, ty, 'mag', (8+player.pow*0.5)*0.08, true, 160,
+      fireBolt(player.x, player.y, tx, ty, 'mag', (8+pPow()*0.5)*0.08, true, 160,
                {vis:'vomi', slow:true, life:0.75, quiet:true});
     }
   }
@@ -2248,7 +2343,7 @@ function update(dt){
         player.sauceAcc-=Math.PI/4;
         const a=player.clubAng;
         fireBolt(player.x+Math.cos(a)*24, player.y+Math.sin(a)*24, Math.cos(a), Math.sin(a),
-                 'mag', 10+player.pow*0.4, true, 170, {vis:'drop', root:0.25, life:1.0, quiet:true});
+                 'mag', 10+pPow()*0.4, true, 170, {vis:'drop', root:0.25, life:1.0, quiet:true});
       }
     }
     const ca=Math.cos(player.clubAng), sa=Math.sin(player.clubAng);
@@ -2260,7 +2355,7 @@ function update(dt){
       const perp=Math.abs(-rx*sa+ry*ca);
       if(proj>0 && proj<26+e.r && perp<e.r+3){
         e.clubCd=0.5;
-        const res=playerDamage(6+player.str*0.4, 'phys', e);
+        const res=playerDamage(6+pStr()*0.4, 'phys', e);
         hurtEnemy(e, res.d, 'phys', true, true, {crit:res.crit});
       }
     }
@@ -2275,7 +2370,7 @@ function update(dt){
   if(!stairsOpen && enemies.every(e=>e.dead)) stairsOpen=true;
   if(stairsOpen && dist(player.x,player.y,stairsPos.x,stairsPos.y)<10){
     floorNum++;
-    player.hp=Math.min(player.maxHp, player.hp+player.maxHp*0.3);
+    player.hp=Math.min(hpMax(), player.hp+hpMax()*0.3);
     genFloor();
     return;
   }
@@ -2426,8 +2521,8 @@ function update(dt){
       if(best){
         m.cdT=1.5;
         const dd=Math.sqrt(bd)||1;
-        const dmg=(5+player.pow*0.4)*player.minionDmgMult;
-        fireBolt(m.x,m.y,(best.x-m.x)/dd,(best.y-m.y)/dd,'mag',dmg,true,170);
+        const dmg=(5+pPow()*0.4)*player.minionDmgMult;
+        fireBolt(m.x,m.y,(best.x-m.x)/dd,(best.y-m.y)/dd,'mag',dmg,true,170,{src:'fam'});
       } else m.cdT=0.3;
     }
   });
@@ -2460,9 +2555,9 @@ function update(dt){
       if(best){
         dg.cdT=0.9; dg.lungeT=0.15;
         dg.flip = best.x<dg.x;
-        const base=(6+player.str*0.2)*player.dogDmgMult*(dg.superD?5.6:1);
+        const base=(6+pStr()*0.2)*player.dogDmgMult*(dg.superD?5.6:1);
         const res=playerDamage(base, 'phys', best);
-        hurtEnemy(best, res.d, 'phys', true, true, {crit:res.crit});
+        hurtEnemy(best, res.d, 'phys', true, true, {crit:res.crit, src:'fam'});
       } else dg.cdT=0.2;
     }
   });
@@ -2476,7 +2571,7 @@ function update(dt){
         if(e.dead) continue;
         if(b.hit.includes(e)) continue;
         if(dist(b.x,b.y,e.x,e.y) < e.r+(b.rad||2)){
-          hurtEnemy(e, b.dmg, b.type, true, true, {kbMult:0.35, crit:b.crit});
+          hurtEnemy(e, b.dmg, b.type, true, true, {kbMult:0.35, crit:b.crit, src:b.src});
           if(b.slow){ e.slowT=2; e.slowPow=0.6; }
           if(b.root) e.rootT=Math.max(e.rootT||0, b.root);
           if(b.burn){ e.burnT=2.5; e.burnDps=b.dmg*b.burn; }
@@ -2958,11 +3053,11 @@ function syncStatsPanel(){
 function updateStatsPanel(){
   const lines=[
     'Niveau : '+player.level,
-    'PV '+Math.ceil(player.hp)+'/'+player.maxHp+' (+'+player.regen.toFixed(1)+'/s)',
-    'Force '+player.str+'   Pouvoir '+player.pow,
-    'Armure '+player.armor+'   Armure mag. '+player.marmor,
-    'Agilité '+player.agi+'   Critique '+player.crit+'%',
-    'Vol de vie '+(player.lifesteal*100).toFixed(0)+'%   Épines '+(player.thorns*100).toFixed(0)+'%',
+    'PV '+Math.ceil(player.hp)+'/'+hpMax()+' (+'+player.regen.toFixed(1)+'/s)',
+    'Force '+Math.round(pStr())+'   Pouvoir '+Math.round(pPow()),
+    'Armure '+Math.round(pArmor())+'   Armure mag. '+Math.round(pMarmor()),
+    'Agilité '+Math.round(pAgi())+'   Critique '+player.crit+'%',
+    'Vol de vie '+(pLifesteal()*100).toFixed(0)+'%   Épines '+(player.thorns*100).toFixed(0)+'%',
     'XP '+player.xp+'/'+player.xpNext,
     'Arme : '+player.weapon.name+' ['+RANK_META[player.weapon.rank||0].label+']',
   ];
@@ -3070,9 +3165,9 @@ function fmtTime(t){
 }
 function renderHUD(c){
   /* barre de vie */
-  bar(c,6,6,80,6, player.hp/player.maxHp, '#4caf50', '#1a1a24');
+  bar(c,6,6,80,6, player.hp/hpMax(), '#4caf50', '#1a1a24');
   c.fillStyle='#e8e4d8'; c.font='7px monospace'; c.textAlign='left';
-  c.fillText(Math.ceil(player.hp)+"/"+player.maxHp+" PV", 6, 20);
+  c.fillText(Math.ceil(player.hp)+"/"+hpMax()+" PV", 6, 20);
 
   /* XP */
   bar(c,6, VH-14, 120, 4, player.xp/player.xpNext, '#5c9ce0', '#1a1a24');
@@ -3102,7 +3197,7 @@ function renderHUD(c){
 
   /* stats compactes */
   c.textAlign='left'; c.fillStyle='#8a8471'; c.font='7px monospace';
-  c.fillText("FOR "+player.str+"  POU "+player.pow+"  ARM "+player.armor+"  AM "+player.marmor+"  AGI "+player.agi, 6, VH-24);
+  c.fillText("FOR "+Math.round(pStr())+"  POU "+Math.round(pPow())+"  ARM "+Math.round(pArmor())+"  AM "+Math.round(pMarmor())+"  AGI "+Math.round(pAgi()), 6, VH-24);
 
   /* journal */
   c.textAlign='right';
