@@ -32,6 +32,10 @@
   .card .ds { color:#b8b2a0; font-size:11px; margin-top:6px; line-height:1.35; }
   .card .key { color:#666; font-size:10px; margin-top:8px; }
   .card.sel { background:#2a3148; transform:translateY(-6px); box-shadow:0 0 14px rgba(143,209,79,.35); }
+  .card.fusion { box-shadow:0 0 14px rgba(255,174,0,.75); }
+  .card.fusion .nm { color:#ffae00; }
+  .fusBadge { font-size:11px; font-weight:bold; color:#ffae00; margin-top:4px; text-shadow:1px 1px 0 #000; }
+  #upSlots { font-size:13px; color:#9fd7ff; margin-bottom:10px; text-shadow:1px 1px 0 #000; }
   #upDesc, #lootDesc { min-height:34px; margin-top:10px; color:#b8b2a0; font-size:12px;
     max-width:500px; line-height:1.4; }
   .selBtn { margin-top:6px; padding:8px 30px; font:bold 14px "Courier New", monospace; color:#0e1220;
@@ -93,6 +97,7 @@
   <div id="levelupScreen" class="overlay">
     <h2>NIVEAU SUPÉRIEUR !</h2>
     <div class="sub">Sélectionnez une amélioration puis validez (1 / 2 / 3, Entrée ou clic), ou ne rien choisir</div>
+    <div id="upSlots"></div>
     <div id="cards"></div>
     <div id="upDesc"></div>
     <button id="upConfirm" class="selBtn" disabled>Valider</button>
@@ -2156,6 +2161,14 @@ function upgradeAvailableAtCap(u){
   });
 }
 /* ---------- montage des niveaux ---------- */
+function fusionPartnerOwned(u){
+  if(u.rank!==3) return false;
+  return LEG_FUSIONS.some(lg=>{
+    const a=lg.fuse[0], b=lg.fuse[1];
+    return (a===u.fam && upgradeCounts[b+RANK_META[3].tag]>0) ||
+           (b===u.fam && upgradeCounts[a+RANK_META[3].tag]>0);
+  });
+}
 function openLevelUp(){
   sLevel();
   let pool = UPGRADES.filter(u => !(upgradeCounts[u.n]>0) && (!u.req || u.req(player)));
@@ -2174,6 +2187,9 @@ function openLevelUp(){
     levelupChoices.push(copy.splice(idx,1)[0]);
   }
   levelupSel=null;
+  const sl=document.getElementById('upSlots');
+  sl.textContent = "Emplacements d'amélioration : "+ownedSlots()+" / "+MAX_UP_SLOTS+
+    (ownedSlots()>=MAX_UP_SLOTS ? " (plein : rangs supérieurs uniquement)" : "");
   const cards = document.getElementById('cards');
   cards.innerHTML='';
   document.getElementById('upDesc').textContent='';
@@ -2182,10 +2198,12 @@ function openLevelUp(){
   levelupChoices.forEach((u,i)=>{
     const rk = RANK_META[u.rank];
     const el=document.createElement('div');
-    el.className='card';
+    el.className='card'+(fusionPartnerOwned(u)?' fusion':'');
     if(u.rank>0) el.style.borderColor = rk.col;
     el.innerHTML = '<div class="ico">'+u.i+'</div><div class="nm">'+u.n+'</div>'+
-      '<div class="ds"><span style="color:'+rk.col+'">['+rk.label+']</span></div><div class="key">['+(i+1)+']</div>';
+      '<div class="ds"><span style="color:'+rk.col+'">['+rk.label+']</span></div>'+
+      (fusionPartnerOwned(u) ? '<div class="fusBadge">★ Fusion légendaire possible</div>' : '')+
+      '<div class="key">['+(i+1)+']</div>';
     el.onclick=()=>selectUpgrade(i);
     el.onmouseenter=()=>showUpgradeDesc(i);
     el.onmouseleave=()=>{ if(levelupSel===null) document.getElementById('upDesc').textContent=''; else showUpgradeDesc(levelupSel); };
