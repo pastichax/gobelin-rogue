@@ -124,7 +124,9 @@ offres d'arme et le menu TAB.
   ennemis), givre (ralentit), feu (brûlure), triple tir (Arc de la tempête).
   Les armes de mêlée ont des dégâts par coup élevés, les armes à distance une
   meilleure sécurité. Une arme de départ aléatoire, de meilleures via
-  l'amélioration « Coffre d'armurier », les coffres ou en tuant une élite.
+  l'amélioration « Coffre d'armurier » (à chaque rang, une arme d'un seul
+  rang au-dessus de l'actuelle ; deux au rang Épique), les coffres ou en
+  tuant une élite.
   Toute arme trouvée (coffre, élite, amélioration « Coffre d'armurier ») ouvre
   un écran de comparaison affichant le rang, le DPS et le scaling (Force ou
   Pouvoir pour les dégâts, Agilité pour la cadence) : gardez la vôtre (1) ou

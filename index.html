@@ -592,10 +592,10 @@ const UP_DEFS = [
     {d:"Vitesse -36%, XP +72%", f:p=>{p.sacSlow=0.36;p.sacXp=0.72;}},
   ]},
   {n:"Coffre d'armurier",    i:"🎁", r:[
-    {d:"Recevoir une arme du rang supérieur à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
-    {d:"Recevoir une arme deux rangs au-dessus à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+2); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
-    {d:"Recevoir une arme de rang maximal à comparer", f:p=>{proposeWeapon(makeWeapon(4), 'offerte par l\'armurier');}},
-    {d:"Recevoir deux armes de rang maximal à comparer", f:p=>{proposeWeapon(makeWeapon(4), 'offerte par l\'armurier');proposeWeapon(makeWeapon(4), 'offerte par l\'armurier');}},
+    {d:"Recevoir une arme d'un rang au-dessus de l'actuelle, à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
+    {d:"Recevoir une arme d'un rang au-dessus de l'actuelle, à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
+    {d:"Recevoir une arme d'un rang au-dessus de l'actuelle, à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
+    {d:"Recevoir deux armes d'un rang au-dessus de l'actuelle, à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
   ]},
   {n:"Ventre solide",        i:"❤", r:[
     {d:"Santé +10% (multiplicatif, PV max futurs inclus)", f:p=>setPct(p,'pctHp',1.10)},
