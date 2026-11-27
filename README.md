@@ -33,7 +33,7 @@ chacune des trois directions de marche.
 | ZQSD / WASD / Flèches | Se déplacer |
 | Espace / E | Attaquer au corps-à-corps (une pression = une attaque) |
 | Clic souris / visée | Arme à distance : tire vers la souris |
-| Maj | Dash (si débloqué) |
+| Maj | Dash (si débloqué) — vitesse proportionnelle à votre vitesse de déplacement |
 | Tab | Panneau de caractéristiques et améliorations (met le jeu en pause, s'affiche par-dessus tous les autres menus, molette pour faire défiler) |
 | 1 / 2 / 3 ou clic | Sélectionner une amélioration, puis Entrée ou bouton « Valider » (cliquable) |
 | Survol d'une carte | Affiche le descriptif de l'amélioration |
@@ -149,18 +149,19 @@ offres d'arme et le menu TAB.
   **Force de la nature** (Force + Santé), **Carapace de tortue** (Armure +
   Armure magique), **Sang arcanique** (Pouvoir + Vol de vie) et **Vélocité
   suprême** (Agilité + Vitesse d'attaque).
-- **Chance** (dé, 3 rangs : Basique, Amélioré, Puissant) : fait évoluer au
-  rang supérieur une amélioration aléatoire possédée du même rang que la
-  Chance jouée — celle-ci gagne les effets du rang supérieur (ex. « Cœur de
-  troll » devient « Cœur de troll amélioré »).
+- **Chance** (dé, 3 rangs : Basique, Amélioré, Puissant, proposables sans
+  ordre) : fait évoluer au rang supérieur une amélioration aléatoire possédée
+  du même rang que la Chance jouée — celle-ci gagne les effets du rang
+  supérieur ; le menu TAB indique, au survol de chaque Chance, l'amélioration
+  ainsi évoluée.
 - **Améliorations déjantées** : **Vomi du gobelin ivre** (cône de vomi tous
   les 8/6/4/3 s selon le rang, dégâts magiques), **Prout du gobelin crado**
   (nuage marron derrière vous qui ralentit fortement les ennemis), **Gros
   gourdin veineux** (gourdin géant à bout rose tournant autour du gobelin,
   1/2/2,75/3,25 tours/s, dégâts physiques ; sa taille grossit à chaque rang :
   +25 %, puis +20 %, puis +15 % — jusqu'à x1,725 — et encore +10 % avec
-  Sauce du chef, la zone de frappe et les gouttes suivant l'agrandissement), **Sac à malice** (deux sacs verts
-  entre les jambes : vitesse -15/25/32/36 %, XP +30/50/64/72 %), **Bon
+  Sauce du chef, la zone de frappe et les gouttes suivant l'agrandissement), **Sac à malice** (sacs verts
+  agrandis à l'écran : vitesse -15/25/32/36 %, XP +30/50/64/72 %), **Bon
   toutou** (1 à 4 chiens fidèles qui errent librement dans le rayon de
   l'aura de ralentissement et fondent sur les ennemis à portée pour attaquer
   au corps-à-corps) et **Toutou costaud** (+15/25/32,5 % de dégâts des chiens,
