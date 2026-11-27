@@ -177,9 +177,11 @@ offres d'arme et le menu TAB.
   et une fois les 10 emplacements occupés, les niveaux ne proposent plus que
   des rangs supérieurs des améliorations possédées, des légendaires ou des
   Chance. L'écran de choix affiche les emplacements restants (X / 10) et met
-  en valeur (lueur dorée + badge « ★ Fusion légendaire possible ») les
-  améliorations Épiques qui compléteraient une paire légendaire avec une
-  Épique déjà possédée. Les 21 améliorations **Légendaires** (dorées)
+  en valeur (lueur dorée + badge) toute amélioration dont la famille partage
+  une amélioration légendaire avec une famille déjà possédée, quel que soit
+  le rang proposé ou possédé — badge « ★ Fusion légendaire possible » pour
+  les rangs à faire évoluer, « ★ Fusion légendaire prête » pour la
+  légendaire elle-même. Les 21 améliorations **Légendaires** (dorées)
   fusionnent deux améliorations Épiques en une seule version bien plus
   puissante — leurs effets s'ajoutent à ceux déjà acquis, plus l'effet
   propre de la légendaire — et n'occupent qu'**un seul emplacement** au lieu

@@ -2162,11 +2162,16 @@ function upgradeAvailableAtCap(u){
 }
 /* ---------- montage des niveaux ---------- */
 function fusionPartnerOwned(u){
-  if(u.rank!==3) return false;
+  if(u.fam==='Chance') return false;
+  if(u.rank===4) return true;
   return LEG_FUSIONS.some(lg=>{
     const a=lg.fuse[0], b=lg.fuse[1];
-    return (a===u.fam && upgradeCounts[b+RANK_META[3].tag]>0) ||
-           (b===u.fam && upgradeCounts[a+RANK_META[3].tag]>0);
+    if(a!==u.fam && b!==u.fam) return false;
+    const other = a===u.fam ? b : a;
+    return Object.keys(upgradeCounts).some(k=>{
+      const uk=UPGRADES.find(x=>x.n===k);
+      return uk && uk.fam===other;
+    });
   });
 }
 function openLevelUp(){
@@ -2202,7 +2207,7 @@ function openLevelUp(){
     if(u.rank>0) el.style.borderColor = rk.col;
     el.innerHTML = '<div class="ico">'+u.i+'</div><div class="nm">'+u.n+'</div>'+
       '<div class="ds"><span style="color:'+rk.col+'">['+rk.label+']</span></div>'+
-      (fusionPartnerOwned(u) ? '<div class="fusBadge">★ Fusion légendaire possible</div>' : '')+
+      (fusionPartnerOwned(u) ? '<div class="fusBadge">'+(u.rank===4?'★ Fusion légendaire prête':'★ Fusion légendaire possible')+'</div>' : '')+
       '<div class="key">['+(i+1)+']</div>';
     el.onclick=()=>selectUpgrade(i);
     el.onmouseenter=()=>showUpgradeDesc(i);
