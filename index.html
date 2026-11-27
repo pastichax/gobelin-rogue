@@ -32,6 +32,10 @@
   .card .ds { color:#b8b2a0; font-size:11px; margin-top:6px; line-height:1.35; }
   .card .key { color:#666; font-size:10px; margin-top:8px; }
   .card.sel { background:#2a3148; transform:translateY(-6px); box-shadow:0 0 14px rgba(143,209,79,.35); }
+  .card.fusion { box-shadow:0 0 14px rgba(255,174,0,.75); }
+  .card.fusion .nm { color:#ffae00; }
+  .fusBadge { font-size:11px; font-weight:bold; color:#ffae00; margin-top:4px; text-shadow:1px 1px 0 #000; }
+  #upSlots { font-size:13px; color:#9fd7ff; margin-bottom:10px; text-shadow:1px 1px 0 #000; }
   #upDesc, #lootDesc { min-height:34px; margin-top:10px; color:#b8b2a0; font-size:12px;
     max-width:500px; line-height:1.4; }
   .selBtn { margin-top:6px; padding:8px 30px; font:bold 14px "Courier New", monospace; color:#0e1220;
@@ -93,6 +97,7 @@
   <div id="levelupScreen" class="overlay">
     <h2>NIVEAU SUPÉRIEUR !</h2>
     <div class="sub">Sélectionnez une amélioration puis validez (1 / 2 / 3, Entrée ou clic), ou ne rien choisir</div>
+    <div id="upSlots"></div>
     <div id="cards"></div>
     <div id="upDesc"></div>
     <button id="upConfirm" class="selBtn" disabled>Valider</button>
@@ -587,10 +592,10 @@ const UP_DEFS = [
     {d:"Vitesse -36%, XP +72%", f:p=>{p.sacSlow=0.36;p.sacXp=0.72;}},
   ]},
   {n:"Coffre d'armurier",    i:"🎁", r:[
-    {d:"Recevoir une arme du rang supérieur à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
-    {d:"Recevoir une arme deux rangs au-dessus à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+2); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
-    {d:"Recevoir une arme de rang maximal à comparer", f:p=>{proposeWeapon(makeWeapon(4), 'offerte par l\'armurier');}},
-    {d:"Recevoir deux armes de rang maximal à comparer", f:p=>{proposeWeapon(makeWeapon(4), 'offerte par l\'armurier');proposeWeapon(makeWeapon(4), 'offerte par l\'armurier');}},
+    {d:"Recevoir une arme d'un rang au-dessus de l'actuelle, à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
+    {d:"Recevoir une arme d'un rang au-dessus de l'actuelle, à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
+    {d:"Recevoir une arme d'un rang au-dessus de l'actuelle, à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
+    {d:"Recevoir deux armes d'un rang au-dessus de l'actuelle, à comparer", f:p=>{const t=Math.min(4,p.weapon.rank+1); proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');proposeWeapon(makeWeapon(t), 'offerte par l\'armurier');}},
   ]},
   {n:"Ventre solide",        i:"❤", r:[
     {d:"Santé +10% (multiplicatif, PV max futurs inclus)", f:p=>setPct(p,'pctHp',1.10)},
@@ -2142,6 +2147,12 @@ function ownedSlots(){
   }
   return c;
 }
+function familyOwnedAtHigherRank(u){
+  return Object.keys(upgradeCounts).some(k=>{
+    const uk=UPGRADES.find(x=>x.n===k);
+    return uk && uk.fam===u.fam && uk.rank>u.rank;
+  });
+}
 function upgradeAvailableAtCap(u){
   if(u.fam==='Chance'){
     return Object.keys(upgradeCounts).some(k=>{
@@ -2156,9 +2167,22 @@ function upgradeAvailableAtCap(u){
   });
 }
 /* ---------- montage des niveaux ---------- */
+function fusionPartnerOwned(u){
+  if(u.fam==='Chance') return false;
+  if(u.rank===4) return true;
+  return LEG_FUSIONS.some(lg=>{
+    const a=lg.fuse[0], b=lg.fuse[1];
+    if(a!==u.fam && b!==u.fam) return false;
+    const other = a===u.fam ? b : a;
+    return Object.keys(upgradeCounts).some(k=>{
+      const uk=UPGRADES.find(x=>x.n===k);
+      return uk && uk.fam===other;
+    });
+  });
+}
 function openLevelUp(){
   sLevel();
-  let pool = UPGRADES.filter(u => !(upgradeCounts[u.n]>0) && (!u.req || u.req(player)));
+  let pool = UPGRADES.filter(u => !(upgradeCounts[u.n]>0) && !familyOwnedAtHigherRank(u) && (!u.req || u.req(player)));
   if(ownedSlots()>=MAX_UP_SLOTS) pool = pool.filter(upgradeAvailableAtCap);
   if(!pool.length){
     addMsg('Améliorations : tous les emplacements sont au rang maximum', '#9a957f');
@@ -2174,6 +2198,9 @@ function openLevelUp(){
     levelupChoices.push(copy.splice(idx,1)[0]);
   }
   levelupSel=null;
+  const sl=document.getElementById('upSlots');
+  sl.textContent = "Emplacements d'amélioration : "+ownedSlots()+" / "+MAX_UP_SLOTS+
+    (ownedSlots()>=MAX_UP_SLOTS ? " (plein : rangs supérieurs uniquement)" : "");
   const cards = document.getElementById('cards');
   cards.innerHTML='';
   document.getElementById('upDesc').textContent='';
@@ -2182,10 +2209,12 @@ function openLevelUp(){
   levelupChoices.forEach((u,i)=>{
     const rk = RANK_META[u.rank];
     const el=document.createElement('div');
-    el.className='card';
+    el.className='card'+(fusionPartnerOwned(u)?' fusion':'');
     if(u.rank>0) el.style.borderColor = rk.col;
     el.innerHTML = '<div class="ico">'+u.i+'</div><div class="nm">'+u.n+'</div>'+
-      '<div class="ds"><span style="color:'+rk.col+'">['+rk.label+']</span></div><div class="key">['+(i+1)+']</div>';
+      '<div class="ds"><span style="color:'+rk.col+'">['+rk.label+']</span></div>'+
+      (fusionPartnerOwned(u) ? '<div class="fusBadge">'+(u.rank===4?'★ Fusion légendaire prête':'★ Fusion légendaire possible')+'</div>' : '')+
+      '<div class="key">['+(i+1)+']</div>';
     el.onclick=()=>selectUpgrade(i);
     el.onmouseenter=()=>showUpgradeDesc(i);
     el.onmouseleave=()=>{ if(levelupSel===null) document.getElementById('upDesc').textContent=''; else showUpgradeDesc(levelupSel); };

@@ -124,7 +124,9 @@ offres d'arme et le menu TAB.
   ennemis), givre (ralentit), feu (brûlure), triple tir (Arc de la tempête).
   Les armes de mêlée ont des dégâts par coup élevés, les armes à distance une
   meilleure sécurité. Une arme de départ aléatoire, de meilleures via
-  l'amélioration « Coffre d'armurier », les coffres ou en tuant une élite.
+  l'amélioration « Coffre d'armurier » (à chaque rang, une arme d'un seul
+  rang au-dessus de l'actuelle ; deux au rang Épique), les coffres ou en
+  tuant une élite.
   Toute arme trouvée (coffre, élite, amélioration « Coffre d'armurier ») ouvre
   un écran de comparaison affichant le rang, le DPS et le scaling (Force ou
   Pouvoir pour les dégâts, Agilité pour la cadence) : gardez la vôtre (1) ou
@@ -174,9 +176,15 @@ offres d'arme et le menu TAB.
   50 % / 35 % / 25 %). **Limite de 10 emplacements** : le gobelin ne peut
   posséder que 10 améliorations (Chance exceptée) ; un rang supérieur
   remplace le rang inférieur de la même famille (les effets s'additionnent),
+  et le rang inférieur remplacé ne peut plus être obtenu à nouveau ;
   et une fois les 10 emplacements occupés, les niveaux ne proposent plus que
   des rangs supérieurs des améliorations possédées, des légendaires ou des
-  Chance. Les 21 améliorations **Légendaires** (dorées)
+  Chance. L'écran de choix affiche les emplacements restants (X / 10) et met
+  en valeur (lueur dorée + badge) toute amélioration dont la famille partage
+  une amélioration légendaire avec une famille déjà possédée, quel que soit
+  le rang proposé ou possédé — badge « ★ Fusion légendaire possible » pour
+  les rangs à faire évoluer, « ★ Fusion légendaire prête » pour la
+  légendaire elle-même. Les 21 améliorations **Légendaires** (dorées)
   fusionnent deux améliorations Épiques en une seule version bien plus
   puissante — leurs effets s'ajoutent à ceux déjà acquis, plus l'effet
   propre de la légendaire — et n'occupent qu'**un seul emplacement** au lieu
